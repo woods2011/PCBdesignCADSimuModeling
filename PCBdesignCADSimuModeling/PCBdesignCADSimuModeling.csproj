@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Models\Resources\Algorithms\PlacementAlgorithms" />
       <Folder Include="ViewModels" />
       <Folder Include="Views" />
     </ItemGroup>

@@ -17,17 +17,8 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
         public List<Resource> Resources { get; }
 
-        
-        
-        public TimeSpan UpdateModelTime(TimeSpan deltaTime)
-        {
-            UpdateModelTimeBody(deltaTime);
-            return EstimateEndTime();
-        }
 
-        
-        protected abstract void UpdateModelTimeBody(TimeSpan deltaTime);
 
-        protected abstract TimeSpan EstimateEndTime();
+        public abstract TimeSpan UpdateModelTime(TimeSpan deltaTime);
     }
 }

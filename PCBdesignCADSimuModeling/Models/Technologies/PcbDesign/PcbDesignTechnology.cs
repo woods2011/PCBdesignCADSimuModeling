@@ -1,5 +1,6 @@
 ﻿using System;
 using PCBdesignCADSimuModeling.Models.Resources;
+using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
 using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures;
 
 namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
@@ -8,15 +9,18 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
     {
         private PcbDesignProcedure _curProcedure;
         private readonly IResourceManager _resourceManager;
-        
-        
-        public PcbDesignTechnology(IResourceManager resourceManager, PcbParams pcb)
+
+
+        public PcbDesignTechnology(IResourceManager resourceManager, IPcbAlgorithmFactoryHoldPcbInfo pcbAlgFactoryHoldPcbInfo)
         {
             _resourceManager = resourceManager;
-            PCB = pcb;
+            PcbAlgFactoryHoldPcbInfo = pcbAlgFactoryHoldPcbInfo;
+            CurProcedure = new PcbParamsInput(this);
         }
 
-        
+
+        public IPcbAlgorithmFactoryHoldPcbInfo PcbAlgFactoryHoldPcbInfo { get; }
+
         public PcbDesignProcedure CurProcedure
         {
             get => _curProcedure;
@@ -27,16 +31,15 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
                 IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.Resources);
             }
         }
+
         public bool IsWaitResources { get; private set; }
-        public PcbParams PCB { get; }
-        
-        
-        
+
+
         public (PcbDesignProcedure, TimeSpan) UpdateModelTime(TimeSpan deltaTime)
         {
             if (IsWaitResources)
                 throw new InvalidOperationException("ProcedureIsWaitResources");
-            
+
             return (CurProcedure, CurProcedure.UpdateModelTime(deltaTime));
         }
     }

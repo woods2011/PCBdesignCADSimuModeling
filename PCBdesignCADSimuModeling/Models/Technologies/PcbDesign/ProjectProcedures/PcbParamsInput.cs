@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using PCBdesignCADSimuModeling.Models.Resources;
 
 namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
 {
-    public class DocumentationProduction : PcbDesignProcedure
+    public class PcbParamsInput : PcbDesignProcedure
     {
-        public DocumentationProduction(PcbDesignTechnology context) : base(context)
+        public PcbParamsInput(PcbDesignTechnology context) : base(context)
         {
         }
-        
 
+        
         public override TimeSpan UpdateModelTime(TimeSpan deltaTime)
         {
             throw new NotImplementedException();

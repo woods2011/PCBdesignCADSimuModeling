@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using PCBdesignCADSimuModeling.Models.Resources;
+using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
+using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
 
 namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
 {
-    class Placement : PcbDesignProcedure
+    public class Placement : PcbDesignProcedure
     {
+        private readonly IPlacingAlgorithm _placingAlg;
+        
         public Placement(PcbDesignTechnology context) : base(context)
         {
+            _placingAlg = context.PcbAlgFactoryHoldPcbInfo.PlacingAlgorithmInstance();
         }
 
-        protected override void UpdateModelTimeBody(TimeSpan deltaTime)
+        public override TimeSpan UpdateModelTime(TimeSpan deltaTime)
         {
             throw new NotImplementedException();
-        }
-
-        protected override TimeSpan EstimateEndTime()
-        {
-            throw new NotImplementedException();
+            //_placingAlg.UpdateModelTime(deltaTime, );
         }
     }
 }
