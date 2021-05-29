@@ -12,7 +12,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
         
         public WireRouting(PcbDesignTechnology context) : base(context)
         {
-            _wireRoutingAlg = context.PcbAlgFactoryHoldPcbInfo.WireRoutingAlgorithmInstance();
+            _wireRoutingAlg = context.PcbAlgFactories.WireRoutingAlgFactory.Create(context.PcbParams);
         }
 
         public override TimeSpan UpdateModelTime(TimeSpan deltaTime)
@@ -21,4 +21,6 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
             //_wireRoutingAlg.UpdateModelTime(deltaTime, );
         }
     }
+
+
 }

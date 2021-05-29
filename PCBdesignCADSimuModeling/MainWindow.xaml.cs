@@ -28,46 +28,16 @@ namespace PCBdesignCADSimuModeling
         public MainWindow()
         {
             InitializeComponent();
+            string placingAlgName = "Example";
+            string wireRoutingAlgName = "Example";
 
-
-            IPcbAlgorithmFactory<PcbParams> pcbAlgorithmFactory = new PcbAlgorithmFactory<PcbParams>(
-                funcPlacing: pcbInfo => new PlacingMultiThreadAlgorithm(new PlacingExampleCxtyEst(pcbInfo), 8, 0.7),
-                funcWireRouting: pcbInfo =>new WireRoutingMultiThreadAlgorithm(new WireRoutingExampleCxtyEst(pcbInfo), 8, 0.7));
+            var kek = (itemz: PlacingAlgProviderFactory.Create(placingAlgName), WireRoutingAlgProviderFactory.Create(wireRoutingAlgName));
 
             //PcbDesignCadSimulator<PcbParams> pcbDesignCadSimulator = new PcbDesignCadSimulator<PcbParams>();
         }
 
-        public class ComplexityEstimator<TPcbInfo> : IComplexityEstimator
-        {
-            private readonly TPcbInfo _pcbInfo;
-            private readonly Func<TPcbInfo, int> _complexityByPcbInfoConvolution;
 
-            public ComplexityEstimator(TPcbInfo pcbInfo, Func<TPcbInfo, int> complexityByPcbInfoConvolution)
-            {
-                _pcbInfo = pcbInfo;
-                _complexityByPcbInfoConvolution = complexityByPcbInfoConvolution;
-            }
-
-            public int EstimateComplexity() => _complexityByPcbInfoConvolution(_pcbInfo);
-        }
-
-        public class PlacingExampleCxtyEst : ComplexityEstimator<PcbParams>
-        {
-            public PlacingExampleCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
-                info => info.ElementsCount * 1000
-            )
-            {
-            }
-        }
-        
-        public class WireRoutingExampleCxtyEst : ComplexityEstimator<PcbParams>
-        {
-            public WireRoutingExampleCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
-                info => info.ElementsCount * 1000
-            )
-            {
-            }
-        }
     }
+
 
 }

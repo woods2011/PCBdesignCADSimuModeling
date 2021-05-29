@@ -2,25 +2,29 @@
 using PCBdesignCADSimuModeling.Models.Resources;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
 using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures;
 
 namespace PCBdesignCADSimuModeling.Models.SimuSystem
 {
-    public class PcbDesignCadSimulator<TPcbInfo> where TPcbInfo : class 
+    public class PcbDesignCadSimulator
     {
         private TimeSpan _modelTime = TimeSpan.Zero;
-        private readonly IPcbAlgorithmFactory<TPcbInfo> _pcbAlgFactory;
+        private readonly PcbAlgFactories _pcbAlgFactories;
+        private readonly IResourceManager _resourceManager = new ResourceManager();
 
-        public PcbDesignCadSimulator(IPcbAlgorithmFactoryHoldPcbInfo pcbAlgorithmFactoryHoldPcbInfo, IPcbAlgorithmFactory<TPcbInfo> pcbAlgFactory)
+        public PcbDesignCadSimulator(PcbAlgFactories pcbAlgFactories)
         {
-            _pcbAlgFactory = pcbAlgFactory;
+            _pcbAlgFactories = pcbAlgFactories;
         }
 
 
         public void Simulate()
         {
-
-            TPcbInfo pcbInfo = null;
-            _ = new PcbDesignTechnology(new ResourceManager(), new PcbAlgorithmFactoryHoldPcbInfo<TPcbInfo>(pcbInfo, _pcbAlgFactory));
+            PcbParams pcbParams = null;
+            
+            throw new NotImplementedException();
+            
+            _ = new PcbDesignTechnology(_resourceManager, pcbParams, _pcbAlgFactories);
         }
     }
 }

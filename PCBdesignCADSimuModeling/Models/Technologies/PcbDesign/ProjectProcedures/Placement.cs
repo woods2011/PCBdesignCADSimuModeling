@@ -12,7 +12,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
         
         public Placement(PcbDesignTechnology context) : base(context)
         {
-            _placingAlg = context.PcbAlgFactoryHoldPcbInfo.PlacingAlgorithmInstance();
+            _placingAlg = context.PcbAlgFactories.PlacingAlgFactory.Create(context.PcbParams);
         }
 
         public override TimeSpan UpdateModelTime(TimeSpan deltaTime)

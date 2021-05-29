@@ -1,6 +1,8 @@
 ﻿using System;
 using PCBdesignCADSimuModeling.Models.Resources;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
+using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
+using PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
 using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures;
 
 namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
@@ -11,15 +13,17 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
         private readonly IResourceManager _resourceManager;
 
 
-        public PcbDesignTechnology(IResourceManager resourceManager, IPcbAlgorithmFactoryHoldPcbInfo pcbAlgFactoryHoldPcbInfo)
+        public PcbDesignTechnology(IResourceManager resourceManager, PcbParams pcbParams, PcbAlgFactories pcbAlgFactories)
         {
             _resourceManager = resourceManager;
-            PcbAlgFactoryHoldPcbInfo = pcbAlgFactoryHoldPcbInfo;
+            PcbParams = pcbParams;
+            PcbAlgFactories = pcbAlgFactories;
             CurProcedure = new PcbParamsInput(this);
         }
 
 
-        public IPcbAlgorithmFactoryHoldPcbInfo PcbAlgFactoryHoldPcbInfo { get; }
+        public PcbParams PcbParams { get; }
+        public PcbAlgFactories PcbAlgFactories { get; }
 
         public PcbDesignProcedure CurProcedure
         {
@@ -34,6 +38,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
 
         public bool IsWaitResources { get; private set; }
 
+        
 
         public (PcbDesignProcedure, TimeSpan) UpdateModelTime(TimeSpan deltaTime)
         {
