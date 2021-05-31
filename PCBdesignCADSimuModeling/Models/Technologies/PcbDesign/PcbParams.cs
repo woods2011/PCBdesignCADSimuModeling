@@ -12,7 +12,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
         }
 
         public int ElementsCount { get; }
-        public double DimensionUsagePercent { get; init; }
+        public double DimensionUsagePercent { get; }
         public bool IsVariousSize { get; }
     }
 }

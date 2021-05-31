@@ -13,10 +13,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MathNet.Numerics.Distributions;
+using PCBdesignCADSimuModeling.Models.Resources;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
 using PCBdesignCADSimuModeling.Models.SimuSystem;
+using PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
 using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
 
 namespace PCBdesignCADSimuModeling
@@ -40,22 +42,22 @@ namespace PCBdesignCADSimuModeling
 
             var kek = (itemz: PlacingAlgProviderFactory.Create(placingAlgName),
                 WireRoutingAlgProviderFactory.Create(wireRoutingAlgName));
+                
+
             
-                        
-            
-            var techIntervalDistr =
-                new Normal(new TimeSpan(1, 0, 0, 0).TotalSeconds, new TimeSpan(6, 0, 0).TotalSeconds);
-            var elementCountDistr = new Normal(2000, 100);
-            var dimensionUsagePctDistr = new Normal(0.8, 0.1);
-
-            double variousSizePctMean = 0.7;
-            var variousSizePctDistr = new Beta(variousSizePctMean, 1.0 - variousSizePctMean);
-
-            var simuEventGenerator = new SimuEventGenerator.Builder()
-                .NewTechInterval(techIntervalDistr)
-                .PcbParams(elementCountDistr, dimensionUsagePctDistr, variousSizePctDistr).Build();
-
-            var simulationEvents = simuEventGenerator.GeneratePcbDesignTech(TimeSpan.FromDays(300));
+            // var techIntervalDistr =
+            //     new Normal(new TimeSpan(1, 0, 0, 0).TotalSeconds, new TimeSpan(6, 0, 0).TotalSeconds);
+            // var elementCountDistr = new Normal(2000, 100);
+            // var dimensionUsagePctDistr = new Normal(0.8, 0.1);
+            //
+            // double variousSizePctMean = 0.7;
+            // var variousSizePctDistr = new Beta(variousSizePctMean, 1.0 - variousSizePctMean);
+            //
+            // var simuEventGenerator = new SimuEventGenerator.Builder()
+            //     .NewTechInterval(techIntervalDistr)
+            //     .PcbParams(elementCountDistr, dimensionUsagePctDistr, variousSizePctDistr).Build();
+            //
+            // var simulationEvents = simuEventGenerator.GeneratePcbDesignTech(TimeSpan.FromDays(300));
 
 
 

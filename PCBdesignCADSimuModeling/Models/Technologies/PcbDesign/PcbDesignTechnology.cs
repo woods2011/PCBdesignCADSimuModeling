@@ -13,7 +13,8 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
         private readonly IResourceManager _resourceManager;
 
 
-        public PcbDesignTechnology(IResourceManager resourceManager, PcbParams pcbParams, PcbAlgFactories pcbAlgFactories)
+        public PcbDesignTechnology(IResourceManager resourceManager, PcbParams pcbParams,
+            PcbAlgFactories pcbAlgFactories)
         {
             _resourceManager = resourceManager;
             PcbParams = pcbParams;
@@ -32,20 +33,24 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
             {
                 _resourceManager.FreeResources(_curProcedure.Resources);
                 _curProcedure = value;
-                IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.Resources);
+                if (_curProcedure is not null)
+                    IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.Resources);
             }
         }
 
         public bool IsWaitResources { get; private set; }
 
-        
 
-        public (PcbDesignProcedure, TimeSpan) UpdateModelTime(TimeSpan deltaTime)
+        public TimeSpan UpdateModelTime(TimeSpan deltaTime)
         {
+            // if (IsWaitResources)
+            //     throw new InvalidOperationException("ProcedureIsWaitResources");
             if (IsWaitResources)
-                throw new InvalidOperationException("ProcedureIsWaitResources");
+                return TimeSpan.MaxValue;
 
-            return (CurProcedure, CurProcedure.UpdateModelTime(deltaTime));
+            return CurProcedure.UpdateModelTime(deltaTime);
         }
+
+        public bool MoveToNextProcedure() => _curProcedure.NextProcedure();
     }
 }

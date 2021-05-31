@@ -14,11 +14,11 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
             _context = context;
         }
 
+        
+        public List<Resource> Resources { get; protected init; } = new();
+        
 
-        public List<Resource> Resources { get; }
-
-
-
+        public abstract bool NextProcedure();
         public abstract TimeSpan UpdateModelTime(TimeSpan deltaTime);
     }
 }

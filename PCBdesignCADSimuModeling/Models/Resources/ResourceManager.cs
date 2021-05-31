@@ -11,8 +11,8 @@ namespace PCBdesignCADSimuModeling.Models.Resources
 
         public void FreeResources(List<Resource> resources)
         {
-            RebalanceResources();
             throw new System.NotImplementedException();
+            RebalanceResources();
         }
 
         public void RebalanceResources()

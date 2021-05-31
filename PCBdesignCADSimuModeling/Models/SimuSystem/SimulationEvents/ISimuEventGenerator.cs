@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using MathNet.Numerics;
 using MathNet.Numerics.Distributions;
 using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
 
-namespace PCBdesignCADSimuModeling.Models.SimuSystem
+namespace PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents
 {
     public interface ISimuEventGenerator
     {
@@ -16,10 +14,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
     public class SimuEventGenerator : ISimuEventGenerator
     {
         private IContinuousDistribution _pcbDesignTechIntervalDistr;
-
-        private IContinuousDistribution _elementCountDistr;
-        private IContinuousDistribution _dimensionUsagePctDistr;
-        private IContinuousDistribution _variousSizePctDistr;
+        private IContinuousDistribution _elementCountDistr, _dimensionUsagePctDistr, _variousSizePctDistr;
 
 
         private SimuEventGenerator()
@@ -29,7 +24,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
 
         public List<SimulationEvent> GeneratePcbDesignTech(TimeSpan finalTime, TimeSpan? startTime = null)
         {
-            List<SimulationEvent> simulationEvents = new List<SimulationEvent>();
+            List<SimulationEvent> simulationEvents = new();
             var curTime = startTime ?? TimeSpan.Zero;
 
             curTime += TimeSpan.FromSeconds(
@@ -38,7 +33,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
             while (curTime < finalTime)
             {
                 simulationEvents.Add(new PcbDesignTechnologyStart(curTime, GeneratePcbParams()));
-                
+
                 curTime += TimeSpan.FromSeconds(
                     Math.Round(Math.Max(0.0, _pcbDesignTechIntervalDistr.Sample())));
             }
@@ -48,7 +43,8 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
 
         private PcbParams GeneratePcbParams()
         {
-            return new PcbParams((int)Math.Round(Math.Max(0.0, _elementCountDistr.Sample())), _dimensionUsagePctDistr.Sample(), _variousSizePctDistr.Sample() >= 0.5);
+            return new PcbParams((int) Math.Round(Math.Max(0.0, _elementCountDistr.Sample())),
+                _dimensionUsagePctDistr.Sample(), _variousSizePctDistr.Sample() >= 0.5);
         }
 
 

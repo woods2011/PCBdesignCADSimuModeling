@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using PCBdesignCADSimuModeling.Models.Resources;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
+using PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
 using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
 using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures;
 
@@ -12,112 +14,99 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
 {
     public class PcbDesignCadSimulator
     {
-        private TimeSpan _modelTime = TimeSpan.Zero;
-        private TimeSpan _finalTime;
+        private TimeSpan _modelTime;
+        private TimeSpan _deltaTime = TimeSpan.Zero;
+        private TimeSpan _finalTime = TimeSpan.Zero;
         private readonly PcbAlgFactories _pcbAlgFactories;
         private readonly IResourceManager _resourceManager = new ResourceManager();
-        private readonly List<PcbDesignTechnology> _activePcbDesignTechs = new List<PcbDesignTechnology>();
+        private readonly ISimuEventGenerator _simuEventGenerator;
+        private readonly Dictionary<PcbDesignTechnology, PcbDesignProcedureFinish> _activePcbDesignTechs = new();
         private readonly List<SimulationEvent> _simulationEvents = new List<SimulationEvent>();
 
 
-        public PcbDesignCadSimulator(PcbAlgFactories pcbAlgFactories, TimeSpan finalTime)
+        public PcbDesignCadSimulator(PcbAlgFactories pcbAlgFactories,
+            ISimuEventGenerator simuEventGenerator, TimeSpan startTime)
         {
             _pcbAlgFactories = pcbAlgFactories;
-            _finalTime = finalTime;
+            _simuEventGenerator = simuEventGenerator;
+            _modelTime = startTime;
         }
 
 
-        public void Simulate()
+        private TimeSpan ModelTime
         {
-            while (_simulationEvents.Count > 0 && _modelTime < _finalTime)
+            get => _modelTime;
+            set
             {
-                var curEvent = _simulationEvents.OrderBy(simuEvent => simuEvent.ActivateTime)
-                    .ThenBy(simuEvent => simuEvent.Priority).First();
+                _deltaTime = value - _modelTime;
+                _modelTime = value;
+            }
+        }
+
+        public bool SimulationIsCompleted => _modelTime > _finalTime;
+
+
+        public void Simulate(TimeSpan finalTime)
+        {
+            _finalTime = finalTime;
+            if (SimulationIsCompleted) throw new InvalidOperationException("Simulation already completed");
+
+            //Generate initial events
+            _simulationEvents.AddRange(
+                _simuEventGenerator.GeneratePcbDesignTech(_finalTime, ModelTime));
+
+            while (_simulationEvents.Count > 0)
+            {
+                ModelTime = _simulationEvents.Min(simuEvent => simuEvent.ActivateTime);
+
+                if (SimulationIsCompleted) break;
                 
-                HandleEvent(curEvent);
-                
-                GenerateEvents();
+                //Determine Current state
+                foreach (var (activeTech, activeEvent) in _activePcbDesignTechs)
+                    activeEvent.ActivateTime = activeTech.UpdateModelTime(_deltaTime);
+
+                //Handle current Events
+                var curEvents = _simulationEvents.Where(simuEvent => simuEvent.ActivateTime == ModelTime)
+                    .OrderBy(simuEvent => simuEvent.Priority).ToList();
+                foreach (var curEvent in curEvents)
+                {
+                    HandleEvent(curEvent);
+                    _simulationEvents.Remove(curEvent);
+                }
             }
 
-            PcbParams pcbParams = null;
-
-            throw new NotImplementedException();
-
-            _ = new PcbDesignTechnology(_resourceManager, pcbParams, _pcbAlgFactories);
-        }
-
-        private void GenerateEvents()
-        {
-            throw new NotImplementedException();
+            _modelTime = _finalTime + TimeSpan.FromMilliseconds(1); //?
         }
 
         private void HandleEvent(SimulationEvent curEvent)
         {
-            var curEventActivateTime = curEvent.ActivateTime;
-            var deltaTime = _modelTime - curEventActivateTime;
-            _modelTime = curEventActivateTime;
-            
             switch (curEvent)
             {
-                case null:
-                    throw new ArgumentNullException(nameof(curEvent));
-                
                 case PcbDesignTechnologyStart pcbDesignTechnologyStart:
-                    _activePcbDesignTechs.Add(new PcbDesignTechnology(_resourceManager, pcbDesignTechnologyStart.GeneratedPcb, _pcbAlgFactories));
+                {
+                    var newTechnology = new PcbDesignTechnology(_resourceManager, pcbDesignTechnologyStart.GeneratedPcb,
+                        _pcbAlgFactories);
+                    _activePcbDesignTechs.Add(newTechnology, new PcbDesignProcedureFinish(newTechnology));
                     break;
-                
-                case PcbDesignTechnologyFinish pcbDesignTechnologyFinish:
-                    var technology = pcbDesignTechnologyFinish.PcbDesignTechnology;
-                    
-                    if (technology.UpdateModelTime(deltaTime).Item2 > TimeSpan.Zero)
-                        throw new Exception("Paradox?????"); //ToDo
-                    
-                    
-                    
-                    _activePcbDesignTechs.Remove(technology);
+                }
+
+                case PcbDesignProcedureFinish pcbDesignProcedureFinish:
+                {
+                    var tech = pcbDesignProcedureFinish.PcbDesignTechnology;
+
+                    if (tech.UpdateModelTime(_deltaTime) > TimeSpan.Zero) throw new Exception("Paradox?????"); //ToDo
+
+                    _activePcbDesignTechs.Remove(tech);
+
+                    if (tech.MoveToNextProcedure())
+                        _activePcbDesignTechs.Add(tech, new PcbDesignProcedureFinish(tech));
+
                     break;
+                }
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(curEvent));
             }
         }
-    }
-
-    public class SimulationEvent
-    {
-        public SimulationEvent(int priority, TimeSpan activateTime)
-        {
-            Priority = priority;
-            ActivateTime = activateTime;
-        }
-        protected SimulationEvent(int priority)
-        {
-            Priority = priority;
-        }
-        
-        
-        public TimeSpan ActivateTime { get; set; }
-        public int Priority { get; }
-    }
-
-    public sealed class PcbDesignTechnologyFinish : SimulationEvent
-    {
-        public PcbDesignTechnologyFinish(PcbDesignTechnology pcbDesignTechnology) : base(1)
-        {
-            PcbDesignTechnology = pcbDesignTechnology;
-            ActivateTime = pcbDesignTechnology.UpdateModelTime(TimeSpan.Zero).Item2;
-        }
-
-        public PcbDesignTechnology PcbDesignTechnology { get; }
-    }
-
-    public sealed class PcbDesignTechnologyStart : SimulationEvent
-    {
-        public PcbDesignTechnologyStart(TimeSpan activateTime, PcbParams generatedPcb) : base(2, activateTime)
-        {
-            GeneratedPcb = generatedPcb;
-        }
-        
-        public PcbParams GeneratedPcb { get; }
     }
 }
