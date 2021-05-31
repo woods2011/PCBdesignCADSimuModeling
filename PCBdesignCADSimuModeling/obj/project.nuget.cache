@@ -1,8 +1,22 @@
 {
   "version": 2,
-  "dgSpecHash": "0Bhc8HgVUjjGuWAhVFvMrccrReqUSGzZr5YIlJX8ELOoPJO3/m9g72jtmVfYUEBle24cbafAZxOp3d0MFAhCpg==",
+  "dgSpecHash": "V4hw66mGm+uKg4jAZ5I6oKgugRCVmEJzLb79gj/6sUS2yZK+MggKRITfD+75XRgRpbs7rLwxz16XmCXzJGVGoA==",
   "success": true,
   "projectFilePath": "C:\\Users\\ArtemPC\\RiderProjects\\PCBdesignCADSimuModeling\\PCBdesignCADSimuModeling\\PCBdesignCADSimuModeling.csproj",
-  "expectedPackageFiles": [],
-  "logs": []
+  "expectedPackageFiles": [
+    "C:\\Users\\ArtemPC\\.nuget\\packages\\extended.wpf.toolkit\\4.1.0\\extended.wpf.toolkit.4.1.0.nupkg.sha512",
+    "C:\\Users\\ArtemPC\\.nuget\\packages\\mathnet.numerics\\4.15.0\\mathnet.numerics.4.15.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Extended.Wpf.Toolkit 4.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net5.0-windows7.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Extended.Wpf.Toolkit",
+      "targetGraphs": [
+        "net5.0-windows7.0"
+      ]
+    }
+  ]
 }

@@ -1,11 +1,18 @@
-﻿namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
+﻿using System;
+
+namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
 {
     public class PcbParams
     {
-        public int ElementsCount { get; init; }
+        public PcbParams(int elementsCount, double dimensionUsagePercent, bool isVariousSize)
+        {
+            ElementsCount = elementsCount;
+            DimensionUsagePercent = Math.Clamp(dimensionUsagePercent, 0.0, 1.0);
+            IsVariousSize = isVariousSize;
+        }
 
-        public (int, int) Dimensions { get; init; }
-
-        public bool IsVariousSize { get; init; }
+        public int ElementsCount { get; }
+        public double DimensionUsagePercent { get; init; }
+        public bool IsVariousSize { get; }
     }
 }
