@@ -8,21 +8,19 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 {
     public class Placement : PcbDesignProcedure
     {
-        private readonly PcbDesignTechnology _context;
         private readonly IPlacingAlgorithm _placingAlg;
         
         public Placement(PcbDesignTechnology context) : base(context)
         {
-            _context = context;
             _placingAlg = context.PcbAlgFactories.PlacingAlgFactory.Create(context.PcbParams);
 
-            Resources.Add(new Designer());
-            Resources.AddRange(CpuThread.CreateList(_placingAlg.MaxThreadUtilization)); //ToDo
+            RequiredResources.Add(new Designer());
+            RequiredResources.AddRange(CpuThreads.CreateList(_placingAlg.MaxThreadUtilization)); //ToDo
         }
 
         public override bool NextProcedure()
         {
-            _context.CurProcedure = new WireRouting(_context);
+            Context.CurProcedure = new WireRouting(Context);
             return true;
         }
 

@@ -6,22 +6,18 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 {
     public class QualityControl : PcbDesignProcedure
     {
-        private readonly PcbDesignTechnology _context;
-
         public QualityControl(PcbDesignTechnology context) : base(context)
         {
-            _context = context;
-            
-            Resources.Add(new Designer());
+            RequiredResources.Add(new Designer());
         }
 
 
         public override bool NextProcedure()
         {
             if (true) //ToDo
-                _context.CurProcedure = new DocumentationProduction(_context);
+                Context.CurProcedure = new DocumentationProduction(Context);
             else
-                _context.CurProcedure = new Placement(_context);
+                Context.CurProcedure = new Placement(Context);
             
             return true;
         }

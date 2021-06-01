@@ -6,16 +6,18 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 {
     public abstract class PcbDesignProcedure
     {
-        private readonly PcbDesignTechnology _context;
-
+        protected readonly PcbDesignTechnology Context;
+        
 
         protected PcbDesignProcedure(PcbDesignTechnology context)
         {
-            _context = context;
+            Context = context;
         }
 
         
-        public List<Resource> Resources { get; protected init; } = new();
+        public List<Resource> RequiredResources { get; } = new();
+        
+        
         
 
         public abstract bool NextProcedure();

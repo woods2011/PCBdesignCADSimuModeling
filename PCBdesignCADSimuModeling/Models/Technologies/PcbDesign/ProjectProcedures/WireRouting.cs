@@ -8,21 +8,19 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 {
     public class WireRouting : PcbDesignProcedure
     {
-        private readonly PcbDesignTechnology _context;
         private readonly IWireRoutingAlgorithm _wireRoutingAlg;
         
         public WireRouting(PcbDesignTechnology context) : base(context)
         {
-            _context = context;
             _wireRoutingAlg = context.PcbAlgFactories.WireRoutingAlgFactory.Create(context.PcbParams);
             
-            Resources.Add(new Designer());
-            Resources.AddRange(CpuThread.CreateList(_wireRoutingAlg.MaxThreadUtilization)); //ToDo
+            RequiredResources.Add(new Designer());
+            RequiredResources.AddRange(CpuThreads.CreateList(_wireRoutingAlg.MaxThreadUtilization)); //ToDo
         }
 
         public override bool NextProcedure()
         {
-            _context.CurProcedure = new QualityControl(_context);
+            Context.CurProcedure = new QualityControl(Context);
             return true;
         }
 

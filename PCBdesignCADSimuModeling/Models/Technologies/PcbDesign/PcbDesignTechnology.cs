@@ -31,10 +31,10 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
             get => _curProcedure;
             set
             {
-                _resourceManager.FreeResources(_curProcedure.Resources);
+                _resourceManager.FreeResources(_curProcedure.RequiredResources);
                 _curProcedure = value;
                 if (_curProcedure is not null)
-                    IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.Resources);
+                    IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.RequiredResources);
             }
         }
 

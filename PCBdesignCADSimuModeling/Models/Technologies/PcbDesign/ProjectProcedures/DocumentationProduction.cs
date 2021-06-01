@@ -5,19 +5,15 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 {
     public class DocumentationProduction : PcbDesignProcedure
     {
-        private readonly PcbDesignTechnology _context;
-
         public DocumentationProduction(PcbDesignTechnology context) : base(context)
         {
-            _context = context;
-            
-            Resources.Add(new Server()); //ToDo
+            RequiredResources.Add(new Server()); //ToDo
         }
 
 
         public override bool NextProcedure()
         {
-            _context.CurProcedure = null;
+            Context.CurProcedure = null;
             return false;
         }
 

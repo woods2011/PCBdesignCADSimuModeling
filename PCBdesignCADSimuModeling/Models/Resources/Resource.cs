@@ -13,16 +13,16 @@ namespace PCBdesignCADSimuModeling.Models.Resources
     {
     }
 
-    public abstract class MixedResources : Resource
+    public abstract class MixedResource : Resource
     {
     }
 
-    public abstract class SharedResources : Resource
+    public abstract class SharedResource : Resource
     {
     }
 
 
-    public class Designer : SharedResources
+    public class Designer : SharedResource
     {
         public ExperienceEn? Experience { get; init; }
 
@@ -34,16 +34,23 @@ namespace PCBdesignCADSimuModeling.Models.Resources
         }
     }
 
-    public class Server : SharedResources
+    public class Server : SharedResource
     {
         public double? InternetSpeed { get; init; }
     }
+    
+    // public class CpuThreads : MixedResources
+    // {
+    //     public int Count { get; init; } = 1;
+    //
+    //     public double? ClockRate { get; init; }
+    // }
 
-    public class CpuThread : MixedResources
+    public class CpuThreads : MixedResource
     {
-        public static List<CpuThread> CreateList(int count, double? clockRate = null) =>
-            Enumerable.Range(1, count).Select(_ => new CpuThread() {ClockRate = clockRate}).ToList();
-
+        public static List<CpuThreads> CreateList(int count, double? clockRate = null) =>
+            Enumerable.Range(1, count).Select(_ => new CpuThreads() {ClockRate = clockRate}).ToList();
+    
         public double? ClockRate { get; init; }
     }
 }
