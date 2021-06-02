@@ -15,7 +15,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
 
 
         public PcbDesignTechnology(IResourceManager resourceManager, PcbParams pcbParams,
-            PcbAlgFactories pcbAlgFactories)
+            IPcbAlgFactories pcbAlgFactories)
         {
             _resourceManager = resourceManager;
             PcbParams = pcbParams;
@@ -25,7 +25,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
 
 
         public PcbParams PcbParams { get; }
-        public PcbAlgFactories PcbAlgFactories { get; }
+        public IPcbAlgFactories PcbAlgFactories { get; }
 
         public PcbDesignProcedure CurProcedure
         {

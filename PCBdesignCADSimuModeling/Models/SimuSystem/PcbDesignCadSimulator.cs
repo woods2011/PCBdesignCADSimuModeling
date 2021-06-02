@@ -17,7 +17,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
         private TimeSpan _modelTime;
         private TimeSpan _deltaTime = TimeSpan.Zero;
         private TimeSpan _finalTime = TimeSpan.Zero;
-        private readonly PcbAlgFactories _pcbAlgFactories;
+        private readonly IPcbAlgFactories _pcbAlgFactories;
         private readonly IResourceManager _resourceManager;
         private readonly ISimuEventGenerator _simuEventGenerator;
         private readonly Dictionary<PcbDesignTechnology, PcbDesignProcedureFinish> _activePcbDesignTechs = new();
@@ -25,7 +25,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
 
 
         public PcbDesignCadSimulator(ISimuEventGenerator simuEventGenerator, List<Resource> recoursePool,
-            PcbAlgFactories pcbAlgFactories, TimeSpan? startTime = null)
+            IPcbAlgFactories pcbAlgFactories, TimeSpan? startTime = null)
         {
             _pcbAlgFactories = pcbAlgFactories;
             _simuEventGenerator = simuEventGenerator;
