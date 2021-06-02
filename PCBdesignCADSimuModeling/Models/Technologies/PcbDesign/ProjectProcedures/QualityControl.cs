@@ -8,7 +8,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
     {
         public QualityControl(PcbDesignTechnology context) : base(context)
         {
-            RequiredResources.Add(new Designer());
+            //RequiredResources.Add(new Designer());
         }
 
 

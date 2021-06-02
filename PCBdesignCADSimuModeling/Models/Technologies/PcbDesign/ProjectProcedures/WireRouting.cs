@@ -14,8 +14,8 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
         {
             _wireRoutingAlg = context.PcbAlgFactories.WireRoutingAlgFactory.Create(context.PcbParams);
             
-            RequiredResources.Add(new Designer());
-            RequiredResources.AddRange(CpuThreads.CreateList(_wireRoutingAlg.MaxThreadUtilization)); //ToDo
+            //RequiredResources.Add(new Designer());
+           //RequiredResources.AddRange(CpuThreads.CreateList(_wireRoutingAlg.MaxThreadUtilization)); //ToDo
         }
 
         public override bool NextProcedure()

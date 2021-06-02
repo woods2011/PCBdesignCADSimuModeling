@@ -7,7 +7,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
     {
         public DocumentationProduction(PcbDesignTechnology context) : base(context)
         {
-            RequiredResources.Add(new Server()); //ToDo
+            //RequiredResources.Add(new Server()); //ToDo
         }
 
 

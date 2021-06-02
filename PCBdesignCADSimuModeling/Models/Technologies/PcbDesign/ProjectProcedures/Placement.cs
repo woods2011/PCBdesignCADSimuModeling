@@ -14,8 +14,8 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
         {
             _placingAlg = context.PcbAlgFactories.PlacingAlgFactory.Create(context.PcbParams);
 
-            RequiredResources.Add(new Designer());
-            RequiredResources.AddRange(CpuThreads.CreateList(_placingAlg.MaxThreadUtilization)); //ToDo
+            //RequiredResources.Add(new Designer());
+            //RequiredResources.AddRange(CpuThreads.CreateList(_placingAlg.MaxThreadUtilization)); //ToDo
         }
 
         public override bool NextProcedure()

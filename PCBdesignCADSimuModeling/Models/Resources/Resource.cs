@@ -15,16 +15,21 @@ namespace PCBdesignCADSimuModeling.Models.Resources
 
     public abstract class MixedResource : Resource
     {
+        public abstract double ResValueForProc(Guid procId);
     }
 
     public abstract class SharedResource : Resource
     {
     }
 
-
     public class Designer : SharedResource
     {
-        public ExperienceEn? Experience { get; init; }
+        public Designer(ExperienceEn experience)
+        {
+            Experience = experience;
+        }
+
+        public ExperienceEn Experience { get; }
 
         public enum ExperienceEn
         {
@@ -34,23 +39,104 @@ namespace PCBdesignCADSimuModeling.Models.Resources
         }
     }
 
+
     public class Server : SharedResource
     {
-        public double? InternetSpeed { get; init; }
+        public Server(double internetSpeed)
+        {
+            InternetSpeed = internetSpeed;
+        }
+
+        public double InternetSpeed { get; }
     }
-    
-    // public class CpuThreads : MixedResources
-    // {
-    //     public int Count { get; init; } = 1;
-    //
-    //     public double? ClockRate { get; init; }
-    // }
 
     public class CpuThreads : MixedResource
     {
-        public static List<CpuThreads> CreateList(int count, double? clockRate = null) =>
-            Enumerable.Range(1, count).Select(_ => new CpuThreads() {ClockRate = clockRate}).ToList();
-    
-        public double? ClockRate { get; init; }
+        private readonly int[] _threadAndTaskCount;
+        private readonly Dictionary<Guid, List<int>> _procIdAndThread = new();
+        private const double OneThreadMultiTaskPenalty = 0.95;
+
+        public CpuThreads(int threadCount, double clockRate)
+        {
+            ThreadCount = threadCount;
+            ClockRate = clockRate;
+            _threadAndTaskCount = Enumerable.Repeat(0, threadCount).ToArray();
+        }
+
+
+        public int ThreadCount { get; }
+        public double ClockRate { get; }
+
+        public override double ResValueForProc(Guid procId)
+        {
+            var curProcThreads = _procIdAndThread[procId];
+            double threadSum = 0.0;
+
+            foreach (var procThread in curProcThreads)
+            {
+                var taskCount = _threadAndTaskCount[procThread];
+                threadSum += 1.0 / taskCount * Math.Pow(OneThreadMultiTaskPenalty, taskCount - 1);
+            }
+
+            return threadSum * ClockRate;
+        }
+
+        public bool TryGetRes(Guid procId, int reqThreadCount)
+        {
+            var threadsList = new List<int>();
+
+            for (var i = 0; i < reqThreadCount; i++)
+            {
+                var indexOfOptimalThread = Array.IndexOf(_threadAndTaskCount, _threadAndTaskCount.Min(num => num));
+                _threadAndTaskCount[indexOfOptimalThread]++;
+                threadsList.Add(indexOfOptimalThread);
+            }
+
+            _procIdAndThread.Add(procId, threadsList);
+
+            return true;
+        }
+
+        public void FreeRes(Guid procId)
+        {
+            var threadsList = _procIdAndThread[procId];
+
+            foreach (var indexOfThread in threadsList)
+            {
+                _threadAndTaskCount[indexOfThread]--;
+            }
+
+            _procIdAndThread.Remove(procId);
+            
+            BalanceRes();
+        }
+
+        protected virtual void BalanceRes()
+        {
+            var maxLoad = _threadAndTaskCount.Max(i1 => i1);
+            var minLoad = _threadAndTaskCount.Min(i1 => i1);
+            var realDeltaLoad = maxLoad - minLoad - 1;
+
+            while (realDeltaLoad > 0)
+            {
+                var indexOfMaxLoadedThread = Array.IndexOf(_threadAndTaskCount, maxLoad);
+                var indexOfMinLoadedThread = Array.IndexOf(_threadAndTaskCount, minLoad);
+                _threadAndTaskCount[indexOfMaxLoadedThread] -= realDeltaLoad;
+                _threadAndTaskCount[indexOfMinLoadedThread] += realDeltaLoad;
+
+                for (var i = 0; i < realDeltaLoad; i++)
+                {
+                    // Procedures that take less threads are transferred first
+                    _procIdAndThread.Values
+                        .OrderBy(threadList => threadList.Count)
+                        .FirstOrDefault(threadsOfProc => threadsOfProc.Remove(indexOfMaxLoadedThread))
+                        ?.Add(indexOfMinLoadedThread);
+                }
+
+                maxLoad = _threadAndTaskCount.Max(i1 => i1);
+                minLoad = _threadAndTaskCount.Min(i1 => i1);
+                realDeltaLoad = maxLoad - minLoad - 1;
+            }
+        }
     }
 }

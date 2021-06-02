@@ -6,7 +6,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
     public abstract class ResourceRequest<TResource> where TResource : Resource
     {
         public bool TryGetResource(List<Resource> availableResources) =>
-            availableResources.First(resource => resource is TResource) is TResource requestedResource
+            availableResources.FirstOrDefault(resource => resource is TResource) is TResource requestedResource
             && TryGetResourceBody(availableResources, requestedResource);
 
         protected abstract bool TryGetResourceBody(List<Resource> availableResources, TResource requestedResource);

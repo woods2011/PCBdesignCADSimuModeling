@@ -8,8 +8,8 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
     {
         public PcbParamsInput(PcbDesignTechnology context) : base(context)
         {
-            RequiredResources.Add(new Designer());
-            RequiredResources.Add(new Server()); //ToDo
+            //RequiredResources.Add(new Designer());
+            //RequiredResources.Add(new Server()); //ToDo
         }
 
 
