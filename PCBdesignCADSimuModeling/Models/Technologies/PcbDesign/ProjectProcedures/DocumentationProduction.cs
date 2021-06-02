@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using PCBdesignCADSimuModeling.Models.Resources;
+using PCBdesignCADSimuModeling.Models.Resources.ResourceRequests;
 
 namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
 {
@@ -7,7 +9,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
     {
         public DocumentationProduction(PcbDesignTechnology context) : base(context)
         {
-            //RequiredResources.Add(new Server()); //ToDo
+            RequiredResources.Add(new ServerRequest(ProcedureId));
         }
 
 
@@ -19,6 +21,9 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
         public override TimeSpan UpdateModelTime(TimeSpan deltaTime)
         {
+            var serverPower = ActiveResources.FindAll(resource => resource is Server)
+                .Sum(resource => resource.ResValueForProc(ProcedureId));
+            
             throw new NotImplementedException();
         }
     }

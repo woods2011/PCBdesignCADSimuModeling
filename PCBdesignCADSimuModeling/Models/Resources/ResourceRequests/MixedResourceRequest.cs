@@ -1,22 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PCBdesignCADSimuModeling.Models.Resources.ResourceRequests
 {
     public abstract class MixedResourceRequest<TMixedResources> : ResourceRequest<TMixedResources>
         where TMixedResources : MixedResource
     {
-        protected override bool TryGetResourceBody(List<Resource> availableResources, TMixedResources requestedResource)
+        protected MixedResourceRequest(Guid procId) : base(procId)
         {
-            if (!TryGetResourceBodyBody(requestedResource, out var remainingResource)) return false;
+        }
+    }
 
-            availableResources.Remove(requestedResource);
-            if (remainingResource is not null)
-                availableResources.Add(remainingResource);
 
-            return true;
+    public class CpuThreadRequest : MixedResourceRequest<CpuThreads>
+    {
+        private readonly int _reqThreadCount;
+
+        
+        public CpuThreadRequest(Guid procId, int reqThreadCount) : base(procId)
+        {
+            _reqThreadCount = reqThreadCount;
         }
 
-        protected abstract bool TryGetResourceBodyBody(TMixedResources requestedResource,
-            out TMixedResources remainingResource);
+
+        protected override bool TryGetResourceBody(CpuThreads potentialResource) =>
+            potentialResource.TryGetResource(ProcId, _reqThreadCount);
     }
 }

@@ -6,51 +6,43 @@ namespace PCBdesignCADSimuModeling.Models.Resources
 {
     public class ResourceManager : IResourceManager
     {
-        public bool TryGetResources(List<IResourceRequest> resourceRequests, out List<Resource> receivedResources)
+        private readonly List<Resource> _resourcePool;
+        
+        
+        public ResourceManager(List<Resource> resourcePool)
+        {
+            _resourcePool = resourcePool;
+        }
+        
+        
+        public bool TryGetResources(Guid procId, List<IResourceRequest> resourceRequests, out List<Resource> receivedResources)
         {
             receivedResources = new List<Resource>();
-            
+
             foreach (var resourceRequest in resourceRequests)
             {
-                if (!resourceRequest.TryGetResource(_resourcePool))
+                if (!resourceRequest.TryGetResource(_resourcePool, out var receivedResource))
                 {
-                    foreach (var receivedResource in receivedResources)
-                    {
-                        //resource.Free(procId);
-                    }
-                    receivedResources = null;
+                    receivedResources.ForEach(resource => resource.FreeResource(procId));
+                    receivedResources = new List<Resource>();
                     return false;
                 }
-                    
+                
+                receivedResources.Add(receivedResource);
             }
 
             return true;
         }
 
-        public void FreeResources(List<Resource> resources)
-        {
-            Guid procId = new Guid();
-
-            foreach (var resource in resources)
-            {
-                //resource.Free(procId);
-            }
-        }
-
-        private readonly List<Resource> _resourcePool;
-
-        public ResourceManager(List<Resource> resourcePool)
-        {
-            _resourcePool = resourcePool;
-        }
+        public void FreeResources(Guid procId, List<Resource> resources) =>
+            resources.ForEach(resource => resource.FreeResource(procId));
     }
 
-    
-    
+
     public interface IResourceManager
     {
-        bool TryGetResources(List<IResourceRequest> resourceRequests, out List<Resource> receivedResources);
+        bool TryGetResources(Guid procId, List<IResourceRequest> resourceRequests, out List<Resource> receivedResources);
 
-        void FreeResources(List<Resource> resources);
+        void FreeResources(Guid procId, List<Resource> resources);
     }
 }

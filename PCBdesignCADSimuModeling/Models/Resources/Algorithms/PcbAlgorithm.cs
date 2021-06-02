@@ -41,12 +41,12 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
 
         private void UpdateModelTimeBody(TimeSpan deltaTime, double cpuPower)
         {
-            CompletionRate = (CompletionRate * _totalComplexity + deltaTime.Seconds * cpuPower) / _totalComplexity;
+            CompletionRate += deltaTime.Seconds * cpuPower / _totalComplexity;
         }
 
         private TimeSpan EstimateEndTime(double cpuPower)
         {
-            return TimeSpan.FromSeconds(Math.Floor((1 - CompletionRate) * _totalComplexity / cpuPower));
+            return TimeSpan.FromSeconds(Math.Round((1 - CompletionRate) * _totalComplexity / cpuPower));
         }
     }
 }

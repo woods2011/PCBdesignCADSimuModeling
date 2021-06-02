@@ -32,14 +32,14 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
             get => _curProcedure;
             set
             {
-                _resourceManager.FreeResources(_curProcedure.ActiveResources);
+                _resourceManager.FreeResources(_curProcedure.ProcedureId, _curProcedure.ActiveResources);
                 _curProcedure = value;
-                if (_curProcedure is not null)
-                {
-                    IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.RequiredResources, out List<Resource> receivedResources);
-                    if (!IsWaitResources)
-                        _curProcedure.ActiveResources.AddRange(receivedResources);
-                }
+
+                if (_curProcedure is null) return;
+
+                IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.ProcedureId,
+                    _curProcedure.RequiredResources, out var receivedResources);
+                _curProcedure.ActiveResources.AddRange(receivedResources);
             }
         }
 
@@ -48,20 +48,13 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
 
         public TimeSpan UpdateModelTime(TimeSpan deltaTime)
         {
-            // if (IsWaitResources)
-            //     throw new InvalidOperationException("ProcedureIsWaitResources");
+            if (!IsWaitResources) return CurProcedure.UpdateModelTime(deltaTime);
             
-            if (IsWaitResources)
-            {
-                // ToDo
-                IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.RequiredResources, out List<Resource> receivedResources);
-                if (!IsWaitResources)
-                    _curProcedure.ActiveResources.AddRange(receivedResources);
-                
-                return TimeSpan.MaxValue;
-            }
-
-            return CurProcedure.UpdateModelTime(deltaTime);
+            IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.ProcedureId,
+                _curProcedure.RequiredResources, out var receivedResources);
+            _curProcedure.ActiveResources.AddRange(receivedResources);
+            
+            return IsWaitResources ? TimeSpan.MaxValue : CurProcedure.UpdateModelTime(TimeSpan.Zero); // ToDo: verify
         }
 
         public bool MoveToNextProcedure() => _curProcedure.NextProcedure();

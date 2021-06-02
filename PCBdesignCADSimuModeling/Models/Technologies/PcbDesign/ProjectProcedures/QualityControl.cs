@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using PCBdesignCADSimuModeling.Models.Resources;
+using PCBdesignCADSimuModeling.Models.Resources.ResourceRequests;
 
 namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
 {
@@ -8,13 +10,13 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
     {
         public QualityControl(PcbDesignTechnology context) : base(context)
         {
-            //RequiredResources.Add(new Designer());
+            RequiredResources.Add(new DesignerRequest(ProcedureId));
         }
 
 
         public override bool NextProcedure()
         {
-            if (true) //ToDo
+            if (true)
                 Context.CurProcedure = new DocumentationProduction(Context);
             else
                 Context.CurProcedure = new Placement(Context);
@@ -24,6 +26,9 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
         public override TimeSpan UpdateModelTime(TimeSpan deltaTime)
         {
+            var designerPower = ActiveResources.FindAll(resource => resource is Designer)
+                .Sum(resource => resource.ResValueForProc(ProcedureId));
+            
             throw new NotImplementedException();
         }
     }
