@@ -21,6 +21,8 @@ namespace PCBdesignCADSimuModeling.Models.Resources
         {
             var receivedResources = new List<Resource>();
 
+            //Console.WriteLine($"Procedure: {procId}");
+            
             foreach (var resourceRequest in resourceRequests)
             {
                 if (!resourceRequest.TryGetResource(

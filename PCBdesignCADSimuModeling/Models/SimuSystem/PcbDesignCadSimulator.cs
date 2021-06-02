@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using PCBdesignCADSimuModeling.Models.Loggers;
 using PCBdesignCADSimuModeling.Models.Resources;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
 using PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
@@ -18,6 +19,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
         private TimeSpan _deltaTime = TimeSpan.Zero;
         private TimeSpan _finalTime = TimeSpan.Zero;
         private readonly IPcbAlgFactories _pcbAlgFactories;
+        private readonly ISimpleLogger _logger;
         private readonly IResourceManager _resourceManager;
         private readonly ISimuEventGenerator _simuEventGenerator;
         private readonly Dictionary<PcbDesignTechnology, PcbDesignProcedureFinish> _activePcbDesignTechs = new();
@@ -25,9 +27,10 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
 
 
         public PcbDesignCadSimulator(ISimuEventGenerator simuEventGenerator, List<Resource> recoursePool,
-            IPcbAlgFactories pcbAlgFactories, TimeSpan? startTime = null)
+            IPcbAlgFactories pcbAlgFactories, ISimpleLogger logger, TimeSpan? startTime = null)
         {
             _pcbAlgFactories = pcbAlgFactories;
+            _logger = logger;
             _simuEventGenerator = simuEventGenerator;
             _modelTime = startTime ?? TimeSpan.Zero;
             _resourceManager = new ResourceManager(recoursePool);
@@ -64,7 +67,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
 
                 //Determine Current state
                 foreach (var (activeTech, activeEvent) in _activePcbDesignTechs)
-                    activeEvent.ActivateTime = activeTech.UpdateModelTime(_deltaTime);
+                    activeEvent.ActivateTime = _modelTime + activeTech.UpdateModelTime(_deltaTime);
 
                 //Handle current Events
                 var curEvents = _simulationEvents.Where(simuEvent => simuEvent.ActivateTime == ModelTime)
@@ -75,7 +78,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
                     _simulationEvents.Remove(curEvent);
                 }
             }
-
+            
             _modelTime = _finalTime + TimeSpan.FromMilliseconds(1); //?
         }
 
@@ -87,7 +90,10 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
                 {
                     var newTechnology = new PcbDesignTechnology(_resourceManager, pcbDesignTechnologyStart.GeneratedPcb,
                         _pcbAlgFactories);
-                    _activePcbDesignTechs.Add(newTechnology, new PcbDesignProcedureFinish(newTechnology));
+                    var procedureFinishEvent = new PcbDesignProcedureFinish(newTechnology, _modelTime);
+                    
+                    _activePcbDesignTechs.Add(newTechnology, procedureFinishEvent);
+                    _simulationEvents.Add(procedureFinishEvent);
                     break;
                 }
 
@@ -100,7 +106,12 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
                     _activePcbDesignTechs.Remove(tech);
 
                     if (tech.MoveToNextProcedure())
-                        _activePcbDesignTechs.Add(tech, new PcbDesignProcedureFinish(tech));
+                    {
+                        var procedureFinishEvent = new PcbDesignProcedureFinish(tech, _modelTime);
+                        
+                        _activePcbDesignTechs.Add(tech, procedureFinishEvent);
+                        _simulationEvents.Add(procedureFinishEvent);
+                    }
 
                     break;
                 }

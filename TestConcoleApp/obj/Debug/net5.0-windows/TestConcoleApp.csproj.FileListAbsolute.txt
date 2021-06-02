@@ -36,3 +36,16 @@ C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0-windows\ref\TestConcoleApp.dll
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0-windows\TestConcoleApp.pdb
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0-windows\TestConcoleApp.genruntimeconfig.cache
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Configuration.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Configuration.Abstractions.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Configuration.Binder.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Logging.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Logging.Configuration.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Logging.Console.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Logging.EventLog.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Options.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Options.ConfigurationExtensions.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Primitives.dll

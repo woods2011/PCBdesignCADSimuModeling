@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using MathNet.Numerics.Distributions;
+using Microsoft.Extensions.Logging.Abstractions;
+using PCBdesignCADSimuModeling.Models.Loggers;
 using PCBdesignCADSimuModeling.Models.Resources;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
@@ -29,7 +32,9 @@ namespace TestConcoleApp
             List<Resource> resourcePool = new();
             resourcePool.AddRange(designers);
             resourcePool.Add(cpuThreads);
+            resourcePool.Add(server);
 
+            
 
             //
 
@@ -44,8 +49,8 @@ namespace TestConcoleApp
             //
 
 
-            double intervalDistrMean = new TimeSpan(1, 0, 0, 0).TotalSeconds;
-            double intervalDistrDev = new TimeSpan(6, 0, 0).TotalSeconds;
+            double intervalDistrMean = new TimeSpan(0, 3, 0, 0).TotalSeconds;
+            double intervalDistrDev = new TimeSpan(1, 0, 0).TotalSeconds;
             var techIntervalDistr = new Normal(intervalDistrMean, intervalDistrDev);
 
 
@@ -68,11 +73,17 @@ namespace TestConcoleApp
 
             //
 
-            TimeSpan finalTime = TimeSpan.FromDays(300);
+
+            ISimpleLogger logger = new ConsoleSimpleLogger();
+            
+            TimeSpan finalTime = TimeSpan.FromDays(50);
 
             PcbDesignCadSimulator simulator =
-                new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
+                new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories, logger);
             simulator.Simulate(finalTime);
+            
         }
     }
+    
+    
 }

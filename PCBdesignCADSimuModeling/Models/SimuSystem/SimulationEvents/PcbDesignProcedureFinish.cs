@@ -5,10 +5,10 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents
 {
     public class PcbDesignProcedureFinish : SimulationEvent
     {
-        public PcbDesignProcedureFinish(PcbDesignTechnology pcbDesignTechnology) : base(1)
+        public PcbDesignProcedureFinish(PcbDesignTechnology pcbDesignTechnology, TimeSpan modelTime) : base(1)
         {
             PcbDesignTechnology = pcbDesignTechnology;
-            ActivateTime = pcbDesignTechnology.UpdateModelTime(TimeSpan.Zero);
+            ActivateTime = modelTime + pcbDesignTechnology.UpdateModelTime(TimeSpan.Zero);
         }
 
         public PcbDesignTechnology PcbDesignTechnology { get; }

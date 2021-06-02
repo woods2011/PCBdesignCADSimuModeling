@@ -11,8 +11,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgori
         
         static WireRoutingAlgProviderFactory()
         {
-            Map["Example"] = () =>
-                IWireRoutingAlgFactory.ExampleWireRouting;
+            Map["Example"] = () => IWireRoutingAlgFactory.ExampleWireRouting;
         }
 
         

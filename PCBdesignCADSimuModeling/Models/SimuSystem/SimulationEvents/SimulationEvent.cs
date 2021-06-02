@@ -16,7 +16,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents
         }
 
         
-        public TimeSpan ActivateTime { get; set; } = TimeSpan.MaxValue;
+        public TimeSpan ActivateTime { get; set; } = TimeSpan.MaxValue / 2.0;
         public int Priority { get; }
     }
 }

@@ -32,13 +32,17 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
             get => _curProcedure;
             set
             {
-                _resourceManager.FreeResources(_curProcedure.ProcedureId, _curProcedure.ActiveResources);
+                if (_curProcedure is not null)
+                    _resourceManager.FreeResources(_curProcedure.ProcedureId, _curProcedure.ActiveResources);
+                
                 _curProcedure = value;
-
                 if (_curProcedure is null) return;
 
                 IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.ProcedureId,
                     _curProcedure.RequiredResources, out var receivedResources);
+
+                //Console.WriteLine(IsWaitResources);
+                
                 _curProcedure.ActiveResources.AddRange(receivedResources);
             }
         }
@@ -54,7 +58,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
                 _curProcedure.RequiredResources, out var receivedResources);
             _curProcedure.ActiveResources.AddRange(receivedResources);
             
-            return IsWaitResources ? TimeSpan.MaxValue : CurProcedure.UpdateModelTime(TimeSpan.Zero); // ToDo: verify
+            return IsWaitResources ? TimeSpan.MaxValue / 2.0 : CurProcedure.UpdateModelTime(TimeSpan.Zero); // ToDo: verify
         }
 
         public bool MoveToNextProcedure() => _curProcedure.NextProcedure();

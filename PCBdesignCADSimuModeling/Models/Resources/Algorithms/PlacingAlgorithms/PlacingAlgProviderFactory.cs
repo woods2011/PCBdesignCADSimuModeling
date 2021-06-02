@@ -11,9 +11,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
         
         static PlacingAlgProviderFactory()
         {
-            Map["Example"] = () =>
-                new PlacingAlgFactory(pcbParams =>
-                    new PlacingMultiThreadAlgorithm(new PlacingExampleCxtyEst(pcbParams), 8, 0.7));
+            Map["Example"] = () => IPlacingAlgFactory.ExampleTrace;
         }
 
         
