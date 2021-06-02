@@ -7,6 +7,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
 {
     public abstract class Resource
     {
+        
     }
 
     public abstract class UndividedResource : Resource
@@ -22,7 +23,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
     {
     }
 
-    public class Designer : SharedResource
+    public class Designer : UndividedResource
     {
         public Designer(ExperienceEn experience)
         {
@@ -81,7 +82,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
             return threadSum * ClockRate;
         }
 
-        public bool TryGetRes(Guid procId, int reqThreadCount)
+        public bool TryGetResource(Guid procId, int reqThreadCount)
         {
             var threadsList = new List<int>();
 
@@ -97,7 +98,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
             return true;
         }
 
-        public void FreeRes(Guid procId)
+        public void FreeResource(Guid procId)
         {
             var threadsList = _procIdAndThread[procId];
 

@@ -1,23 +1,47 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using PCBdesignCADSimuModeling.Models.Resources.ResourceRequests;
 
 namespace PCBdesignCADSimuModeling.Models.Resources
 {
     public class ResourceManager : IResourceManager
     {
-        public bool TryGetResources(List<Resource> resources)
+        public bool TryGetResources(List<IResourceRequest> resourceRequests, out List<Resource> receivedResources)
         {
-            throw new System.NotImplementedException();
+            receivedResources = new List<Resource>();
+            
+            foreach (var resourceRequest in resourceRequests)
+            {
+                if (!resourceRequest.TryGetResource(_resourcePool))
+                {
+                    foreach (var receivedResource in receivedResources)
+                    {
+                        //resource.Free(procId);
+                    }
+                    receivedResources = null;
+                    return false;
+                }
+                    
+            }
+
+            return true;
         }
 
         public void FreeResources(List<Resource> resources)
         {
-            throw new System.NotImplementedException();
-            RebalanceResources();
+            Guid procId = new Guid();
+
+            foreach (var resource in resources)
+            {
+                //resource.Free(procId);
+            }
         }
 
-        public void RebalanceResources()
+        private readonly List<Resource> _resourcePool;
+
+        public ResourceManager(List<Resource> resourcePool)
         {
-            throw new System.NotImplementedException();
+            _resourcePool = resourcePool;
         }
     }
 
@@ -25,7 +49,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
     
     public interface IResourceManager
     {
-        bool TryGetResources(List<Resource> resources);
+        bool TryGetResources(List<IResourceRequest> resourceRequests, out List<Resource> receivedResources);
 
         void FreeResources(List<Resource> resources);
     }

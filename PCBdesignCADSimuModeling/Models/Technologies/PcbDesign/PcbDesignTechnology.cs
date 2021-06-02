@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using PCBdesignCADSimuModeling.Models.Resources;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
@@ -31,10 +32,14 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
             get => _curProcedure;
             set
             {
-                _resourceManager.FreeResources(_curProcedure.RequiredResources);
+                _resourceManager.FreeResources(_curProcedure.ActiveResources);
                 _curProcedure = value;
                 if (_curProcedure is not null)
-                    IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.RequiredResources);
+                {
+                    IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.RequiredResources, out List<Resource> receivedResources);
+                    if (!IsWaitResources)
+                        _curProcedure.ActiveResources.AddRange(receivedResources);
+                }
             }
         }
 
@@ -45,8 +50,16 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
         {
             // if (IsWaitResources)
             //     throw new InvalidOperationException("ProcedureIsWaitResources");
+            
             if (IsWaitResources)
+            {
+                // ToDo
+                IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.RequiredResources, out List<Resource> receivedResources);
+                if (!IsWaitResources)
+                    _curProcedure.ActiveResources.AddRange(receivedResources);
+                
                 return TimeSpan.MaxValue;
+            }
 
             return CurProcedure.UpdateModelTime(deltaTime);
         }

@@ -18,18 +18,19 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
         private TimeSpan _deltaTime = TimeSpan.Zero;
         private TimeSpan _finalTime = TimeSpan.Zero;
         private readonly PcbAlgFactories _pcbAlgFactories;
-        private readonly IResourceManager _resourceManager = new ResourceManager();
+        private readonly IResourceManager _resourceManager;
         private readonly ISimuEventGenerator _simuEventGenerator;
         private readonly Dictionary<PcbDesignTechnology, PcbDesignProcedureFinish> _activePcbDesignTechs = new();
         private readonly List<SimulationEvent> _simulationEvents = new List<SimulationEvent>();
 
 
-        public PcbDesignCadSimulator(PcbAlgFactories pcbAlgFactories,
-            ISimuEventGenerator simuEventGenerator, TimeSpan startTime)
+        public PcbDesignCadSimulator(ISimuEventGenerator simuEventGenerator, List<Resource> recoursePool,
+            PcbAlgFactories pcbAlgFactories, TimeSpan? startTime = null)
         {
             _pcbAlgFactories = pcbAlgFactories;
             _simuEventGenerator = simuEventGenerator;
-            _modelTime = startTime;
+            _modelTime = startTime ?? TimeSpan.Zero;
+            _resourceManager = new ResourceManager(recoursePool);
         }
 
 
@@ -60,7 +61,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
                 ModelTime = _simulationEvents.Min(simuEvent => simuEvent.ActivateTime);
 
                 if (SimulationIsCompleted) break;
-                
+
                 //Determine Current state
                 foreach (var (activeTech, activeEvent) in _activePcbDesignTechs)
                     activeEvent.ActivateTime = activeTech.UpdateModelTime(_deltaTime);

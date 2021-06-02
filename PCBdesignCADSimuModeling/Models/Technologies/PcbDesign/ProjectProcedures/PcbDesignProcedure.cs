@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using PCBdesignCADSimuModeling.Models.Resources;
+using PCBdesignCADSimuModeling.Models.Resources.ResourceRequests;
 
 namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
 {
@@ -14,8 +15,8 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
             Context = context;
         }
 
-        
-        public List<Resource> RequiredResources { get; } = new();
+        public List<IResourceRequest> RequiredResources { get; } = new();
+        public List<Resource> ActiveResources { get; } = new();
         
         
         
