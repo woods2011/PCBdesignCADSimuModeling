@@ -1,0 +1,16 @@
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0\TestConcoleApp.exe
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0\TestConcoleApp.deps.json
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0\TestConcoleApp.runtimeconfig.json
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0\TestConcoleApp.runtimeconfig.dev.json
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0\TestConcoleApp.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0\ref\TestConcoleApp.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0\TestConcoleApp.pdb
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0\TestConcoleApp.csprojAssemblyReference.cache
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0\TestConcoleApp.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0\TestConcoleApp.AssemblyInfoInputs.cache
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0\TestConcoleApp.AssemblyInfo.cs
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0\TestConcoleApp.csproj.CoreCompileInputs.cache
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0\TestConcoleApp.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0\ref\TestConcoleApp.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0\TestConcoleApp.pdb
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\obj\Debug\net5.0\TestConcoleApp.genruntimeconfig.cache

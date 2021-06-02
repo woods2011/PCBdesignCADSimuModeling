@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "dgSpecHash": "W0dq9MinsgCLZTbIW/lqLVBN7CUbSobc3/+mHvFVIEoBK/Yd8kcNd1+mcweFwg6VO2R6lBclJtppSIX5AwtiHw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\ArtemPC\\RiderProjects\\PCBdesignCADSimuModeling\\TestConcoleApp\\TestConcoleApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ArtemPC\\.nuget\\packages\\extended.wpf.toolkit\\4.1.0\\extended.wpf.toolkit.4.1.0.nupkg.sha512",
+    "C:\\Users\\ArtemPC\\.nuget\\packages\\mathnet.numerics\\4.15.0\\mathnet.numerics.4.15.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Extended.Wpf.Toolkit 4.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net5.0-windows7.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Extended.Wpf.Toolkit",
+      "targetGraphs": [
+        "net5.0-windows7.0"
+      ]
+    }
+  ]
+}
