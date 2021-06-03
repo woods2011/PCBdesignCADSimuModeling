@@ -42,6 +42,11 @@ namespace PCBdesignCADSimuModeling.ViewModels
 
         public Server Server { get; } = new(200);
         public CpuThreads Cpu { get; } = new(16, 2.5);
+
+        public TechIntervalBuilderDisplayModel TechIntervalDistr { get; } =
+            new(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0));
+        
+        
         
         
         private void BeginSimulationHandler()
@@ -51,6 +56,10 @@ namespace PCBdesignCADSimuModeling.ViewModels
 
             Debug.WriteLine(Server.InternetSpeed);
             Debug.WriteLine($"{Cpu.ThreadCount} | {Cpu.ClockRate}");
+            
+            Debug.WriteLine($"{TimeSpan.FromSeconds(TechIntervalDistr.Build().Sample())}");
+            Debug.WriteLine($"{TimeSpan.FromSeconds(TechIntervalDistr.Build().Sample())}");
+            Debug.WriteLine($"{TimeSpan.FromSeconds(TechIntervalDistr.Build().Sample())}");
 
             // List<Designer> designers = new()
             // {

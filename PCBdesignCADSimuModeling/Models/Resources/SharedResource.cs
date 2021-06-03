@@ -35,9 +35,6 @@ namespace PCBdesignCADSimuModeling.Models.Resources
 
         public override double ResValueForProc(Guid procId) => _resValueConvolution(this);
 
-        public override void FreeResource(Guid procId)
-        {
-            UtilizingProcIds.Remove(procId);
-        }
+        public override void FreeResource(Guid procId) => UtilizingProcIds.Remove(procId);
     }
 }

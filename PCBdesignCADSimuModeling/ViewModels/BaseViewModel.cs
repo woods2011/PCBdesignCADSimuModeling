@@ -31,7 +31,8 @@ namespace PCBdesignCADSimuModeling.ViewModels
 
         public DictionaryWrapper<string, string> ErrorCollection { get; } = new(new Dictionary<string, string>());
 
-        public virtual bool IsValid => Validator.TryValidateObject(this, new ValidationContext(this), null, true);
+        public virtual bool IsValid => 
+            Validator.TryValidateObject(this, new ValidationContext(this), null, true);
 
         public virtual string Error
         {
@@ -81,7 +82,7 @@ namespace PCBdesignCADSimuModeling.ViewModels
 
         #endregion
 
-        
+
         public virtual void Dispose()
         {
         }
