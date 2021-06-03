@@ -39,3 +39,6 @@ C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\bin\Debug\net5.0-windows\ru\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\bin\Debug\net5.0-windows\sv\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\bin\Debug\net5.0-windows\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\obj\Debug\net5.0-windows\Views\MessageView.g.cs
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\obj\Debug\net5.0-windows\GeneratedInternalTypeHelper.g.cs
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\obj\Debug\net5.0-windows\Views\MessageView.baml

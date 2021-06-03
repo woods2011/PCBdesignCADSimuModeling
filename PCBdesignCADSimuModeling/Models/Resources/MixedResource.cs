@@ -4,9 +4,11 @@ using System.Linq;
 
 namespace PCBdesignCADSimuModeling.Models.Resources
 {
-    public abstract class MixedResource : Resource
+    public abstract class MixedResource : IResource
     {
         protected readonly List<Guid> UtilizingProcIds = new();
+        public abstract double ResValueForProc(Guid procId);
+        public abstract void FreeResource(Guid procId);
     }
     
     

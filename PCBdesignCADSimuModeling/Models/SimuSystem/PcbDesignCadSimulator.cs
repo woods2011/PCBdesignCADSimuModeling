@@ -26,7 +26,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
         private readonly List<SimulationEvent> _simulationEvents = new List<SimulationEvent>();
 
 
-        public PcbDesignCadSimulator(ISimuEventGenerator simuEventGenerator, List<Resource> recoursePool,
+        public PcbDesignCadSimulator(ISimuEventGenerator simuEventGenerator, List<IResource> recoursePool,
             IPcbAlgFactories pcbAlgFactories, ISimpleLogger logger, TimeSpan? startTime = null)
         {
             _pcbAlgFactories = pcbAlgFactories;

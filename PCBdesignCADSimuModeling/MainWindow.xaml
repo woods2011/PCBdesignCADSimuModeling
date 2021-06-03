@@ -4,11 +4,81 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PCBdesignCADSimuModeling"
+        xmlns:views="clr-namespace:PCBdesignCADSimuModeling.Views"
+        xmlns:viewModels="clr-namespace:PCBdesignCADSimuModeling.ViewModels"
         xmlns:wpfTool="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" d:DataContext="{d:DesignInstance local:MainWindow }">
-    <Grid>
-        <wpfTool:TimeSpanUpDown Text="{Binding Times}" Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        Title="MainWindow" Height="450" Width="800"
+        d:DataContext="{d:DesignInstance Type=viewModels:MainViewModel, IsDesignTimeCreatable=True}">
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+
+    <Grid Background="AliceBlue" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+
+
+        <Grid Margin="5" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+
+            <Grid Margin="5" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+
+                <DataGrid ItemsSource="{Binding DesignersList}"
+                          ColumnWidth="100" HorizontalAlignment="Left" />
+
+
+                <StackPanel Grid.Row="2">
+                    <Button Width="50" HorizontalAlignment="Right" FontSize="14"
+                            Command="{Binding AddDesigner, UpdateSourceTrigger=PropertyChanged}" Content="+" />
+                    <Button Width="50" HorizontalAlignment="Right" FontSize="14"
+                            Command="{Binding RemoveDesigner, UpdateSourceTrigger=PropertyChanged}" Content="-" />
+                    <Button VerticalAlignment="Bottom" Width="50" HorizontalAlignment="Right" FontSize="14"
+                            Command="{Binding BeginSimulation, UpdateSourceTrigger=PropertyChanged}" Content="NotOk" />
+                </StackPanel>
+            </Grid>
+
+
+            <DataGrid Margin="5" Grid.Column="1" />
+            <StackPanel Margin="5" Grid.Column="2" />
+
+
+        </Grid>
+
+        <ContentControl
+            Grid.Row="1"
+            Content="{Binding MessageViewModel}"
+            Visibility="{Binding MessageViewModel.HasMessage,
+            Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type viewModels:MessageViewModel}">
+                    <views:MessageView />
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
     </Grid>
 </Window>
+
+
+<!-- <wpfTool:TimeSpanUpDown Text="{Binding Times}" Width="auto" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top"/> -->
+
+<!-- <StackPanel> -->
+<!--     <Button Width="50" HorizontalAlignment="Right" FontSize="14" -->
+<!--             Command="{Binding TestCommand, UpdateSourceTrigger=PropertyChanged}" Content="NotOk" /> -->
+<!--     <Button Width="50" HorizontalAlignment="Right" FontSize="14" -->
+<!--             Command="{Binding TestCommand2, UpdateSourceTrigger=PropertyChanged}" Content="Ok" /> -->
+<!-- </StackPanel> -->

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace PCBdesignCADSimuModeling.Models.Loggers
 {
@@ -8,13 +9,22 @@ namespace PCBdesignCADSimuModeling.Models.Loggers
         void Log(object message);
     }
 
+
     public class ConsoleSimpleLogger : ISimpleLogger
     {
-        public void Log(object message)
-        {
-            Console.WriteLine(message.ToString());
-        }
+        public void Log(object message) => Console.WriteLine(message.ToString());
     }
+
+
+    public class InMemorySimpleLogger : ISimpleLogger
+    {
+        private StringBuilder StringBuilder { get; } = new();
+
+        public void Log(object message) => StringBuilder.AppendLine(message.ToString());
+
+        public string GetData() => StringBuilder.ToString();
+    }
+
 
     public class CompositionSimpleLogger : ISimpleLogger
     {
@@ -25,7 +35,6 @@ namespace PCBdesignCADSimuModeling.Models.Loggers
             _loggers = loggers;
         }
 
-        public void Log(object message) => 
-            _loggers.ForEach(logger => logger.Log(message.ToString()));
+        public void Log(object message) => _loggers.ForEach(logger => logger.Log(message));
     }
 }

@@ -3,9 +3,12 @@ using System.Collections.Generic;
 
 namespace PCBdesignCADSimuModeling.Models.Resources
 {
-    public abstract class SharedResource : Resource
+    public abstract class SharedResource : IResource
     {
         protected readonly List<Guid> UtilizingProcIds = new();
+        public abstract double ResValueForProc(Guid procId);
+
+        public abstract void FreeResource(Guid procId);
     }
 
 

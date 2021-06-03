@@ -6,11 +6,11 @@ namespace PCBdesignCADSimuModeling.Models.Resources.ResourceRequests
 {
     public interface IResourceRequest
     {
-        bool TryGetResource(List<Resource> availableResources, out Resource reqResource);
+        bool TryGetResource(List<IResource> availableResources, out IResource reqResource);
     }
     
     
-    public abstract class ResourceRequest<TResource> : IResourceRequest where TResource : Resource
+    public abstract class ResourceRequest<TResource> : IResourceRequest where TResource : IResource
     {
         protected ResourceRequest(Guid procId)
         {
@@ -21,7 +21,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources.ResourceRequests
         public Guid ProcId { get; }
         
         
-        public bool TryGetResource(List<Resource> availableResources, out Resource reqResource)
+        public bool TryGetResource(List<IResource> availableResources, out IResource reqResource)
         {
             reqResource = availableResources.FirstOrDefault(resource => resource is TResource tResource && TryGetResourceBody(tResource));
             return reqResource is not null;

@@ -7,19 +7,19 @@ namespace PCBdesignCADSimuModeling.Models.Resources
 {
     public class ResourceManager : IResourceManager
     {
-        private readonly List<Resource> _resourcePool;
+        private readonly List<IResource> _resourcePool;
 
 
-        public ResourceManager(List<Resource> resourcePool)
+        public ResourceManager(List<IResource> resourcePool)
         {
             _resourcePool = resourcePool;
         }
 
 
         public bool TryGetResources(Guid procId, List<IResourceRequest> resourceRequests,
-            out List<Resource> receivedResourcesOut)
+            out List<IResource> receivedResourcesOut)
         {
-            var receivedResources = new List<Resource>();
+            var receivedResources = new List<IResource>();
 
             //Console.WriteLine($"Procedure: {procId}");
             
@@ -30,7 +30,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
                     out var receivedResource))
                 {
                     receivedResources.ForEach(resource => resource.FreeResource(procId));
-                    receivedResourcesOut = new List<Resource>();
+                    receivedResourcesOut = new List<IResource>();
                     return false;
                 }
 
@@ -41,7 +41,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
             return true;
         }
 
-        public void FreeResources(Guid procId, List<Resource> resources) =>
+        public void FreeResources(Guid procId, List<IResource> resources) =>
             resources.ForEach(resource => resource.FreeResource(procId));
     }
 
@@ -49,8 +49,8 @@ namespace PCBdesignCADSimuModeling.Models.Resources
     public interface IResourceManager
     {
         bool TryGetResources(Guid procId, List<IResourceRequest> resourceRequests,
-            out List<Resource> receivedResources);
+            out List<IResource> receivedResources);
 
-        void FreeResources(Guid procId, List<Resource> resources);
+        void FreeResources(Guid procId, List<IResource> resources);
     }
 }

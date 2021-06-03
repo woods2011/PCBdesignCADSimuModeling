@@ -7,11 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="ViewModels" />
-      <Folder Include="Views" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Extended.Wpf.Toolkit" Version="4.1.0" />
       <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
     </ItemGroup>

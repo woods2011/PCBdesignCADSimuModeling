@@ -2,9 +2,12 @@
 
 namespace PCBdesignCADSimuModeling.Models.Resources
 {
-    public abstract class UndividedResource : Resource
+    public abstract class UndividedResource : IResource
     {
         protected Guid UtilizingProcId = Guid.Empty;
+        public abstract double ResValueForProc(Guid procId);
+
+        public abstract void FreeResource(Guid procId);
     }
 
 
@@ -12,7 +15,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
     {
         private readonly Func<Designer, double> _resValueConvolution;
 
-
+        
         public Designer(ExperienceEn experience, Func<Designer, double> resValueConvolution = null)
         {
             Experience = experience;
@@ -20,7 +23,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
         }
 
 
-        public ExperienceEn Experience { get; }
+        public ExperienceEn Experience { get; set; }
 
 
         public bool TryGetResource(Guid procId)

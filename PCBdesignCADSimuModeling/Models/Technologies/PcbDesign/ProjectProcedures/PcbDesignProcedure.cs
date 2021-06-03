@@ -20,7 +20,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
         
         
         public List<IResourceRequest> RequiredResources { get; } = new();
-        public List<Resource> ActiveResources { get; } = new();
+        public List<IResource> ActiveResources { get; } = new();
 
 
         public abstract bool NextProcedure();
