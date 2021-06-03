@@ -29,8 +29,8 @@ namespace PCBdesignCADSimuModeling.Models.Resources
         }
 
 
-        public int ThreadCount { get; }
-        public double ClockRate { get; }
+        public int ThreadCount { get; set; }
+        public double ClockRate { get; set; }
 
 
         

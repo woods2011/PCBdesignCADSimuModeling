@@ -26,9 +26,12 @@ namespace PCBdesignCADSimuModeling.ViewModels
         public MessageViewModel MessageViewModel { get; } = new();
         public ICommand BeginSimulation => new ActionCommand(_ => BeginSimulationHandler());
 
-        public ICommand AddDesigner => new ActionCommand(_ => DesignersList.Add(new Designer(Designer.ExperienceEn.Little)));
+
+        public ICommand AddDesigner =>
+            new ActionCommand(_ => DesignersList.Add(new Designer(Designer.ExperienceEn.Little)));
+
         public ICommand RemoveDesigner => new ActionCommand(_ => DesignersList.Remove(DesignersList.LastOrDefault()));
-        
+
         public ObservableCollection<Designer> DesignersList { get; } = new()
         {
             new Designer(Designer.ExperienceEn.Little),
@@ -36,15 +39,19 @@ namespace PCBdesignCADSimuModeling.ViewModels
             new Designer(Designer.ExperienceEn.Little),
         };
 
+
+        public Server Server { get; } = new(200);
+        public CpuThreads Cpu { get; } = new(16, 2.5);
+        
         
         private void BeginSimulationHandler()
         {
             foreach (var designer in DesignersList)
                 Debug.WriteLine(designer.Experience);
-                
-            
 
-            
+            Debug.WriteLine(Server.InternetSpeed);
+            Debug.WriteLine($"{Cpu.ThreadCount} | {Cpu.ClockRate}");
+
             // List<Designer> designers = new()
             // {
             //     new Designer(Designer.ExperienceEn.Average),
@@ -107,7 +114,6 @@ namespace PCBdesignCADSimuModeling.ViewModels
         }
     }
 }
-
 
 
 // public List<Designer.ExperienceEn> ExperienceEnumList { get; } = Enum.GetValues(typeof(Designer.ExperienceEn)).Cast<Designer.ExperienceEn>().ToList();

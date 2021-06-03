@@ -17,14 +17,14 @@ namespace PCBdesignCADSimuModeling.Models.Resources
         private readonly Func<Server, double> _resValueConvolution;
 
 
-        public Server(double internetSpeed, Func<Server, double> resValueConvolution = null)
+        public Server(int internetSpeed, Func<Server, double> resValueConvolution = null)
         {
             InternetSpeed = internetSpeed;
             _resValueConvolution = resValueConvolution ?? (server => server.InternetSpeed);
         }
 
 
-        public double InternetSpeed { get; }
+        public int InternetSpeed { get; set; }
 
 
         public bool TryGetResource(Guid procId)
