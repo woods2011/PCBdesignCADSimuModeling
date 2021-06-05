@@ -24,6 +24,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
 
         public abstract bool NextProcedure();
-        public abstract TimeSpan UpdateModelTime(TimeSpan deltaTime);
+        public abstract void UpdateModelTime(TimeSpan deltaTime);
+        public abstract TimeSpan EstimateEndTime();
     }
 }

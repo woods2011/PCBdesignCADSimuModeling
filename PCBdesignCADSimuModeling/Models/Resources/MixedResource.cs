@@ -19,7 +19,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
         private readonly double _oneThreadMultiTaskPenalty;
 
 
-        public CpuThreads(int threadCount, double clockRate, double oneThreadMultiTaskPenalty = 0.95)
+        public CpuThreads(int threadCount, double clockRate, double oneThreadMultiTaskPenalty = 0.9)
         {
             ThreadCount = threadCount;
             ClockRate = clockRate;

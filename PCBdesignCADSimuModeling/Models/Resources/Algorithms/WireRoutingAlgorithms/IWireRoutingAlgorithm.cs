@@ -13,7 +13,7 @@
     
     public class WireRoutingOneThreadAlgorithm : OneThreadPcbAlgorithm, IWireRoutingAlgorithm
     {
-        protected WireRoutingOneThreadAlgorithm(IComplexityEstimator complexityEstimator) : base(complexityEstimator)
+        public WireRoutingOneThreadAlgorithm(IComplexityEstimator complexityEstimator) : base(complexityEstimator)
         {
         }
     }

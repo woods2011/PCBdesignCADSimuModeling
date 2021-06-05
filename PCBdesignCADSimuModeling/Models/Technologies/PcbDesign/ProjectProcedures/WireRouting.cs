@@ -26,14 +26,24 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
             return true;
         }
 
-        public override TimeSpan UpdateModelTime(TimeSpan deltaTime)
+        public override void UpdateModelTime(TimeSpan deltaTime)
         {
             var designerPower = ActiveResources.FindAll(resource => resource is Designer)
                 .Sum(resource => resource.ResValueForProc(ProcedureId));
             var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
                 .Sum(resource => resource.ResValueForProc(ProcedureId));
             
-            return _wireRoutingAlg.UpdateModelTime(deltaTime, cpuPower);
+            _wireRoutingAlg.UpdateModelTime(deltaTime, cpuPower);
+        }
+
+        public override TimeSpan EstimateEndTime()
+        {
+            var designerPower = ActiveResources.FindAll(resource => resource is Designer)
+                .Sum(resource => resource.ResValueForProc(ProcedureId));
+            var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
+                .Sum(resource => resource.ResValueForProc(ProcedureId));
+            
+            return _wireRoutingAlg.EstimateEndTime(cpuPower);
         }
     }
 

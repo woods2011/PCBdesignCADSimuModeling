@@ -42,6 +42,8 @@
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
 
 
@@ -95,7 +97,22 @@
                         </Grid>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="3" Margin="0,0,0,5">
+                    <StackPanel Grid.Row="3" Margin="0,5,0,5">
+                        <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="Bold" Text="Алгоритмы:" />
+
+                        <TextBlock Margin="0,0,5,5"
+                                   FontSize="12" VerticalAlignment="Center" Text="Размещение:" FontWeight="DemiBold" FontStyle="Italic"/>
+                        <ComboBox Margin="0,0,0,5"
+                                  ItemsSource="{Binding PlacingAlgsStrs}" SelectedItem="{Binding SelectedPlacingAlgStr}" />
+
+                        <TextBlock Margin="0,0,5,5"
+                                   FontSize="12" VerticalAlignment="Center" Text="Трассировка:" FontWeight="DemiBold" FontStyle="Italic"/>
+                        <ComboBox Margin="0,0,0,5"
+                                  ItemsSource="{Binding WireRoutingAlgsStrs}" SelectedItem="{Binding SelectedWireRoutingAlgStr}" />
+
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Margin="0,5,0,5">
                         <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="Bold" Text="Проектировщики:" />
                         <StackPanel Orientation="Horizontal">
                             <DataGrid ItemsSource="{Binding DesignersList}"
@@ -110,6 +127,7 @@
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
+
                 </Grid>
             </Grid>
 
@@ -122,6 +140,7 @@
 
                 <Grid IsSharedSizeScope="True">
                     <Grid.RowDefinitions>
+                        <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
@@ -148,25 +167,26 @@
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,5,5"
                                        FontSize="12" VerticalAlignment="Center" Text="~Число плат в год:" />
-                            <TextBlock Grid.Row="0" Grid.Column="1" 
+                            <TextBlock Grid.Row="0" Grid.Column="1" Margin="0,3"
                                        Background="LightGray"
-                                       Text="{Binding TechIntervalDistr.TechPerYear}"/>
+                                       TextAlignment="Center" VerticalAlignment="Center"
+                                       Text="{Binding TechIntervalDistr.TechPerYear}" />
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,5,5"
                                        FontSize="12" VerticalAlignment="Center" Text="Мат. ожидание:" />
                             <wpfTool:TimeSpanUpDown Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
-                                                HorizontalAlignment="Left"
-                                                MinWidth="50"
-                                                Minimum="0"
-                                                Value="{Binding TechIntervalDistr.Mean}" />
+                                                    HorizontalAlignment="Left"
+                                                    MinWidth="50"
+                                                    Minimum="0"
+                                                    Value="{Binding TechIntervalDistr.Mean}" />
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,5,5"
                                        FontSize="12" VerticalAlignment="Center" Text="СКО:" />
                             <wpfTool:TimeSpanUpDown Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"
-                                                  HorizontalAlignment="Left"
-                                                  MinWidth="50"
-                                                  Minimum="0"
-                                                  Value="{Binding TechIntervalDistr.Std}" />
+                                                    HorizontalAlignment="Left"
+                                                    MinWidth="50"
+                                                    Minimum="0"
+                                                    Value="{Binding TechIntervalDistr.Std}" />
                         </Grid>
                     </StackPanel>
 
@@ -191,28 +211,30 @@
 
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5"
-                                       FontSize="12" VerticalAlignment="Center" FontStyle="Italic" FontWeight="DemiBold"
+                                       FontSize="12" VerticalAlignment="Center" FontStyle="Italic"
+                                       FontWeight="DemiBold"
                                        Text="Число элементов на плате:" />
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,5,5"
                                        FontSize="12" VerticalAlignment="Center" Text="Мат. ожидание:" />
                             <wpfTool:IntegerUpDown Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
-                                                  HorizontalAlignment="Left"
-                                                  MinWidth="50"
-                                                  Minimum="20" Maximum="300" Increment="5"
-                                                  Value="{Binding }" />
+                                                   HorizontalAlignment="Left"
+                                                   MinWidth="50"
+                                                   Minimum="25" Maximum="500" Increment="10"
+                                                   Value="{Binding ElementCountDistr.Mean}" />
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,5,5"
                                        FontSize="12" VerticalAlignment="Center" Text="СКО:" />
                             <wpfTool:IntegerUpDown Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"
-                                                  HorizontalAlignment="Left"
-                                                  MinWidth="50"
-                                                  Minimum="0" Maximum="1" Increment="0.05"
-                                                  Value="{Binding }" />
+                                                   HorizontalAlignment="Left"
+                                                   MinWidth="50"
+                                                   Minimum="0" Maximum="1000" Increment="5"
+                                                   Value="{Binding ElementCountDistr.Std}" />
 
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5"
-                                       FontSize="12" VerticalAlignment="Center" FontStyle="Italic" FontWeight="DemiBold"
+                                       FontSize="12" VerticalAlignment="Center" FontStyle="Italic"
+                                       FontWeight="DemiBold"
                                        Text="Процент занимой площади платы:" />
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,5,5"
@@ -220,20 +242,21 @@
                             <wpfTool:DoubleUpDown Grid.Row="4" Grid.Column="1" Margin="0,0,0,5"
                                                   HorizontalAlignment="Left"
                                                   MinWidth="50"
-                                                  Minimum="0" Maximum="1" Increment="0.05"
-                                                  Value="{Binding }" />
+                                                  Minimum="0" Maximum="1" Increment="0.05" FormatString="F3"
+                                                  Value="{Binding DimensionUsagePctDistr.Mean}" />
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,5,5"
                                        FontSize="12" VerticalAlignment="Center" Text="СКО:" />
                             <wpfTool:DoubleUpDown Grid.Row="5" Grid.Column="1" Margin="0,0,0,5"
                                                   HorizontalAlignment="Left"
                                                   MinWidth="50"
-                                                  Minimum="0" Maximum="1" Increment="0.05"
-                                                  Value="{Binding }" />
+                                                  Minimum="0" Maximum="1" Increment="0.05" FormatString="F3"
+                                                  Value="{Binding DimensionUsagePctDistr.Std}" />
 
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5"
-                                       FontSize="12" VerticalAlignment="Center" FontStyle="Italic" FontWeight="DemiBold"
+                                       FontSize="12" VerticalAlignment="Center" FontStyle="Italic"
+                                       FontWeight="DemiBold"
                                        Text="Процент плат с разногабаритными элементами:" />
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,5,5"
@@ -241,26 +264,29 @@
                             <wpfTool:DoubleUpDown Grid.Row="7" Grid.Column="1" Margin="0,0,0,5"
                                                   HorizontalAlignment="Left"
                                                   MinWidth="50"
-                                                  Minimum="0" Maximum="1" Increment="0.05"
-                                                  Value="{Binding }" />
+                                                  Minimum="0" Maximum="1" Increment="0.05" FormatString="F3"
+                                                  Value="{Binding VariousSizePctMean}" />
                         </Grid>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="3" Margin="0,0,0,5">
-                        <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="Bold" Text="Проектировщики:" />
-                        <StackPanel Orientation="Horizontal">
-                            <DataGrid ItemsSource="{Binding DesignersList}"
-                                      ColumnWidth="100" HorizontalAlignment="Left" />
-                            <StackPanel Margin="5,0">
-                                <Button Margin="0,0,0,5" Width="50" HorizontalAlignment="Right" FontSize="14"
-                                        Command="{Binding AddDesigner, UpdateSourceTrigger=PropertyChanged}"
-                                        Content="+" />
-                                <Button Margin="0,0,0,5" Width="50" HorizontalAlignment="Right" FontSize="14"
-                                        Command="{Binding RemoveDesigner, UpdateSourceTrigger=PropertyChanged}"
-                                        Content="-" />
-                            </StackPanel>
-                        </StackPanel>
-                    </StackPanel>
+
+                    <Grid Grid.Row="3" Margin="0,20,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="SaprConfig" Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Margin="0,0,0,5" FontSize="14" FontWeight="Bold"
+                                   Text="Время моделирования:" />
+                        <wpfTool:TimeSpanUpDown Grid.Column="1" Margin="0,0,0,5"
+                                                HorizontalAlignment="Left"
+                                                MinWidth="50"
+                                                Minimum="0"
+                                                Value="{Binding FinalTime}" />
+                    </Grid>
+
+                    <Button Grid.Row="4" Margin="0,10,0,0" VerticalAlignment="Bottom" Width="auto" HorizontalAlignment="Right" FontSize="14"
+                            Command="{Binding BeginSimulation, UpdateSourceTrigger=PropertyChanged}" Content="Начать Моделирование" />
                 </Grid>
 
                 <StackPanel Grid.Row="2">

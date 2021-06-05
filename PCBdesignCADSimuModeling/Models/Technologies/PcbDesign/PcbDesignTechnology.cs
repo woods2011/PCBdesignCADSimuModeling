@@ -34,32 +34,40 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
             {
                 if (_curProcedure is not null)
                     _resourceManager.FreeResources(_curProcedure.ProcedureId, _curProcedure.ActiveResources);
-                
+
                 _curProcedure = value;
                 if (_curProcedure is null) return;
 
-                IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.ProcedureId,
-                    _curProcedure.RequiredResources, out var receivedResources);
-
-                //Console.WriteLine(IsWaitResources);
-                
-                _curProcedure.ActiveResources.AddRange(receivedResources);
+                IsWaitResources = !_resourceManager.TryGetResources(
+                    _curProcedure.ProcedureId, _curProcedure.RequiredResources, out var receivedResources);
+                if (!IsWaitResources) 
+                    _curProcedure.ActiveResources.AddRange(receivedResources);
             }
         }
 
         public bool IsWaitResources { get; private set; }
 
 
-        public TimeSpan UpdateModelTime(TimeSpan deltaTime)
+        public void UpdateModelTime(TimeSpan deltaTime)
         {
-            if (!IsWaitResources) return CurProcedure.UpdateModelTime(deltaTime);
-            
-            IsWaitResources = !_resourceManager.TryGetResources(_curProcedure.ProcedureId,
-                _curProcedure.RequiredResources, out var receivedResources);
-            _curProcedure.ActiveResources.AddRange(receivedResources);
-            
-            return IsWaitResources ? TimeSpan.MaxValue / 2.0 : CurProcedure.UpdateModelTime(TimeSpan.Zero); // ToDo: verify
+            if (!IsWaitResources)
+                CurProcedure.UpdateModelTime(deltaTime);
         }
+
+
+        public TimeSpan EstimateEndTime()
+        {
+            if (!IsWaitResources)
+                return CurProcedure.EstimateEndTime();
+
+            IsWaitResources = !_resourceManager.TryGetResources(
+                _curProcedure.ProcedureId, _curProcedure.RequiredResources, out var receivedResources);
+            if (!IsWaitResources) 
+                _curProcedure.ActiveResources.AddRange(receivedResources);
+
+            return IsWaitResources ? TimeSpan.MaxValue / 2.0 : CurProcedure.EstimateEndTime();
+        }
+
 
         public bool MoveToNextProcedure() => _curProcedure.NextProcedure();
     }

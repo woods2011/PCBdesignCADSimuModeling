@@ -8,13 +8,14 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
     {
         private static readonly Dictionary<string, Func<IPlacingAlgFactory>> Map = new();
 
-        
+
         static PlacingAlgProviderFactory()
         {
-            Map["Example"] = () => IPlacingAlgFactory.ExampleTrace;
+            Map[PlacingSequentialStr] = () => IPlacingAlgFactory.PlacingSequential;
+            Map[PlacingPartitioningStr] = () => IPlacingAlgFactory.PlacingPartitioning;
         }
 
-        
+
         public static IPlacingAlgFactory Create(string placingAlgName)
         {
             var creator =
@@ -22,10 +23,15 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
 
             return creator();
         }
+
         private static Func<IPlacingAlgFactory> GetCreator(string placingAlgName)
         {
             Map.TryGetValue(placingAlgName, out var creator);
             return creator;
         }
+
+        
+        public static string PlacingSequentialStr = "Последовательное размещение";
+        public static string PlacingPartitioningStr = "Метод разбиения (параллельный)";
     }
 }

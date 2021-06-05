@@ -6,10 +6,15 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
     public interface IPlacingAlgFactory
     {
         public IPlacingAlgorithm Create(PcbParams pcbInfo);
+   
         
-        public static readonly IPlacingAlgFactory ExampleTrace =
+        public static readonly IPlacingAlgFactory PlacingSequential =
             new PlacingAlgFactory(pcbParams =>
-                new PlacingMultiThreadAlgorithm(new WireRoutingExampleCxtyEst(pcbParams), 8, 0.7));
+                new PlacingOneThreadAlgorithm(new PlacingSequentialCxtyEst(pcbParams)));
+        
+        public static readonly IPlacingAlgFactory PlacingPartitioning =
+            new PlacingAlgFactory(pcbParams =>
+                new PlacingMultiThreadAlgorithm(new PlacingPartitioningCxtyEst(pcbParams), 8, 0.75));
     }
     
     

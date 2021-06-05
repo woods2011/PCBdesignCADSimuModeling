@@ -11,7 +11,8 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgori
         
         static WireRoutingAlgProviderFactory()
         {
-            Map["Example"] = () => IWireRoutingAlgFactory.ExampleWireRouting;
+            Map[WireRoutingWaveStr] = () => IWireRoutingAlgFactory.WireRoutingWave;
+            Map[WireRoutingChannelStr] = () => IWireRoutingAlgFactory.WireRoutingChannel;
         }
 
         
@@ -27,5 +28,9 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgori
             Map.TryGetValue(wireRoutingAlgName, out var creator);
             return creator;
         }
+        
+        
+        public static string WireRoutingWaveStr = "Волновой метод";
+        public static string WireRoutingChannelStr = "Канальный (параллельный)";
     }
 }

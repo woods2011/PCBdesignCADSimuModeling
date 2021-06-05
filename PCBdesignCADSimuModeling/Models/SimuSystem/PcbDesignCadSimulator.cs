@@ -66,8 +66,8 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
                 if (SimulationIsCompleted) break;
 
                 //Determine Current state
-                foreach (var (activeTech, activeEvent) in _activePcbDesignTechs)
-                    activeEvent.ActivateTime = _modelTime + activeTech.UpdateModelTime(_deltaTime);
+                foreach (var activeTech in _activePcbDesignTechs.Keys)
+                    activeTech.UpdateModelTime(_deltaTime);
 
                 //Handle current Events
                 var curEvents = _simulationEvents.Where(simuEvent => simuEvent.ActivateTime == ModelTime)
@@ -77,6 +77,10 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
                     HandleEvent(curEvent);
                     _simulationEvents.Remove(curEvent);
                 }
+                
+                //Correct activate time for events
+                foreach (var (activeTech, activeEvent) in _activePcbDesignTechs)
+                    activeEvent.ActivateTime = _modelTime + activeTech.EstimateEndTime();
             }
             
             _modelTime = _finalTime + TimeSpan.FromMilliseconds(1); //?
@@ -101,7 +105,7 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
                 {
                     var tech = pcbDesignProcedureFinish.PcbDesignTechnology;
 
-                    if (tech.UpdateModelTime(_deltaTime) > TimeSpan.Zero) throw new Exception("Paradox?????"); //ToDo
+                    if (tech.EstimateEndTime() > TimeSpan.Zero) throw new Exception("Paradox?????"); //ToDo
 
                     _activePcbDesignTechs.Remove(tech);
 

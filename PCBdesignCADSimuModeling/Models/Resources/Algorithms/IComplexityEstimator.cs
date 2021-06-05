@@ -5,37 +5,73 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
 {
     public interface IComplexityEstimator
     {
-        int EstimateComplexity();
+        long EstimateComplexity();
     }
-    
+
     public class ComplexityEstimator : IComplexityEstimator
     {
         private readonly PcbParams _pcbInfo;
-        private readonly Func<PcbParams, int> _complexityByPcbInfoConvolution;
+        private readonly Func<PcbParams, long> _complexityByPcbInfoConvolution;
 
-        public ComplexityEstimator(PcbParams pcbInfo, Func<PcbParams, int> complexityByPcbInfoConvolution)
+        public ComplexityEstimator(PcbParams pcbInfo, Func<PcbParams, long> complexityByPcbInfoConvolution)
         {
             _pcbInfo = pcbInfo;
             _complexityByPcbInfoConvolution = complexityByPcbInfoConvolution;
         }
 
-        public int EstimateComplexity() => _complexityByPcbInfoConvolution(_pcbInfo);
+        public long EstimateComplexity() => _complexityByPcbInfoConvolution(_pcbInfo);
     }
 
-    public class PlacingExampleCxtyEst : ComplexityEstimator
+    public class PlacingSequentialCxtyEst : ComplexityEstimator
     {
-        public PlacingExampleCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
-            info => info.ElementsCount * 1000
-        )
+        public PlacingSequentialCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
+            pcb => (long) Math.Round(
+                pcb.ElementsCount * Math.Log2(pcb.ElementsCount) * Math.Log2(pcb.ElementsCount) / 4.0 *
+                (Math.Exp(1 / (1 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
+                (pcb.IsVariousSize ? 2 : 1)
+                * 25.0
+            ))
         {
         }
     }
-        
-    public class WireRoutingExampleCxtyEst : ComplexityEstimator
+
+    public class PlacingPartitioningCxtyEst : ComplexityEstimator
     {
-        public WireRoutingExampleCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
-            info => info.ElementsCount * 1010
-        )
+        public PlacingPartitioningCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
+            pcb => (long) Math.Round(
+                pcb.ElementsCount * pcb.ElementsCount / Math.Log2(pcb.ElementsCount) / Math.Sqrt(Math.Log2(pcb.ElementsCount)) * 2.25 * Math.Sqrt(2) *
+                (Math.Exp(1 / (1 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
+                (pcb.IsVariousSize ? 2.2 : 1) 
+                * 25.0
+            ))
+        {
+        }
+    }
+
+
+    public class WireRoutingWaveCxtyEst : ComplexityEstimator
+    {
+        public WireRoutingWaveCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
+            pcb => (long) Math.Round(
+                pcb.ElementsCount * Math.Log2(pcb.ElementsCount) * Math.Log2(pcb.ElementsCount) / 4.0 *
+                (Math.Exp(1 / (1 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
+                (pcb.IsVariousSize ? 2 : 1)
+                * 25.0 * 2
+            ))
+        {
+        }
+    }
+    
+    
+    public class  WireRoutingChannelCxtyEst : ComplexityEstimator
+    {
+        public WireRoutingChannelCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
+            pcb => (long) Math.Round(
+                pcb.ElementsCount * pcb.ElementsCount / Math.Log2(pcb.ElementsCount) / Math.Sqrt(Math.Log2(pcb.ElementsCount)) * 2.25 * Math.Sqrt(2) *
+                (Math.Exp(1 / (1 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
+                (pcb.IsVariousSize ? 2.2 : 1) 
+                * 25.0 * 2
+            ))
         {
         }
     }

@@ -19,15 +19,17 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
             return false;
         }
         
-        private TimeSpan _totalTime = TimeSpan.FromHours(6);
+        private TimeSpan _remainTime = TimeSpan.FromDays(0.5);
 
-        public override TimeSpan UpdateModelTime(TimeSpan deltaTime)
+        public override void UpdateModelTime(TimeSpan deltaTime)
         {
             var serverPower = ActiveResources.FindAll(resource => resource is Server)
                 .Sum(resource => resource.ResValueForProc(ProcedureId));
+            serverPower = 1.8 / Math.Exp(40.0 / serverPower);
             
-            _totalTime -= deltaTime;
-            return _totalTime;
+            _remainTime -= deltaTime * serverPower;
         }
+
+        public override TimeSpan EstimateEndTime() => _remainTime > TimeSpan.Zero ? _remainTime : TimeSpan.Zero;
     }
 }

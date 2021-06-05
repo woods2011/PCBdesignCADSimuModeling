@@ -7,9 +7,14 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgori
     {
         public IWireRoutingAlgorithm Create(PcbParams pcbInfo);
 
-        public static readonly IWireRoutingAlgFactory ExampleWireRouting =
+        
+        public static readonly IWireRoutingAlgFactory WireRoutingWave =
             new WireRoutingAlgFactory(pcbParams =>
-                new WireRoutingMultiThreadAlgorithm(new WireRoutingExampleCxtyEst(pcbParams), 8, 0.7));
+                new WireRoutingOneThreadAlgorithm(new WireRoutingWaveCxtyEst(pcbParams)));
+        
+        public static readonly IWireRoutingAlgFactory WireRoutingChannel =
+            new WireRoutingAlgFactory(pcbParams =>
+                new WireRoutingMultiThreadAlgorithm(new WireRoutingChannelCxtyEst(pcbParams), 16, 0.8));
     }
 
     public class WireRoutingAlgFactory : IWireRoutingAlgFactory
