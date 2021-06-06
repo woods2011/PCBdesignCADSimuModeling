@@ -16,6 +16,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <PkgWpfSharp_Controls Condition=" '$(PkgWpfSharp_Controls)' == '' ">C:\Users\ArtemPC\.nuget\packages\wpfsharp.controls\1.0.1</PkgWpfSharp_Controls>
     <PkgExtended_Wpf_Toolkit Condition=" '$(PkgExtended_Wpf_Toolkit)' == '' ">C:\Users\ArtemPC\.nuget\packages\extended.wpf.toolkit\4.1.0</PkgExtended_Wpf_Toolkit>
   </PropertyGroup>
 </Project>

@@ -27,9 +27,9 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
         public PlacingSequentialCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
             pcb => (long) Math.Round(
                 pcb.ElementsCount * Math.Log2(pcb.ElementsCount) * Math.Log2(pcb.ElementsCount) / 4.0 *
-                (Math.Exp(1 / (1 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
-                (pcb.IsVariousSize ? 2 : 1)
-                * 25.0
+                (Math.Exp(1.0 / (1.0 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
+                (pcb.IsVariousSize ? 2.0 : 1.0)
+                * 60.0
             ))
         {
         }
@@ -40,9 +40,9 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
         public PlacingPartitioningCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
             pcb => (long) Math.Round(
                 pcb.ElementsCount * pcb.ElementsCount / Math.Log2(pcb.ElementsCount) / Math.Sqrt(Math.Log2(pcb.ElementsCount)) * 2.25 * Math.Sqrt(2) *
-                (Math.Exp(1 / (1 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
-                (pcb.IsVariousSize ? 2.2 : 1) 
-                * 25.0
+                (Math.Exp(1.0 / (1.0 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
+                (pcb.IsVariousSize ? 2.5 : 1.0) 
+                * 60.0
             ))
         {
         }
@@ -54,9 +54,9 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
         public WireRoutingWaveCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
             pcb => (long) Math.Round(
                 pcb.ElementsCount * Math.Log2(pcb.ElementsCount) * Math.Log2(pcb.ElementsCount) / 4.0 *
-                (Math.Exp(1 / (1 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
-                (pcb.IsVariousSize ? 2 : 1)
-                * 25.0 * 2
+                (Math.Exp(1.0 / (1.0 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
+                (pcb.IsVariousSize ? 2.0 : 1.0)
+                * 60 * 2.0
             ))
         {
         }
@@ -68,9 +68,9 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
         public WireRoutingChannelCxtyEst(PcbParams pcbInfo) : base(pcbInfo,
             pcb => (long) Math.Round(
                 pcb.ElementsCount * pcb.ElementsCount / Math.Log2(pcb.ElementsCount) / Math.Sqrt(Math.Log2(pcb.ElementsCount)) * 2.25 * Math.Sqrt(2) *
-                (Math.Exp(1 / (1 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
+                (Math.Exp(1.0 / (1.0 - (Math.Pow(pcb.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
                 (pcb.IsVariousSize ? 2.2 : 1) 
-                * 25.0 * 2
+                * 60 * 2.0
             ))
         {
         }

@@ -7,12 +7,14 @@
         xmlns:views="clr-namespace:PCBdesignCADSimuModeling.Views"
         xmlns:viewModels="clr-namespace:PCBdesignCADSimuModeling.ViewModels"
         xmlns:wpfTool="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+        xmlns:wpfsharp="clr-namespace:WpfSharp.Controls;assembly=WpfSharp.Controls"
         mc:Ignorable="d"
-        Title="Имитационное моделиерование" Width="1280" Height="720"
+        Title="Имитационное моделиерование" Width="1580" Height="720"
         d:DataContext="{d:DesignInstance Type=viewModels:MainViewModel, IsDesignTimeCreatable=True}">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <wpfsharp:StringToWordsConverter x:Key="StringToWordsConverter" />
     </Window.Resources>
 
     <Grid Background="AliceBlue" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -22,12 +24,16 @@
         </Grid.RowDefinitions>
 
 
-        <Grid Grid.Row="0" Margin="5">
+        <Grid Grid.Row="0" Margin="5" IsSharedSizeScope="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
 
             <Grid Margin="5" Grid.Column="0">
@@ -38,7 +44,6 @@
 
                 <Grid IsSharedSizeScope="True">
                     <Grid.RowDefinitions>
-                        <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
@@ -60,6 +65,8 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="SaprConfig" Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,5,5"
@@ -69,14 +76,22 @@
                                                    MinWidth="50"
                                                    Minimum="1" Maximum="128" Increment="2"
                                                    Value="{Binding Cpu.ThreadCount}" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Margin="5,0,0,5"
+                                       FontSize="12" VerticalAlignment="Center" Text="Стоимость:" />
+                            <TextBlock Grid.Row="0" Grid.Column="3" Margin="5,0,0,5"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       Background="LightGray"
+                                       MinWidth="50"
+                                       Text="{Binding Cpu.Cost}" />
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,5,5"
                                        FontSize="12" VerticalAlignment="Center" Text="Частота (ГГц):" />
-                            <wpfTool:DoubleUpDown Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
-                                                  HorizontalAlignment="Left"
+                            <wpfTool:DoubleUpDown Grid.Row="1" Grid.Column="1"
+                                                  HorizontalAlignment="Center"
                                                   MinWidth="50"
-                                                  Minimum="1.2" Maximum="4.5" Increment="0.5"
-                                                  Value="{Binding Cpu.ClockRate}" />
+                                                  Minimum="1.2" Maximum="4.5" Increment="0.25"
+                                                  Value="{Binding Cpu.ClockRate}" Height="20" VerticalAlignment="Top" />
                         </Grid>
                     </StackPanel>
 
@@ -85,7 +100,9 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="SaprConfig" Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Margin="0,0,5,5"
                                        FontSize="12" VerticalAlignment="Center" Text="Скорость (Мбит/с):" />
@@ -94,6 +111,14 @@
                                                    MinWidth="50"
                                                    Minimum="25" Maximum="2000" Increment="25"
                                                    Value="{Binding Server.InternetSpeed}" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Margin="5,0,0,5"
+                                       FontSize="12" VerticalAlignment="Center" Text="Стоимость:" />
+                            <TextBlock Grid.Row="0" Grid.Column="3" Margin="5,0,0,5"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       Background="LightGray"
+                                       MinWidth="50"
+                                       Text="{Binding Server.Cost}" />
                         </Grid>
                     </StackPanel>
 
@@ -101,14 +126,18 @@
                         <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="Bold" Text="Алгоритмы:" />
 
                         <TextBlock Margin="0,0,5,5"
-                                   FontSize="12" VerticalAlignment="Center" Text="Размещение:" FontWeight="DemiBold" FontStyle="Italic"/>
+                                   FontSize="12" VerticalAlignment="Center" Text="Размещение:" FontWeight="DemiBold"
+                                   FontStyle="Italic" />
                         <ComboBox Margin="0,0,0,5"
-                                  ItemsSource="{Binding PlacingAlgsStrs}" SelectedItem="{Binding SelectedPlacingAlgStr}" />
+                                  ItemsSource="{Binding PlacingAlgsStrs}"
+                                  SelectedItem="{Binding SelectedPlacingAlgStr}" />
 
                         <TextBlock Margin="0,0,5,5"
-                                   FontSize="12" VerticalAlignment="Center" Text="Трассировка:" FontWeight="DemiBold" FontStyle="Italic"/>
+                                   FontSize="12" VerticalAlignment="Center" Text="Трассировка:" FontWeight="DemiBold"
+                                   FontStyle="Italic" />
                         <ComboBox Margin="0,0,0,5"
-                                  ItemsSource="{Binding WireRoutingAlgsStrs}" SelectedItem="{Binding SelectedWireRoutingAlgStr}" />
+                                  ItemsSource="{Binding WireRoutingAlgsStrs}"
+                                  SelectedItem="{Binding SelectedWireRoutingAlgStr}" />
 
                     </StackPanel>
 
@@ -127,7 +156,6 @@
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
-
                 </Grid>
             </Grid>
 
@@ -144,6 +172,8 @@
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
+
                         <RowDefinition />
                     </Grid.RowDefinitions>
 
@@ -285,17 +315,95 @@
                                                 Value="{Binding FinalTime}" />
                     </Grid>
 
-                    <Button Grid.Row="4" Margin="0,10,0,0" VerticalAlignment="Bottom" Width="auto" HorizontalAlignment="Right" FontSize="14"
-                            Command="{Binding BeginSimulation, UpdateSourceTrigger=PropertyChanged}" Content="Начать Моделирование" />
+                    <Button Grid.Row="4" Margin="0,10,0,0" VerticalAlignment="Bottom" Width="auto"
+                            HorizontalAlignment="Right" FontSize="14"
+                            Command="{Binding BeginSimulation, UpdateSourceTrigger=PropertyChanged}"
+                            Content="Начать Моделирование" />
+
                 </Grid>
 
-                <StackPanel Grid.Row="2">
-                    <Button VerticalAlignment="Bottom" Width="50" HorizontalAlignment="Right" FontSize="14"
-                            Command="{Binding BeginSimulation, UpdateSourceTrigger=PropertyChanged}" Content="NotOk" />
-                </StackPanel>
+
+                <!-- <StackPanel Grid.Row="2"> -->
+                <!--     <WrapPanel> -->
+                <!--         <Label Content="Путь до файла с результатми всех экспериментов:/> -->
+                <!--         <Button VerticalAlignment="Bottom" Width="50" HorizontalAlignment="Right" FontSize="14" -->
+                <!--                 Command="{Binding SaveSimuResult, UpdateSourceTrigger=PropertyChanged}" Content="NotOk" /> -->
+                <!--     </WrapPanel> -->
+                <!-- </StackPanel> -->
             </Grid>
 
-            <StackPanel Grid.Column="2" Margin="5" />
+            <Grid Grid.Column="2" Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Margin="0,0,0,5"
+                           FontSize="14" FontWeight="Bold" Text="РЕЗУЛЬТАТЫ ИМ. МОДЕЛИРОВАНИЯ" />
+
+                <WrapPanel Grid.Row="1">
+                    <TextBlock Text="Поиск" FontWeight="DemiBold" />
+                    <TextBox Margin="5,0,0,0" MinWidth="150"
+                             Text="{Binding SimuResultSearchStr, UpdateSourceTrigger=PropertyChanged}" />
+                </WrapPanel>
+
+                <ScrollViewer Grid.Row="2" Margin="0,5"
+                              CanContentScroll="True" HorizontalScrollBarVisibility="Visible"
+                              VerticalScrollBarVisibility="Visible">
+                    <wpfsharp:SearchableTextBlock
+                        Background="White"
+                        HighlightableText="{Binding SimuResultStr}"
+                        SearchWords="{Binding SimuResultSearchStrFake, Converter={StaticResource ResourceKey=StringToWordsConverter}}" />
+                </ScrollViewer>
+            </Grid>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group2"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group3"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group4"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label VerticalContentAlignment="Center" 
+                           Content="Путь до файла со всеми результатми:"
+                           FontWeight="DemiBold" FontSize="13"/>
+
+                    <TextBox Grid.Column="1" 
+                             VerticalContentAlignment="Center"
+                             Height="auto"
+                        Text="{Binding AllResultsFileName}" />
+
+                    <Button Grid.Column="3" VerticalAlignment="Stretch" Width="auto"
+                            FontSize="14"
+                            Command="{Binding SaveSimuResult, UpdateSourceTrigger=PropertyChanged}"
+                            Content="Сохранить результат моделирования" />
+                </Grid>
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group2"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group3"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group4"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label VerticalContentAlignment="Center" 
+                           Content="Путь до файла с подробным логом последнего результата:"
+                           FontWeight="DemiBold" FontSize="13"/>
+
+                    <TextBox Grid.Column="1" 
+                             VerticalContentAlignment="Center" 
+                             Height="auto"
+                             Text="{Binding LastResultLogFileName}" />
+
+                    <Button Grid.Column="3" VerticalAlignment="Stretch" Width="auto"
+                            FontSize="14"
+                            Command="{Binding SaveLastSimuLog, UpdateSourceTrigger=PropertyChanged}"
+                            Content="Сохранить подробный лог" />
+                </Grid>
+            </StackPanel>
         </Grid>
 
         <ContentControl

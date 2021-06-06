@@ -42,3 +42,5 @@ C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\obj\Debug\net5.0-windows\Views\MessageView.g.cs
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\obj\Debug\net5.0-windows\GeneratedInternalTypeHelper.g.cs
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\obj\Debug\net5.0-windows\Views\MessageView.baml
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\bin\Debug\net5.0-windows\Newtonsoft.Json.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling\bin\Debug\net5.0-windows\WpfSharp.Controls.dll

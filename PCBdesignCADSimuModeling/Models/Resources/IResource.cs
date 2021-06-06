@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace PCBdesignCADSimuModeling.Models.Resources
 {
@@ -6,5 +7,10 @@ namespace PCBdesignCADSimuModeling.Models.Resources
     {
         public double ResValueForProc(Guid procId);
         public void FreeResource(Guid procId);
+        
+        public IResource Clone();
+        
+        [JsonIgnore]
+        public double Cost { get; }
     }
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "rutxmKDfWxuLIGqOzmdX+bcn6sNUeQRuaoqVGe3YqsZEfuTF4QjYWmDqYKfcyaTROs4AT6LtutrVTKgveg49bA==",
+  "dgSpecHash": "ZOJnYgAOPu0dC16BfXRqQYbCf4WZpGZLGDJSuHN4Q/jXuO/nUHQJ5eH3hZNR/zROFYwsgcSkbDZoAVx3Ofyxag==",
   "success": true,
   "projectFilePath": "C:\\Users\\ArtemPC\\RiderProjects\\PCBdesignCADSimuModeling\\TestConcoleApp\\TestConcoleApp.csproj",
   "expectedPackageFiles": [
@@ -21,9 +21,11 @@
     "C:\\Users\\ArtemPC\\.nuget\\packages\\microsoft.extensions.primitives\\5.0.0\\microsoft.extensions.primitives.5.0.0.nupkg.sha512",
     "C:\\Users\\ArtemPC\\.nuget\\packages\\microsoft.netcore.platforms\\5.0.0\\microsoft.netcore.platforms.5.0.0.nupkg.sha512",
     "C:\\Users\\ArtemPC\\.nuget\\packages\\microsoft.win32.registry\\5.0.0\\microsoft.win32.registry.5.0.0.nupkg.sha512",
+    "C:\\Users\\ArtemPC\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
     "C:\\Users\\ArtemPC\\.nuget\\packages\\system.diagnostics.eventlog\\5.0.0\\system.diagnostics.eventlog.5.0.0.nupkg.sha512",
     "C:\\Users\\ArtemPC\\.nuget\\packages\\system.security.accesscontrol\\5.0.0\\system.security.accesscontrol.5.0.0.nupkg.sha512",
-    "C:\\Users\\ArtemPC\\.nuget\\packages\\system.security.principal.windows\\5.0.0\\system.security.principal.windows.5.0.0.nupkg.sha512"
+    "C:\\Users\\ArtemPC\\.nuget\\packages\\system.security.principal.windows\\5.0.0\\system.security.principal.windows.5.0.0.nupkg.sha512",
+    "C:\\Users\\ArtemPC\\.nuget\\packages\\wpfsharp.controls\\1.0.1\\wpfsharp.controls.1.0.1.nupkg.sha512"
   ],
   "logs": [
     {
@@ -32,6 +34,16 @@
       "warningLevel": 1,
       "message": "Package 'Extended.Wpf.Toolkit 4.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net5.0-windows7.0'. This package may not be fully compatible with your project.",
       "libraryId": "Extended.Wpf.Toolkit",
+      "targetGraphs": [
+        "net5.0-windows7.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'WpfSharp.Controls 1.0.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net5.0-windows7.0'. This package may not be fully compatible with your project.",
+      "libraryId": "WpfSharp.Controls",
       "targetGraphs": [
         "net5.0-windows7.0"
       ]

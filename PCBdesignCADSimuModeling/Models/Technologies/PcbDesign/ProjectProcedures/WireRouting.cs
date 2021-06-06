@@ -16,7 +16,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
         {
             _wireRoutingAlg = context.PcbAlgFactories.WireRoutingAlgFactory.Create(context.PcbParams);
 
-            RequiredResources.Add(new DesignerRequest(ProcedureId));
+            //RequiredResources.Add(new DesignerRequest(ProcedureId));
             RequiredResources.Add(new CpuThreadRequest(ProcedureId, _wireRoutingAlg.MaxThreadUtilization));
         }
 
@@ -28,8 +28,8 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
         public override void UpdateModelTime(TimeSpan deltaTime)
         {
-            var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-                .Sum(resource => resource.ResValueForProc(ProcedureId));
+            // var designerPower = ActiveResources.FindAll(resource => resource is Designer)
+            //     .Sum(resource => resource.ResValueForProc(ProcedureId));
             var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
                 .Sum(resource => resource.ResValueForProc(ProcedureId));
             
@@ -38,14 +38,15 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
         public override TimeSpan EstimateEndTime()
         {
-            var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-                .Sum(resource => resource.ResValueForProc(ProcedureId));
+            // var designerPower = ActiveResources.FindAll(resource => resource is Designer)
+            //     .Sum(resource => resource.ResValueForProc(ProcedureId));
             var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
                 .Sum(resource => resource.ResValueForProc(ProcedureId));
             
             return _wireRoutingAlg.EstimateEndTime(cpuPower);
         }
+        
+        
+        public override string Name { get; } = "Трассировка";
     }
-
-
 }

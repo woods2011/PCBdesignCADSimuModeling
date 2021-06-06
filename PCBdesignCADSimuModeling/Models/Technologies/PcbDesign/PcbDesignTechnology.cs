@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PCBdesignCADSimuModeling.Models.Loggers;
 using PCBdesignCADSimuModeling.Models.Resources;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
 using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
@@ -12,17 +13,21 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
     {
         private PcbDesignProcedure _curProcedure;
         private readonly IResourceManager _resourceManager;
+        private readonly ISimpleLogger _logger;
 
 
         public PcbDesignTechnology(IResourceManager resourceManager, PcbParams pcbParams,
-            IPcbAlgFactories pcbAlgFactories)
+            IPcbAlgFactories pcbAlgFactories, ISimpleLogger logger)
         {
             _resourceManager = resourceManager;
+            _logger = logger;
             PcbParams = pcbParams;
             PcbAlgFactories = pcbAlgFactories;
             CurProcedure = new PcbParamsInput(this);
         }
 
+
+        public int TechId { get; } = Id;
 
         public PcbParams PcbParams { get; }
         public IPcbAlgFactories PcbAlgFactories { get; }
@@ -40,8 +45,11 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
 
                 IsWaitResources = !_resourceManager.TryGetResources(
                     _curProcedure.ProcedureId, _curProcedure.RequiredResources, out var receivedResources);
-                if (!IsWaitResources) 
+                if (!IsWaitResources)
                     _curProcedure.ActiveResources.AddRange(receivedResources);
+                else
+                    _logger.Log(
+                        $"{_logger.ModelTime} | Технология: {TechId} - Ожидание ресурсов - Проектная процедура: {_curProcedure.Name}");
             }
         }
 
@@ -62,13 +70,30 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
 
             IsWaitResources = !_resourceManager.TryGetResources(
                 _curProcedure.ProcedureId, _curProcedure.RequiredResources, out var receivedResources);
-            if (!IsWaitResources) 
+            if (!IsWaitResources)
+            {
                 _curProcedure.ActiveResources.AddRange(receivedResources);
+                _logger.Log(
+                    $"{_logger.ModelTime} | Технология: {TechId} - Ожидание ресурсов оконченно - Проектная процедура: {_curProcedure.Name}");
+            }
 
             return IsWaitResources ? TimeSpan.MaxValue / 2.0 : CurProcedure.EstimateEndTime();
         }
 
 
         public bool MoveToNextProcedure() => _curProcedure.NextProcedure();
+
+
+        private static int _id = 0;
+
+        public static int Id
+        {
+            get
+            {
+                _id++;
+                return _id;
+            }
+            set => _id = value;
+        }
     }
 }

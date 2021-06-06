@@ -16,10 +16,11 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
         {
             _placingAlg = context.PcbAlgFactories.PlacingAlgFactory.Create(context.PcbParams);
 
-            RequiredResources.Add(new DesignerRequest(ProcedureId));
+            //RequiredResources.Add(new DesignerRequest(ProcedureId));
             RequiredResources.Add(new CpuThreadRequest(ProcedureId, _placingAlg.MaxThreadUtilization));
         }
 
+        
         public override bool NextProcedure()
         {
             Context.CurProcedure = new WireRouting(Context);
@@ -28,8 +29,8 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
         public override void UpdateModelTime(TimeSpan deltaTime)
         {
-            var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-                .Sum(resource => resource.ResValueForProc(ProcedureId));
+            // var designerPower = ActiveResources.FindAll(resource => resource is Designer)
+            //     .Sum(resource => resource.ResValueForProc(ProcedureId));
             var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
                 .Sum(resource => resource.ResValueForProc(ProcedureId));
             
@@ -38,12 +39,15 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
         public override TimeSpan EstimateEndTime()
         {
-            var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-                .Sum(resource => resource.ResValueForProc(ProcedureId));
+            // var designerPower = ActiveResources.FindAll(resource => resource is Designer)
+            //     .Sum(resource => resource.ResValueForProc(ProcedureId));
             var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
                 .Sum(resource => resource.ResValueForProc(ProcedureId));
             
             return _placingAlg.EstimateEndTime(cpuPower);
         }
+
+
+        public override string Name { get; } = "Размещение";
     }
 }

@@ -49,3 +49,5 @@ C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Options.dll
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Options.ConfigurationExtensions.dll
 C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Microsoft.Extensions.Primitives.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\Newtonsoft.Json.dll
+C:\Users\ArtemPC\RiderProjects\PCBdesignCADSimuModeling\TestConcoleApp\bin\Debug\net5.0-windows\WpfSharp.Controls.dll

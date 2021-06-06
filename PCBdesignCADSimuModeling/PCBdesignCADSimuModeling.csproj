@@ -9,6 +9,8 @@
     <ItemGroup>
       <PackageReference Include="Extended.Wpf.Toolkit" Version="4.1.0" />
       <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <PackageReference Include="WpfSharp.Controls" Version="1.0.1" />
     </ItemGroup>
 
 </Project>

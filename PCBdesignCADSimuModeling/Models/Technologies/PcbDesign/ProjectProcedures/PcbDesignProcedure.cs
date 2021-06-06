@@ -9,7 +9,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
     {
         protected readonly PcbDesignTechnology Context;
 
-
+        
         protected PcbDesignProcedure(PcbDesignTechnology context)
         {
             Context = context;
@@ -17,7 +17,7 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
 
         public Guid ProcedureId { get; } = Guid.NewGuid();
-        
+        public virtual string Name { get; } = String.Empty;
         
         public List<IResourceRequest> RequiredResources { get; } = new();
         public List<IResource> ActiveResources { get; } = new();

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using MathNet.Numerics.Distributions;
+using Newtonsoft.Json;
 using PCBdesignCADSimuModeling.Commands;
 using PCBdesignCADSimuModeling.Models.Loggers;
 using PCBdesignCADSimuModeling.Models.Resources;
@@ -19,6 +21,12 @@ namespace PCBdesignCADSimuModeling.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
+        private string _simuResultStr = String.Empty;
+        private string _simuResultSearchStr = "Технология: ";
+        private SimulationResult _lastSimulationResult;
+        private FileSimpleLogger _fileSimpleLogger;
+
+
         public MainViewModel()
         {
         }
@@ -26,7 +34,15 @@ namespace PCBdesignCADSimuModeling.ViewModels
 
         public ICommand BeginSimulation => new ActionCommand(_ => BeginSimulationHandler());
 
-        //
+        public ICommand SaveSimuResult => new ActionCommand(_ => SaveSimuResultHandler(),
+            _ => _lastSimulationResult is not null && !String.IsNullOrEmpty(AllResultsFileName));
+
+        public ICommand SaveLastSimuLog => new ActionCommand(_ => SaveLastSimuLogHandler(),
+            _ => _fileSimpleLogger is not null && !String.IsNullOrEmpty(LastResultLogFileName));
+
+
+        //  
+
 
         public ICommand AddDesigner =>
             new ActionCommand(_ => DesignersList.Add(new Designer(Designer.ExperienceEn.Little)));
@@ -36,18 +52,17 @@ namespace PCBdesignCADSimuModeling.ViewModels
         public ObservableCollection<Designer> DesignersList { get; } = new()
         {
             new Designer(Designer.ExperienceEn.Little),
-            new Designer(Designer.ExperienceEn.Little),
-            new Designer(Designer.ExperienceEn.Little),
+            new Designer(Designer.ExperienceEn.Average),
         };
 
-        
-        public Server Server { get; } = new(200);
+
+        public Server Server { get; } = new(150);
         public CpuThreads Cpu { get; } = new(16, 2.5);
 
-        
+
         //
 
-        
+
         public TechIntervalBuilderDisplayModel TechIntervalDistr { get; } =
             new(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0));
 
@@ -57,7 +72,7 @@ namespace PCBdesignCADSimuModeling.ViewModels
         public DistributionBuilderDisplayModelDbl DimensionUsagePctDistr { get; } =
             new DistributionBuilderDisplayModelDbl(0.6, 0.1);
 
-        public double VariousSizePctMean { get; set; } = 0.7;
+        public double VariousSizePctMean { get; set; } = 0.8;
         public TimeSpan FinalTime { get; set; } = TimeSpan.FromDays(30);
 
 
@@ -86,14 +101,47 @@ namespace PCBdesignCADSimuModeling.ViewModels
 
         //
 
-        
+        public string SimuResultStr
+        {
+            get => _simuResultStr;
+            set
+            {
+                _simuResultStr = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string SimuResultSearchStr
+        {
+            get => _simuResultSearchStr;
+            set
+            {
+                _simuResultSearchStr = value;
+                OnPropertyChanged(nameof(SimuResultSearchStrFake));
+            }
+        }
+
+        public string SimuResultSearchStrFake => SimuResultSearchStr.Replace(" ", ".");
+
+        //
+
+        public string LastResultLogFileName { get; set; } = Directory.GetCurrentDirectory() + @"\LastSimulationLog.txt";
+
+        public string AllResultsFileName { get; set; } =
+            Directory.GetCurrentDirectory() + @"\AllSimulationResults.json";
+        //
+
         private void BeginSimulationHandler()
         {
-            var fileSimpleLogger = new FileSimpleLogger();
+            _fileSimpleLogger = new FileSimpleLogger();
             ISimpleLogger logger = new CompositionSimpleLogger(new List<ISimpleLogger>()
             {
-                fileSimpleLogger, new DebugSimpleLogger()
+                _fileSimpleLogger, new DebugSimpleLogger()
             });
+            PcbDesignTechnology.Id = 0;
+
+
+            //
 
 
             List<IResource> resourcePool = new();
@@ -114,9 +162,57 @@ namespace PCBdesignCADSimuModeling.ViewModels
                     variousSizePctDistr: new Beta(VariousSizePctMean, 1.0 - VariousSizePctMean))
                 .Build();
 
+            //
 
-            var simulator = new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories, logger);
-            //simulator.Simulate(FinalTime);
+            var simulator = new PcbDesignCadSimulator(simuEventGenerator,
+                resourcePool.Select(resource => resource.Clone()).ToList(), pcbAlgFactories, logger);
+            var simRes = simulator.Simulate(FinalTime);
+            SimuResultStr = _fileSimpleLogger.GetData();
+
+            _lastSimulationResult = new SimulationResult()
+            {
+                RealTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss"),
+                ResourcePool = resourcePool,
+                SelectedPlacingAlgStr = SelectedPlacingAlgStr,
+                SelectedWireRoutingAlgStr = SelectedWireRoutingAlgStr,
+                TechIntervalDistr = TechIntervalDistr,
+                ElementCountDistr = ElementCountDistr,
+                DimensionUsagePctDistr = DimensionUsagePctDistr,
+                VariousSizePctMean = VariousSizePctMean,
+                FinalTime = FinalTime
+            };
+
+            //
+
+            foreach (var pair in simRes)
+            {
+                Debug.WriteLine(
+                    $"Технология {pair.Key.TechId}: Общее время - {pair.Value.Finish - pair.Value.Start} | Старт - {pair.Value.Start} | Финищ - {pair.Value.Finish}");
+            }
+
+            var a = TimeSpan.FromSeconds(simRes.Average(pair =>
+                pair.Value.Finish.TotalSeconds - pair.Value.Start.TotalSeconds));
+        }
+
+
+        private void SaveSimuResultHandler()
+        {
+            var fileLogger = new FileSimpleLogger();
+            var serializeResult = JsonConvert.SerializeObject(_lastSimulationResult, Formatting.Indented,
+                new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.Auto});
+            fileLogger.Log(serializeResult);
+            fileLogger.LogToFile(AllResultsFileName);
+        }
+
+        private void SaveLastSimuLogHandler()
+        {
+            _fileSimpleLogger.Log("Сводка:");
+            var serializeResult = JsonConvert.SerializeObject(_lastSimulationResult, Formatting.Indented,
+                new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.Auto});
+            _fileSimpleLogger.Log(serializeResult);
+            
+            _fileSimpleLogger.LogToFileTruncate(LastResultLogFileName);
+
         }
     }
 }
