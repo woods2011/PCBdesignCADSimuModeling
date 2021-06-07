@@ -54,7 +54,7 @@ namespace PCBdesignCADSimuModeling.Views {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/PCBdesignCADSimuModeling;V1.0.0.0;component/views/messageview.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/PCBdesignCADSimuModeling;component/views/messageview.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Views\MessageView.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

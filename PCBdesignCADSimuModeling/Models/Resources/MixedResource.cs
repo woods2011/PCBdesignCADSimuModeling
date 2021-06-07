@@ -143,7 +143,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
             (Math.Exp(ClockRate / 5.0) * 1.0 / ThreadCount +
              Math.Exp(ClockRate / 3.0) * (ThreadCount - 1.0) / ThreadCount) *
             Math.Pow(ThreadCount, 0.87)
-            * 1000);
+            * 1500);
 
         public event PropertyChangedEventHandler PropertyChanged;
 

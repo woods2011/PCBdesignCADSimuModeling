@@ -36,5 +36,18 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
         
         [JsonProperty("Общее время моделирования")]
         public TimeSpan FinalTime { get; set; }
+        
+        
+        [JsonProperty("Результат моделирования: Среднее время на одну плату")]
+        public TimeSpan AverageProductionTime { get; set; }
+
+        [JsonProperty("Результат моделирования: СКО от среднего времени на одну плату")]
+        public TimeSpan DevProductionTime { get; set; }
+        
+        [JsonProperty("Результат моделирования: Стоимость конфигурации")]
+        public double TotalCost { get; set; }
+        
+        [JsonProperty("Результат моделирования: Оценка по критериям производоительность и стоимость")]
+        public double CostToTime { get; set; }
     }
 }

@@ -336,19 +336,48 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Margin="0,0,0,5"
                            FontSize="14" FontWeight="Bold" Text="РЕЗУЛЬТАТЫ ИМ. МОДЕЛИРОВАНИЯ" />
 
-                <WrapPanel Grid.Row="1">
+                <WrapPanel Grid.Row="1" Margin="0,3">
+                    <TextBlock Text="Оценка выбранной конфигурации САПР:" FontWeight="Bold" />
+                    <TextBlock Margin="5,0,0,0" MinWidth="150"
+                               Text="{Binding LastSimulationResult.CostToTime, UpdateSourceTrigger=PropertyChanged}" />
+                </WrapPanel>
+
+                <WrapPanel Grid.Row="2" Margin="0,3">
+                    <TextBlock Text="Суммарная стоимость выбранной конфигурации САПР:"/>
+                    <TextBlock Margin="5,0,0,0" MinWidth="150"
+                             Text="{Binding LastSimulationResult.TotalCost, UpdateSourceTrigger=PropertyChanged}" />
+                </WrapPanel>
+
+
+                <WrapPanel Grid.Row="3" Margin="0,3" >
+                    <TextBlock Text="Среднее время проектирование одной Печатной Платы:" />
+                    <TextBlock Margin="5,0,0,0" MinWidth="150"
+                               Text="{Binding LastSimulationResult.AverageProductionTime, UpdateSourceTrigger=PropertyChanged}" />
+                </WrapPanel>
+
+                <WrapPanel Grid.Row="4" Margin="0,3" >
+                    <TextBlock Text="СКО от среднего времени проектирования одной Печатной Платы:"/>
+                    <TextBlock Margin="5,0,0,0" MinWidth="150"
+                               Text="{Binding LastSimulationResult.DevProductionTime, UpdateSourceTrigger=PropertyChanged}" />
+                </WrapPanel>
+
+                <WrapPanel Grid.Row="5" Margin="0,10,0,5" >
                     <TextBlock Text="Поиск" FontWeight="DemiBold" />
                     <TextBox Margin="5,0,0,0" MinWidth="150"
                              Text="{Binding SimuResultSearchStr, UpdateSourceTrigger=PropertyChanged}" />
                 </WrapPanel>
 
-                <ScrollViewer Grid.Row="2" Margin="0,5"
+                <ScrollViewer Grid.Row="6" Margin="0,5"
                               CanContentScroll="True" HorizontalScrollBarVisibility="Visible"
                               VerticalScrollBarVisibility="Visible">
                     <wpfsharp:SearchableTextBlock

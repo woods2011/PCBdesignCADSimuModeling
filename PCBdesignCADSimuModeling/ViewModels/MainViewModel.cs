@@ -23,7 +23,7 @@ namespace PCBdesignCADSimuModeling.ViewModels
     {
         private string _simuResultStr = String.Empty;
         private string _simuResultSearchStr = "Технология: ";
-        private SimulationResult _lastSimulationResult;
+        private SimulationResult _lastSimulationResult = new SimulationResult();
         private FileSimpleLogger _fileSimpleLogger;
 
 
@@ -32,13 +32,13 @@ namespace PCBdesignCADSimuModeling.ViewModels
         }
 
 
-        public ICommand BeginSimulation => new ActionCommand(_ => BeginSimulationHandler());
+        public ICommand BeginSimulation => new ActionCommand(_ => BeginSimulationHandler(), _ => DesignersList.Count >= 1);
 
         public ICommand SaveSimuResult => new ActionCommand(_ => SaveSimuResultHandler(),
-            _ => _lastSimulationResult is not null && !String.IsNullOrEmpty(AllResultsFileName));
+            _ => LastSimulationResult is not null && !String.IsNullOrEmpty(SimuResultStr));
 
         public ICommand SaveLastSimuLog => new ActionCommand(_ => SaveLastSimuLogHandler(),
-            _ => _fileSimpleLogger is not null && !String.IsNullOrEmpty(LastResultLogFileName));
+            _ => _fileSimpleLogger is not null && !String.IsNullOrEmpty(SimuResultStr));
 
 
         //  
@@ -129,6 +129,16 @@ namespace PCBdesignCADSimuModeling.ViewModels
 
         public string AllResultsFileName { get; set; } =
             Directory.GetCurrentDirectory() + @"\AllSimulationResults.json";
+
+        public SimulationResult LastSimulationResult
+        {
+            get => _lastSimulationResult;
+            set
+            {
+                _lastSimulationResult = value;
+                OnPropertyChanged();
+            }
+        }
         //
 
         private void BeginSimulationHandler()
@@ -169,7 +179,19 @@ namespace PCBdesignCADSimuModeling.ViewModels
             var simRes = simulator.Simulate(FinalTime);
             SimuResultStr = _fileSimpleLogger.GetData();
 
-            _lastSimulationResult = new SimulationResult()
+            
+            
+            var productionTimesSec =  simRes.Select(pair =>
+                pair.Value.Finish.TotalSeconds - pair.Value.Start.TotalSeconds).ToList();
+            var avgTimeSec = productionTimesSec.Average(time => time);
+            var devTimeSec = Math.Sqrt(productionTimesSec.Sum(time => Math.Pow(time - avgTimeSec, 2)) / productionTimesSec.Count);
+
+
+            var totalConfigCost = resourcePool.Sum(resource => resource.Cost) + DesignersList.Count * 10000.0;
+            var averageProductionTime = TimeSpan.FromSeconds(avgTimeSec);
+            var devProductionTime = TimeSpan.FromSeconds(devTimeSec);
+            
+            LastSimulationResult = new SimulationResult()
             {
                 RealTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss"),
                 ResourcePool = resourcePool,
@@ -179,26 +201,24 @@ namespace PCBdesignCADSimuModeling.ViewModels
                 ElementCountDistr = ElementCountDistr,
                 DimensionUsagePctDistr = DimensionUsagePctDistr,
                 VariousSizePctMean = VariousSizePctMean,
-                FinalTime = FinalTime
+                FinalTime = FinalTime,
+                AverageProductionTime = averageProductionTime,
+                DevProductionTime = devProductionTime,
+                TotalCost = totalConfigCost,    
+                CostToTime = 0.6 * (100000.0 / averageProductionTime.TotalDays) / (0.4 * totalConfigCost)
             };
 
             //
 
-            foreach (var pair in simRes)
-            {
-                Debug.WriteLine(
-                    $"Технология {pair.Key.TechId}: Общее время - {pair.Value.Finish - pair.Value.Start} | Старт - {pair.Value.Start} | Финищ - {pair.Value.Finish}");
-            }
-
-            var a = TimeSpan.FromSeconds(simRes.Average(pair =>
-                pair.Value.Finish.TotalSeconds - pair.Value.Start.TotalSeconds));
+            
+            var a = averageProductionTime;
         }
 
 
         private void SaveSimuResultHandler()
         {
             var fileLogger = new FileSimpleLogger();
-            var serializeResult = JsonConvert.SerializeObject(_lastSimulationResult, Formatting.Indented,
+            var serializeResult = JsonConvert.SerializeObject(LastSimulationResult, Formatting.Indented,
                 new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.Auto});
             fileLogger.Log(serializeResult);
             fileLogger.LogToFile(AllResultsFileName);
@@ -207,7 +227,7 @@ namespace PCBdesignCADSimuModeling.ViewModels
         private void SaveLastSimuLogHandler()
         {
             _fileSimpleLogger.Log("Сводка:");
-            var serializeResult = JsonConvert.SerializeObject(_lastSimulationResult, Formatting.Indented,
+            var serializeResult = JsonConvert.SerializeObject(LastSimulationResult, Formatting.Indented,
                 new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.Auto});
             _fileSimpleLogger.Log(serializeResult);
             
