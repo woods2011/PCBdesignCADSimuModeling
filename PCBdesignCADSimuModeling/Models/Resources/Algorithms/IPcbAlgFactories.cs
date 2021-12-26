@@ -1,7 +1,7 @@
-﻿using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
+﻿using PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
+namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms
 {
     public interface IPcbAlgFactories
     {

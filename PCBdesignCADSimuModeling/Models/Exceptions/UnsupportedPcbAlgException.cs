@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace PCBdesignCADSimuModeling.Models.Exceptions
+namespace PcbDesignCADSimuModeling.Models.Exceptions
 {
     public class UnsupportedPcbAlgException : Exception
     {
-        public UnsupportedPcbAlgException(string wireRoutingAlgName) : base(
-            $"Algorithm: {wireRoutingAlgName} is not Supported")
+        public UnsupportedPcbAlgException(string algName) : base(
+            $"Algorithm: {algName} is not Supported")
         {
         }
     }

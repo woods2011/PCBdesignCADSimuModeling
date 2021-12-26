@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using PCBdesignCADSimuModeling.ViewModels;
+using PcbDesignCADSimuModeling.ViewModels;
 
-namespace PCBdesignCADSimuModeling
+namespace PcbDesignCADSimuModeling
 {
     /// <summary>
     /// Interaction logic for App.xaml

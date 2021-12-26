@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using PCBdesignCADSimuModeling.Annotations;
+using Newtonsoft.Json;
 
-namespace PCBdesignCADSimuModeling.Models.Resources
+namespace PcbDesignCADSimuModeling.Models.Resources
 {
     public abstract class SharedResource : IResource
     {
-        protected readonly List<Guid> UtilizingProcIds = new();
-        public abstract double ResValueForProc(Guid procId);
+        public abstract double ResValueForProc(int procId);
 
-        public abstract void FreeResource(Guid procId);
+        public abstract void FreeResource(int procId);
         public abstract IResource Clone();
         public abstract double Cost { get; }
     }
@@ -19,54 +18,27 @@ namespace PCBdesignCADSimuModeling.Models.Resources
 
     public class Server : SharedResource, INotifyPropertyChanged
     {
-        private readonly Func<Server, double> _resValueConvolution;
-        private int _internetSpeed;
+        [JsonIgnore]
+        public Func<Server, double> ResValueConvolution { get; init; } = server => server.InternetSpeed;
+
+        public int InternetSpeed { get; set; }
+        
+
+        public Server(int internetSpeed) => InternetSpeed = internetSpeed;
 
 
-        public Server(int internetSpeed, Func<Server, double> resValueConvolution = null)
-        {
-            InternetSpeed = internetSpeed;
-            _resValueConvolution = resValueConvolution ?? (server => server.InternetSpeed);
-        }
+        public bool TryGetResource(int _) => true;
+
+        public override double ResValueForProc(int procId) => ResValueConvolution(this);
+
+        public override void FreeResource(int _) {}
 
 
-        public int InternetSpeed
-        {
-            get => _internetSpeed;
-            set
-            {
-                if (value == _internetSpeed) return;
-                _internetSpeed = value;
-                OnPropertyChanged(nameof(Cost));
-            }
-        }
-
-
-        public bool TryGetResource(Guid procId)
-        {
-            UtilizingProcIds.Add(procId);
-            return true;
-        }
-
-        public override double ResValueForProc(Guid procId) => _resValueConvolution(this);
-
-        public override void FreeResource(Guid procId) => UtilizingProcIds.Remove(procId);
-
-
-        //
-
-
-        public override IResource Clone() => new Server(this.InternetSpeed);
+        public override IResource Clone() => new Server(InternetSpeed) {ResValueConvolution = ResValueConvolution};
 
         public override double Cost => Math.Round(
             Math.Exp(1.0 + 125.0 / (InternetSpeed + 31.5)) * InternetSpeed * 3.5);
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

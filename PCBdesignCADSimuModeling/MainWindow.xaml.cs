@@ -13,15 +13,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MathNet.Numerics.Distributions;
-using PCBdesignCADSimuModeling.Models.Resources;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
-using PCBdesignCADSimuModeling.Models.SimuSystem;
-using PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PcbDesignCADSimuModeling.Models.Resources;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
+using PcbDesignCADSimuModeling.Models.SimuSystem;
+using PcbDesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
 
-namespace PCBdesignCADSimuModeling
+namespace PcbDesignCADSimuModeling
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -31,6 +31,15 @@ namespace PCBdesignCADSimuModeling
         public MainWindow()
         {
             InitializeComponent();
+        }
+        
+        private void TextBox_KeyEnterUpdate(object sender, KeyEventArgs e)  
+        {
+            if (e.Key != Key.Enter) return;
+                
+            var tBox = (TextBox)sender;
+            var prop = TextBox.TextProperty;
+            BindingOperations.GetBindingExpression(tBox, prop)?.UpdateSource();
         }
     }
 }

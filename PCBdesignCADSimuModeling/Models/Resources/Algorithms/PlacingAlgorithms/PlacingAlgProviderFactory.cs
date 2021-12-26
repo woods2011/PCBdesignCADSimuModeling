@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using PCBdesignCADSimuModeling.Models.Exceptions;
+using PcbDesignCADSimuModeling.Models.Exceptions;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
+namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
 {
     public static class PlacingAlgProviderFactory
     {
@@ -11,8 +11,8 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
 
         static PlacingAlgProviderFactory()
         {
-            Map[PlacingSequentialStr] = () => IPlacingAlgFactory.PlacingSequential;
-            Map[PlacingPartitioningStr] = () => IPlacingAlgFactory.PlacingPartitioning;
+            Map[PlacingSequentialStr] = () => new PlacingAlgFactory(PlacingOneThreadAlgorithm.PlacingSequential);
+            Map[PlacingPartitioningStr] = () => new PlacingAlgFactory(PlacingMultiThreadAlgorithm.PlacingPartitioning);
         }
 
 

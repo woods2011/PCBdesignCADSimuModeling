@@ -6,17 +6,17 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace PCBdesignCADSimuModeling.ViewModels
+namespace PcbDesignCADSimuModeling.ViewModels
 {
     public abstract class BaseViewModel : INotifyPropertyChanged, IDataErrorInfo, IDisposable
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = "") =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        protected virtual bool OnPropertyChanged<T>(ref T backingField, T value,
-            [CallerMemberName] string propertyName = "")
+        protected virtual bool OnPropertyChanged<T>
+            (ref T backingField, T value, [CallerMemberName] string propertyName = "")
         {
             if (EqualityComparer<T>.Default.Equals(backingField, value))
                 return false;
@@ -27,52 +27,49 @@ namespace PCBdesignCADSimuModeling.ViewModels
         }
 
 
-        #region Валидация
+        #region Validation
 
-        public DictionaryWrapper<string, string> ErrorCollection { get; } = new(new Dictionary<string, string>());
+        public DictionaryWrapper<string, string?> ErrorCollection { get; } = new(new Dictionary<string, string?>());
 
-        public virtual bool IsValid => 
+        public virtual bool IsValid =>
             Validator.TryValidateObject(this, new ValidationContext(this), null, true);
 
-        public virtual string Error
+        public virtual string? Error
         {
             get
             {
                 var result = ErrorCollection
                     .Where(pair => pair.Value != null)
-                    .Aggregate(String.Empty, (current, pair) => current + $"{pair.Key} - {pair.Value} \r\n");
+                    .Aggregate(String.Empty,
+                        (current, pair) => current + $"{pair.Key} - {pair.Value} {Environment.NewLine}");
 
                 return (result == String.Empty) ? null : result;
             }
         }
 
-        public virtual string this[string columnName]
+        public virtual string? this[string columnName]
         {
             get
             {
-                string result = null;
+                string? result = null;
                 var validationResults = new List<ValidationResult>();
 
                 var propertyValue = this.GetType().GetProperty(columnName)?.GetValue(this);
                 var isValid = Validator.TryValidateProperty(
-                    propertyValue, new ValidationContext(this) {MemberName = columnName}, validationResults);
+                    propertyValue, new ValidationContext(this) { MemberName = columnName }, validationResults);
 
-                if (!isValid)
-                    result = validationResults.First().ErrorMessage; // ToDo: replace with aggregate
+                if (!isValid) result = validationResults.First().ErrorMessage; // ToDo: replace with aggregate
 
                 if (ErrorCollection.ContainsKey(columnName))
                 {
-                    if (ErrorCollection[columnName] != result)
-                    {
-                        ErrorCollection[columnName] = result;
-                        OnPropertyChanged(nameof(ErrorCollection));
-                        OnPropertyChanged(nameof(Error));
-                    }
+                    if (ErrorCollection[columnName] == result) return result;
+                    
+                    ErrorCollection[columnName] = result;
+                    OnPropertyChanged(nameof(Error));
                 }
-                else if (result != null)
+                else if (result != null) // ToDo: remove
                 {
                     ErrorCollection.Add(columnName, result);
-                    OnPropertyChanged(nameof(ErrorCollection));
                     OnPropertyChanged(nameof(Error));
                 }
 
@@ -89,19 +86,15 @@ namespace PCBdesignCADSimuModeling.ViewModels
     }
 
 
-    public class DictionaryWrapper<TKey, TValue> : IDictionary<TKey, TValue>
+    public class DictionaryWrapper<TKey, TValue> : IDictionary<TKey, TValue?>
     {
-        private readonly IDictionary<TKey, TValue> _dictionary;
+        private readonly IDictionary<TKey, TValue?> _dictionary;
 
 
-        public DictionaryWrapper(IDictionary<TKey, TValue> dictionary)
-        {
-            _dictionary = dictionary;
-            _ = new Dictionary<TKey, TValue>();
-        }
+        public DictionaryWrapper(IDictionary<TKey, TValue?> dictionary) => _dictionary = dictionary;
 
 
-        public TValue this[TKey key]
+        public TValue? this[TKey key]       
         {
             get
             {
@@ -112,7 +105,7 @@ namespace PCBdesignCADSimuModeling.ViewModels
         }
 
 
-        public void Add(TKey key, TValue value)
+        public void Add(TKey key, TValue? value)
         {
             _dictionary.Add(key, value);
         }
@@ -127,26 +120,26 @@ namespace PCBdesignCADSimuModeling.ViewModels
             return _dictionary.Remove(key);
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, out TValue? value)
         {
             return _dictionary.TryGetValue(key, out value);
         }
 
         public ICollection<TKey> Keys => _dictionary.Keys;
 
-        public ICollection<TValue> Values => _dictionary.Values;
+        public ICollection<TValue?> Values => _dictionary.Values;
 
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+        public IEnumerator<KeyValuePair<TKey, TValue?>> GetEnumerator()
         {
             return _dictionary.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _dictionary).GetEnumerator();
+            return ((IEnumerable)_dictionary).GetEnumerator();
         }
 
-        public void Add(KeyValuePair<TKey, TValue> item)
+        public void Add(KeyValuePair<TKey, TValue?> item)
         {
             _dictionary.Add(item);
         }
@@ -156,17 +149,17 @@ namespace PCBdesignCADSimuModeling.ViewModels
             _dictionary.Clear();
         }
 
-        public bool Contains(KeyValuePair<TKey, TValue> item)
+        public bool Contains(KeyValuePair<TKey, TValue?> item)
         {
             return _dictionary.Contains(item);
         }
 
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<TKey, TValue?>[] array, int arrayIndex)
         {
-            _dictionary.CopyTo(array, arrayIndex);
+            _dictionary.CopyTo(array, arrayIndex);  
         }
 
-        public bool Remove(KeyValuePair<TKey, TValue> item)
+        public bool Remove(KeyValuePair<TKey, TValue?> item)
         {
             return _dictionary.Remove(item);
         }

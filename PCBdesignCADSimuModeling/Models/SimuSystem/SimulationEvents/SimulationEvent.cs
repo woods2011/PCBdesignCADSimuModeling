@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents
+namespace PcbDesignCADSimuModeling.Models.SimuSystem.SimulationEvents
 {
     public abstract class SimulationEvent
     {
@@ -10,13 +10,13 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents
             ActivateTime = activateTime;
         }
         
-        protected SimulationEvent(int priority)
-        {
-            Priority = priority;
-        }
+        // protected SimulationEvent(int priority)
+        // {
+        //     Priority = priority;
+        // }
 
         
-        public TimeSpan ActivateTime { get; set; } = TimeSpan.MaxValue / 2.0;
+        public TimeSpan ActivateTime { get; set; }
         public int Priority { get; }
     }
 }

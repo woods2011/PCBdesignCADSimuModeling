@@ -1,17 +1,17 @@
 ﻿using System;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
+namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms
 {
     public class MultiThreadPcbAlgorithm : PcbAlgorithm
     {
         private readonly double _parallelismRatio;
 
 
-        public MultiThreadPcbAlgorithm(IComplexityEstimator complexityEstimator, int maxThreadUtilization,
-            double parallelismRatio) : base(complexityEstimator, maxThreadUtilization)
+        public MultiThreadPcbAlgorithm(long totalComplexity, int maxThreadUtilization,
+            double parallelismRatio) : base(totalComplexity, maxThreadUtilization)
         {
-            _parallelismRatio = parallelismRatio;
+            _parallelismRatio = parallelismRatio;   
         }
 
 

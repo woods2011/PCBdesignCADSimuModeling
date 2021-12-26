@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PCBdesignCADSimuModeling.Models.Resources;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
-using PCBdesignCADSimuModeling.Models.Resources.ResourceRequests;
+using PcbDesignCADSimuModeling.Models.Resources;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
+using PcbDesignCADSimuModeling.Models.Resources.ResourceRequests;
 
-namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
+namespace PcbDesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
 {
     public class WireRouting : PcbDesignProcedure
     {
         private readonly IWireRoutingAlgorithm _wireRoutingAlg;
-        
+        private double _cpuPower;
+
         public WireRouting(PcbDesignTechnology context) : base(context)
         {
             _wireRoutingAlg = context.PcbAlgFactories.WireRoutingAlgFactory.Create(context.PcbParams);
-
-            //RequiredResources.Add(new DesignerRequest(ProcedureId));
-            RequiredResources.Add(new CpuThreadRequest(ProcedureId, _wireRoutingAlg.MaxThreadUtilization));
+            RequiredResources.AddRange(GetResourceRequestList());
         }
+
 
         public override bool NextProcedure()
         {
@@ -28,25 +28,25 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
         public override void UpdateModelTime(TimeSpan deltaTime)
         {
-            // var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-            //     .Sum(resource => resource.ResValueForProc(ProcedureId));
-            var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
-                .Sum(resource => resource.ResValueForProc(ProcedureId));
-            
-            _wireRoutingAlg.UpdateModelTime(deltaTime, cpuPower);
+            _wireRoutingAlg.UpdateModelTime(deltaTime, _cpuPower);
         }
 
         public override TimeSpan EstimateEndTime()
         {
-            // var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-            //     .Sum(resource => resource.ResValueForProc(ProcedureId));
-            var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
-                .Sum(resource => resource.ResValueForProc(ProcedureId));
-            
-            return _wireRoutingAlg.EstimateEndTime(cpuPower);
+            _cpuPower = ActiveResources.OfType<CpuThreads>().Sum(resource => resource.ResValueForProc(ProcId));
+            return _wireRoutingAlg.EstimateEndTime(_cpuPower);
         }
-        
-        
-        public override string Name { get; } = "Трассировка";
+
+        public override void InitResourcesPower()
+        {
+        }
+
+        private List<IResourceRequest> GetResourceRequestList() => new()
+        {
+            //RequiredResources.Add(new DesignerRequest(ProcedureId));
+            new CpuThreadRequest(ProcId, _wireRoutingAlg.MaxThreadUtilization),
+        };
+
+        public override string Name => "Трассировка";
     }
 }

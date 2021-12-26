@@ -1,7 +1,7 @@
 ﻿using System;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
 
-namespace PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents
+namespace PcbDesignCADSimuModeling.Models.SimuSystem.SimulationEvents
 {
     public class PcbDesignTechnologyStart : SimulationEvent
     {

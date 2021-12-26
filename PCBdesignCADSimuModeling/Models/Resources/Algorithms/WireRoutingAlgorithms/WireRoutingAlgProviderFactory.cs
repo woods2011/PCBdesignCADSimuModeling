@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using PCBdesignCADSimuModeling.Models.Exceptions;
+using PcbDesignCADSimuModeling.Models.Exceptions;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms
+namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms
 {
     public static class WireRoutingAlgProviderFactory
     {
@@ -11,8 +11,8 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgori
         
         static WireRoutingAlgProviderFactory()
         {
-            Map[WireRoutingWaveStr] = () => IWireRoutingAlgFactory.WireRoutingWave;
-            Map[WireRoutingChannelStr] = () => IWireRoutingAlgFactory.WireRoutingChannel;
+            Map[WireRoutingWaveStr] = () => new WireRoutingAlgFactory(WireRoutingOneThreadAlgorithm.WireRoutingWave);
+            Map[WireRoutingChannelStr] = () => new WireRoutingAlgFactory(WireRoutingMultiThreadAlgorithm.WireRoutingChannel);
         }
 
         

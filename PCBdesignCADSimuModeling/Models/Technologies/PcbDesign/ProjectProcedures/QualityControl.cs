@@ -1,51 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PCBdesignCADSimuModeling.Models.Resources;
-using PCBdesignCADSimuModeling.Models.Resources.ResourceRequests;
+using PcbDesignCADSimuModeling.Models.Resources;
+using PcbDesignCADSimuModeling.Models.Resources.ResourceRequests;
 
-namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
+namespace PcbDesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
 {
     public class QualityControl : PcbDesignProcedure
     {
-        public QualityControl(PcbDesignTechnology context) : base(context)
-        {
-            RequiredResources.Add(new DesignerRequest(ProcedureId));
-        }
+        private double _designerPower;
+
+        public QualityControl(PcbDesignTechnology context) : base(context) =>
+            RequiredResources.AddRange(GetResourceRequestList());
 
 
         public override bool NextProcedure()
         {
-            if (true)
-                Context.CurProcedure = new DocumentationProduction(Context);
-            else
-                Context.CurProcedure = new Placement(Context);
-            
+            Context.CurProcedure = new DocumentationProduction(Context);
             return true;
         }
 
         private TimeSpan _remainTime = TimeSpan.FromDays(0.5);
-        
-        public override void UpdateModelTime(TimeSpan deltaTime)
+
+        public override void UpdateModelTime(TimeSpan deltaTime) => _remainTime -= deltaTime * _designerPower;
+
+        public override TimeSpan EstimateEndTime() =>
+            _remainTime < TimeTol ? TimeSpan.Zero : _remainTime / _designerPower;
+
+        public override void InitResourcesPower() => _designerPower =
+            ActiveResources.OfType<Designer>().Sum(resource => resource.ResValueForProc(ProcId));
+
+        private List<IResourceRequest> GetResourceRequestList() => new()
         {
-            var maxDesignerPower =  (double) Enum.GetValues<Designer.ExperienceEn>().Max();
-            var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-                .Sum(resource => 0.5 + resource.ResValueForProc(ProcedureId) / maxDesignerPower);
-            
-            _remainTime -= deltaTime * designerPower;
-        }
+            new DesignerRequest(ProcId)
+        };
 
-        public override TimeSpan EstimateEndTime()
-        {
-            var maxDesignerPower =  (double) Enum.GetValues<Designer.ExperienceEn>().Max();
-            var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-                .Sum(resource => 0.5 + resource.ResValueForProc(ProcedureId) / maxDesignerPower);
-            
-            var estimateEndTime = _remainTime > TimeSpan.FromSeconds(0.5) ? _remainTime / designerPower : TimeSpan.Zero;
-            return estimateEndTime;
-        }
-
-
-        public override string Name { get; } = "Оценка качества";
+        public override string Name => "Оценка качества";
     }
 }

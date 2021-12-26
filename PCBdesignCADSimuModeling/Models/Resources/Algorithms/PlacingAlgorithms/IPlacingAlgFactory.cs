@@ -1,20 +1,11 @@
 ﻿using System;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
+namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
 {
     public interface IPlacingAlgFactory
     {
         public IPlacingAlgorithm Create(PcbParams pcbInfo);
-   
-        
-        public static readonly IPlacingAlgFactory PlacingSequential =
-            new PlacingAlgFactory(pcbParams =>
-                new PlacingOneThreadAlgorithm(new PlacingSequentialCxtyEst(pcbParams)));
-        
-        public static readonly IPlacingAlgFactory PlacingPartitioning =
-            new PlacingAlgFactory(pcbParams =>
-                new PlacingMultiThreadAlgorithm(new PlacingPartitioningCxtyEst(pcbParams), 8, 0.75));
     }
     
     
@@ -28,9 +19,6 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms
             _funcPlacing = funcPlacing;
         }
 
-        public IPlacingAlgorithm Create(PcbParams pcbInfo)
-        {
-            return _funcPlacing(pcbInfo);
-        }
+        public IPlacingAlgorithm Create(PcbParams pcbInfo) => _funcPlacing(pcbInfo);
     }
 }

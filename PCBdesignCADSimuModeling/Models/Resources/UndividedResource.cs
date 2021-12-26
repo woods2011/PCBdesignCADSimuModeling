@@ -2,16 +2,16 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using PCBdesignCADSimuModeling.Annotations;
+using Newtonsoft.Json;
 
-namespace PCBdesignCADSimuModeling.Models.Resources
+namespace PcbDesignCADSimuModeling.Models.Resources
 {
     public abstract class UndividedResource : IResource
     {
-        protected Guid UtilizingProcId = Guid.Empty;
-        public abstract double ResValueForProc(Guid procId);
+        protected int? UtilizingProcId;
+        public abstract double ResValueForProc(int procId);
 
-        public abstract void FreeResource(Guid procId);
+        public abstract void FreeResource(int procId);
 
         public abstract IResource Clone();
         public abstract double Cost { get; }
@@ -20,64 +20,27 @@ namespace PCBdesignCADSimuModeling.Models.Resources
 
     public class Designer : UndividedResource, INotifyPropertyChanged
     {
-        private readonly Func<Designer, double> _resValueConvolution;
-        private ExperienceEn _experience;
-
-
-        public Designer(ExperienceEn experience, Func<Designer, double> resValueConvolution = null)
-        {
-            Experience = experience;
-            _resValueConvolution = resValueConvolution ?? (designer => (double) designer.Experience);
+        public Designer()
+        { 
         }
 
-
-        public ExperienceEn Experience
+        public bool TryGetResource(int procId)
         {
-            get => _experience;
-            set
-            {
-                if (value == _experience) return;
-                _experience = value;
-                OnPropertyChanged(nameof(Cost));
-            }
-        }
-
-
-        public bool TryGetResource(Guid procId)
-        {
-            if (UtilizingProcId != Guid.Empty) return false;
+            if (UtilizingProcId.HasValue) return false;
 
             UtilizingProcId = procId;
             return true;
         }
 
-        public override double ResValueForProc(Guid procId) => _resValueConvolution(this);
+        public override double ResValueForProc(int _) => 1.0;
 
-        public override void FreeResource(Guid procId) => UtilizingProcId = Guid.Empty;
-
-
-        //
+        public override void FreeResource(int procId) => UtilizingProcId = null;
 
 
-        public override IResource Clone() => new Designer(this.Experience);
+        public override IResource Clone() => new Designer();
 
-        public override double Cost => Math.Round(
-            (0.5 + ((double) Experience - 0.5) / (double) Enum.GetValues<Designer.ExperienceEn>().Max()) * 53000.0);
+        public override double Cost => 60000;
 
-
-        public enum ExperienceEn
-        {
-            Little = 1,
-            Average = 2,
-            Extensive = 3
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

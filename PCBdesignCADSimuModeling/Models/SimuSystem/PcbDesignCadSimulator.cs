@@ -4,37 +4,37 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
-using PCBdesignCADSimuModeling.Models.Loggers;
-using PCBdesignCADSimuModeling.Models.Resources;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
-using PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures;
+using PcbDesignCADSimuModeling.Models.Loggers;
+using PcbDesignCADSimuModeling.Models.Resources;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms;
+using PcbDesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures;
 
-namespace PCBdesignCADSimuModeling.Models.SimuSystem
+namespace PcbDesignCADSimuModeling.Models.SimuSystem
 {
     public class PcbDesignCadSimulator
     {
-        private TimeSpan _modelTime;
+        private readonly ISimpleLogger? _logger;
+        private TimeSpan _modelTime = TimeSpan.Zero;
         private TimeSpan _deltaTime = TimeSpan.Zero;
-        private TimeSpan _finalTime = TimeSpan.Zero;
         private readonly IPcbAlgFactories _pcbAlgFactories;
-        private readonly ISimpleLogger _logger;
         private readonly IResourceManager _resourceManager;
         private readonly ISimuEventGenerator _simuEventGenerator;
-        private readonly Dictionary<PcbDesignTechnology, PcbDesignProcedureFinish> _activePcbDesignTechs = new();
-        private readonly List<SimulationEvent> _simulationEvents = new List<SimulationEvent>();
-        private readonly Dictionary<PcbDesignTechnology, (TimeSpan Start, TimeSpan Finish)> _techStartAndFinish = new();
- 
+        private readonly List<PcbDesignTechnology> _activePcbDesignTechs = new();
+        private readonly List<SimulationEvent> _simulationEvents = new();
+        private readonly Dictionary<PcbDesignTechnology, TimeSpan> _techStart = new(); // ToDo: remove
+        private readonly Dictionary<PcbDesignTechnology, TimeSpan> _techDuration = new();
+
 
         public PcbDesignCadSimulator(ISimuEventGenerator simuEventGenerator, List<IResource> recoursePool,
-            IPcbAlgFactories pcbAlgFactories, ISimpleLogger logger, TimeSpan? startTime = null)
+            IPcbAlgFactories pcbAlgFactories, ISimpleLogger? logger = null, TimeSpan? timeTol = null)
         {
+            _simuEventGenerator = simuEventGenerator;
+            _resourceManager = new ResourceManager(recoursePool);
             _pcbAlgFactories = pcbAlgFactories;
             _logger = logger;
-            _simuEventGenerator = simuEventGenerator;
-            _modelTime = startTime ?? TimeSpan.Zero;
-            _resourceManager = new ResourceManager(recoursePool);
+            _timeTol = timeTol ?? TimeSpan.MaxValue;
         }
 
 
@@ -45,101 +45,244 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem
             {
                 _deltaTime = value - _modelTime;
                 _modelTime = value;
-                _logger.ModelTime = TimeSpan.FromSeconds(Math.Round(value.TotalSeconds)); // ToDo: delete this
+                _logger?.Log($">ТЕКУЩЕЕ МОДЕЛЬНОЕ ВРЕМЯ: {ModelTime}");
             }
         }
 
-        public bool SimulationIsCompleted => _modelTime > _finalTime;
 
-
-        public Dictionary<PcbDesignTechnology, (TimeSpan Start, TimeSpan Finish)> Simulate(TimeSpan finalTime)
+        public Dictionary<PcbDesignTechnology, TimeSpan> Simulate(TimeSpan finalTime,
+            List<SimulationEvent>? initSimulationEvents = null)
         {
-            _finalTime = finalTime;
-            if (SimulationIsCompleted) throw new InvalidOperationException("Simulation already completed");
-
             //Generate initial events
-            _simulationEvents.AddRange(
-                _simuEventGenerator.GeneratePcbDesignTech(_finalTime, ModelTime));
+            _simulationEvents.AddRange(initSimulationEvents ?? _simuEventGenerator.GeneratePcbDesignTech(finalTime));
 
             while (_simulationEvents.Count > 0)
             {
-                ModelTime = _simulationEvents.Min(simuEvent => simuEvent.ActivateTime);
-
-                if (SimulationIsCompleted) break;
+                var (closestEvents, closestEventTime) = _simulationEvents.MinsByAndKey(simuEv => simuEv.ActivateTime);
+                ModelTime = closestEventTime;
+                if (ModelTime > finalTime.AddAndClamp(_timeTol)) return _techDuration;
 
                 //Determine Current state
-                foreach (var activeTech in _activePcbDesignTechs.Keys.OrderBy(technology => _techStartAndFinish[technology].Start))
+                foreach (var activeTech in _activePcbDesignTechs.Where(technology => !technology.IsWaitForResources))
                     activeTech.UpdateModelTime(_deltaTime);
 
                 //Handle current Events
-                var curEvents = _simulationEvents.Where(simuEvent => simuEvent.ActivateTime == ModelTime)
-                    .OrderBy(simuEvent => simuEvent.Priority).ToList();
-                foreach (var curEvent in curEvents)
+                foreach (var curEvent in closestEvents)
                 {
                     HandleEvent(curEvent);
                     _simulationEvents.Remove(curEvent);
                 }
-                
-                //Correct activate time for events
-                foreach (var (activeTech, activeEvent) in _activePcbDesignTechs.OrderBy(pair => _techStartAndFinish[pair.Key].Start))
-                    activeEvent.ActivateTime = _modelTime + activeTech.EstimateEndTime();
+
+                //Try Get Resources for pending procedures
+                foreach (var activeTech in _activePcbDesignTechs
+                             .Where(technology => technology.IsWaitForResources)
+                             .OrderBy(technology => technology.TechId)) activeTech.TryGetResources();
+
+
+                //Estimate time until procedure finish and generate event if its closest
+                if (_activePcbDesignTechs.Count <= 0) continue;
+
+                var (closestFinishTechs, closestTechEndTime) = _activePcbDesignTechs
+                    .Where(technology => !technology.IsWaitForResources)
+                    .MinsByAndKey(technology => technology.EstimateEndTime());
+                closestTechEndTime += _modelTime;
+
+                if (_simulationEvents.Count == 0 ||
+                    closestTechEndTime <= _simulationEvents.Min(simuEv => simuEv.ActivateTime))
+                    _simulationEvents.AddRange(closestFinishTechs.Select(technology =>
+                        new PcbDesignProcedureFinish(technology, closestTechEndTime)));
             }
-            
-            _modelTime = _finalTime + TimeSpan.FromMilliseconds(1); //?
-            return _techStartAndFinish.Where(pair => pair.Value.Finish != TimeSpan.MaxValue).ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            return _techDuration;
         }
 
-        
+        public Dictionary<PcbDesignTechnology, TimeSpan> SimulateOptimized1(TimeSpan finalTime,
+            List<SimulationEvent>? initSimulationEvents = null)
+        {
+            //Generate initial events
+            _simulationEvents.AddRange(initSimulationEvents ?? _simuEventGenerator.GeneratePcbDesignTech(finalTime));
+            var (closestEvents, closestEventTime) = _simulationEvents.MinsByAndKey(simuEv => simuEv.ActivateTime);
+
+            while (_simulationEvents.Count > 0)
+            {
+                ModelTime = closestEventTime;
+                if (ModelTime > finalTime.AddAndClamp(_timeTol)) return _techDuration;
+
+                //Determine Current state
+                foreach (var activeTech in _activePcbDesignTechs.Where(technology => !technology.IsWaitForResources))
+                    activeTech.UpdateModelTime(_deltaTime);
+
+                //Handle current Events
+                foreach (var curEvent in closestEvents)
+                {
+                    HandleEvent(curEvent);
+                    _simulationEvents.Remove(curEvent);
+                }
+
+                //Get Resources for needEd
+                foreach (var activeTech in _activePcbDesignTechs
+                             .Where(technology => technology.IsWaitForResources)
+                             .OrderBy(technology => technology.TechId)) activeTech.TryGetResources();
+
+
+                //Correct activate time for events
+                if (_activePcbDesignTechs.Count <= 0)
+                {
+                    if (_simulationEvents.Count != 0)
+                        (closestEvents, closestEventTime) = _simulationEvents.MinsByAndKey(ev => ev.ActivateTime);
+                    continue;
+                }
+
+                var (closestFinishTechs, closestTechEndTime) = _activePcbDesignTechs
+                    .Where(technology => !technology.IsWaitForResources)
+                    .MinsByAndKey(technology => technology.EstimateEndTime());
+                closestTechEndTime += _modelTime;
+
+                if (_simulationEvents.Count != 0)
+                {
+                    (closestEvents, closestEventTime) = _simulationEvents.MinsByAndKey(ev => ev.ActivateTime);
+                    if (closestTechEndTime > closestEventTime) continue;
+
+                    var procFinishEvents = closestFinishTechs.Select<PcbDesignTechnology, SimulationEvent>(
+                        technology => new PcbDesignProcedureFinish(technology, closestTechEndTime)).ToList();
+                    _simulationEvents.AddRange(procFinishEvents);
+
+                    if (closestTechEndTime == closestEventTime)
+                    {
+                        closestEvents.AddRange(procFinishEvents);
+                        continue;
+                    }
+
+                    (closestEvents, closestEventTime) = (procFinishEvents, closestTechEndTime);
+                }
+                else
+                {
+                    var procFinishEvents = closestFinishTechs.Select<PcbDesignTechnology, SimulationEvent>(
+                        technology => new PcbDesignProcedureFinish(technology, closestTechEndTime)).ToList();
+                    _simulationEvents.AddRange(procFinishEvents);
+                    (closestEvents, closestEventTime) = (procFinishEvents, closestTechEndTime);
+                }
+            }
+
+            return _techDuration;
+        }
+
         private void HandleEvent(SimulationEvent curEvent)
         {
             switch (curEvent)
             {
                 case PcbDesignTechnologyStart pcbDesignTechnologyStart:
                 {
-                    var newTechnology = new PcbDesignTechnology(_resourceManager, pcbDesignTechnologyStart.GeneratedPcb,
-                        _pcbAlgFactories, _logger);
-                    var procedureFinishEvent = new PcbDesignProcedureFinish(newTechnology, _modelTime);
-                    
-                    _activePcbDesignTechs.Add(newTechnology, procedureFinishEvent);
-                    _simulationEvents.Add(procedureFinishEvent);
-                    
-                    
-                    _logger.Log($"{_logger.ModelTime} | Технология: {newTechnology.TechId} - Старт технологии");
-                    _techStartAndFinish.Add(newTechnology, (_logger.ModelTime, TimeSpan.MaxValue));
-                    
+                    var newTechnology = new PcbDesignTechnology(_resourceManager, _pcbAlgFactories,
+                        pcbDesignTechnologyStart.GeneratedPcb, NewId, _logger);
+                    _activePcbDesignTechs.Add(newTechnology);
+                    _techStart.Add(newTechnology, ModelTime);
+                    _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (newTechnology.TechId - 1) % 15))}" +
+                                 $"Технология: {newTechnology.TechId} - СТАРТ ТЕХНОЛОГИИ");
                     break;
                 }
 
                 case PcbDesignProcedureFinish pcbDesignProcedureFinish:
                 {
                     var tech = pcbDesignProcedureFinish.PcbDesignTechnology;
+                    _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (tech.TechId - 1) % 15))}" +
+                                 $"Технология: {tech.TechId} - Финиш проектной процедуры: {tech.CurProcedure.Name}");
 
-                    if (tech.EstimateEndTime() > TimeSpan.Zero) throw new Exception($"Paradox????? {tech.EstimateEndTime()}"); //ToDo
-
-                    
-                    _activePcbDesignTechs.Remove(tech);
-                    _logger.Log($"{_logger.ModelTime} | Технология: {tech.TechId} - Финиш проектной процедуры: {tech.CurProcedure.Name}");
-
-                    
-                    if (tech.MoveToNextProcedure())
+                    if (!tech.MoveToNextProcedure())
                     {
-                        var procedureFinishEvent = new PcbDesignProcedureFinish(tech, _modelTime);
-                        
-                        _activePcbDesignTechs.Add(tech, procedureFinishEvent);
-                        _simulationEvents.Add(procedureFinishEvent);
-                    }
-                    else
-                    {
-                        _logger.Log($"{_logger.ModelTime} | Технология: {tech.TechId} - Финиш технологии");
-                        _techStartAndFinish[tech] = (_techStartAndFinish[tech].Start, _logger.ModelTime);
+                        _activePcbDesignTechs.Remove(tech);
+                        _techDuration[tech] = _modelTime - _techStart[tech];
+                        _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (tech.TechId - 1) % 15))}" +
+                                     $"Технология: {tech.TechId} - ФИНИШ ТЕХНОЛОГИИ");
                     }
 
                     break;
                 }
 
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(curEvent));
+                default: throw new ArgumentOutOfRangeException(nameof(curEvent));
             }
         }
+
+
+        private readonly TimeSpan _timeTol;
+        private int _curId = 1;
+        private int NewId => _curId++;
     }
 }
+
+
+// var events = new List<SimulationEvent>();
+// foreach (var activeTech in _activePcbDesignTechs
+//              .OrderBy(technology => _techStartAndFinish[technology].Start))
+// {
+//     var endTime = _modelTime + activeTech.EstimateEndTime();
+//     if (endTime > nextEventTime) continue;
+//     events.Clear();
+//     nextEventTime = endTime;
+//     events.Add(new PcbDesignProcedureFinish(activeTech, endTime));
+//     _techStartAndFinish[activeTech] = (_techStartAndFinish[activeTech].Start, endTime);
+// }
+
+
+// public Dictionary<PcbDesignTechnology, TimeSpan> SimulateOptimized2(TimeSpan finalTime, List<SimulationEvent>? initSimulationEvents = null)
+// {
+//     if (_modelTime > finalTime) throw new InvalidOperationException("Simulation already completed");
+//
+//     //Generate initial events
+//     _simulationEvents.AddRange(initSimulationEvents ?? _simuEventGenerator.GeneratePcbDesignTech(finalTime));
+//     var (closestEvents, closestEventTime) = _simulationEvents.MinsByAndKey(simuEvent => simuEvent.ActivateTime);
+//
+//     while (_simulationEvents.Count > 0)
+//     {
+//         ModelTime = closestEventTime;
+//
+//         //Determine Current state
+//         foreach (var activeTech in _activePcbDesignTechs.Where(technology => !technology.IsWaitForResources))
+//             activeTech.UpdateModelTime(_deltaTime);
+//
+//         //Handle current Events
+//         foreach (var curEvent in closestEvents)
+//         {
+//             HandleEvent(curEvent);
+//             _simulationEvents.Remove(curEvent);
+//         }
+//
+//         //Get Resources for needEd
+//         foreach (var activeTech in _activePcbDesignTechs
+//                      .Where(technology => technology.IsWaitForResources)
+//                      .OrderBy(technology => technology.TechId)) activeTech.TryGetResources();
+//
+//
+//         //Correct activate time for events
+//         if (_simulationEvents.Count >= 1)
+//             (closestEvents, closestEventTime) =
+//                 _simulationEvents.MinsByAndKey(simuEvent => simuEvent.ActivateTime);
+//         else
+//         {
+//             closestEventTime = TimeSpan.MaxValue;
+//             closestEvents.Clear();
+//         }
+//
+//         if (_activePcbDesignTechs.Count <= 0) continue;
+//
+//         var (closestFinishTechs, closestTechEndTime) = _activePcbDesignTechs
+//             .Where(technology => !technology.IsWaitForResources)
+//             .MinsByAndKey(technology => technology.EstimateEndTime());
+//         closestTechEndTime += _modelTime;
+//
+//         if (closestTechEndTime > closestEventTime) continue;
+//
+//         var closestFinishTechsEvents = closestFinishTechs.Select(technology =>
+//             new PcbDesignProcedureFinish(technology, closestTechEndTime) as SimulationEvent).ToList();
+//         _simulationEvents.AddRange(closestFinishTechsEvents);
+//
+//         if (closestTechEndTime == closestEventTime) closestEvents.AddRange(closestFinishTechsEvents);
+//         else
+//         {
+//             closestEvents = closestFinishTechsEvents;
+//             closestEventTime = closestTechEndTime;
+//         }
+//     }
+//
+//     return _techDuration;
+// }

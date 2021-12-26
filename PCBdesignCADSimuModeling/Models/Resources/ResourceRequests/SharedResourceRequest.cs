@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.ResourceRequests
+namespace PcbDesignCADSimuModeling.Models.Resources.ResourceRequests
 {
     public abstract class SharedResourceRequest<TResource> : ResourceRequest<TResource>
         where TResource : SharedResource
     {
-        protected SharedResourceRequest(Guid procId) : base(procId)
+        protected SharedResourceRequest(int procId) : base(procId)
         {
         }
     }
@@ -14,7 +14,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources.ResourceRequests
 
     public class ServerRequest : SharedResourceRequest<Server>
     {
-        public ServerRequest(Guid procId) : base(procId)
+        public ServerRequest(int procId) : base(procId)
         {
         }
 

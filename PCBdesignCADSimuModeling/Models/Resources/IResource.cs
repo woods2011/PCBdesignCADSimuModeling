@@ -1,12 +1,12 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace PCBdesignCADSimuModeling.Models.Resources
+namespace PcbDesignCADSimuModeling.Models.Resources
 {
     public interface IResource
     {
-        public double ResValueForProc(Guid procId);
-        public void FreeResource(Guid procId);
+        public double ResValueForProc(int procId);
+        public void FreeResource(int procId);
         
         public IResource Clone();
         

@@ -1,41 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
 using MathNet.Numerics.Distributions;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
 
-namespace PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents
+namespace PcbDesignCADSimuModeling.Models.SimuSystem.SimulationEvents
 {
     public interface ISimuEventGenerator
     {
-        List<SimulationEvent> GeneratePcbDesignTech(TimeSpan finalTime, TimeSpan? startTime = null);
+        List<SimulationEvent> GeneratePcbDesignTech(TimeSpan finalTime);
     }
 
 
     public class SimuEventGenerator : ISimuEventGenerator
     {
-        private IContinuousDistribution _pcbDesignTechIntervalDistr;
-        private IContinuousDistribution _elementCountDistr, _dimensionUsagePctDistr, _variousSizePctDistr;
+        private readonly IContinuousDistribution _timeBetweenTechsDistr;
+        private readonly IContinuousDistribution _pcbElemsCountDistr, _pcbDimUsagePctDistr;
+        private readonly double _pcbElemsIsVarSizeProb;
+        private readonly Random _random;
 
-
-        private SimuEventGenerator()
+        public SimuEventGenerator(
+            IContinuousDistribution timeBetweenTechsDistr,
+            IContinuousDistribution pcbElemsCountDistr, IContinuousDistribution pcbDimUsagePctDistr,
+            double pcbElemsIsVarSizeProb, Random random)
         {
+            _timeBetweenTechsDistr = timeBetweenTechsDistr;
+            _pcbElemsCountDistr = pcbElemsCountDistr;
+            _pcbDimUsagePctDistr = pcbDimUsagePctDistr;
+            _pcbElemsIsVarSizeProb = pcbElemsIsVarSizeProb;
+            _random = random;
         }
 
 
-        public List<SimulationEvent> GeneratePcbDesignTech(TimeSpan finalTime, TimeSpan? startTime = null)
+        public List<SimulationEvent> GeneratePcbDesignTech(TimeSpan finalTime)
         {
             List<SimulationEvent> simulationEvents = new();
-            var curTime = startTime ?? TimeSpan.Zero;
-
-            curTime += TimeSpan.FromSeconds(
-                Math.Round(Math.Max(0.0, _pcbDesignTechIntervalDistr.Sample())));
-
+            var curTime = TimeSpan.FromSeconds(Math.Round(Math.Max(0.0, _timeBetweenTechsDistr.Sample())));
+            
+            
             while (curTime < finalTime)
             {
                 simulationEvents.Add(new PcbDesignTechnologyStart(curTime, GeneratePcbParams()));
 
                 curTime += TimeSpan.FromSeconds(
-                    Math.Round(Math.Max(0.0, _pcbDesignTechIntervalDistr.Sample())));
+                    Math.Round(Math.Max(0.0, _timeBetweenTechsDistr.Sample())));
             }
 
             return simulationEvents;
@@ -43,56 +50,8 @@ namespace PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents
 
         private PcbParams GeneratePcbParams()
         {
-            return new PcbParams((int) Math.Round(Math.Max(0.0, _elementCountDistr.Sample())),
-                _dimensionUsagePctDistr.Sample(), _variousSizePctDistr.Sample() >= 0.5);
-        }
-
-
-        public class Builder
-        {
-            private readonly SimuEventGenerator _eventGenerator = new SimuEventGenerator();
-
-            public Builder()
-            {
-            }
-
-            public SimuEventGeneratorBuilderStep2 NewTechInterval(
-                IContinuousDistribution pcbDesignTechIntervalDistr)
-            {
-                _eventGenerator._pcbDesignTechIntervalDistr = pcbDesignTechIntervalDistr;
-                return new SimuEventGeneratorBuilderStep2(_eventGenerator);
-            }
-        }
-
-        public class SimuEventGeneratorBuilderStep2
-        {
-            private readonly SimuEventGenerator _eventGenerator;
-
-            public SimuEventGeneratorBuilderStep2(SimuEventGenerator eventGenerator)
-            {
-                _eventGenerator = eventGenerator;
-            }
-
-            public SimuEventGeneratorBuilderFinal PcbParams(IContinuousDistribution elementCountDistr,
-                IContinuousDistribution dimensionUsagePctDistr, IContinuousDistribution variousSizePctDistr)
-            {
-                _eventGenerator._elementCountDistr = elementCountDistr;
-                _eventGenerator._dimensionUsagePctDistr = dimensionUsagePctDistr;
-                _eventGenerator._variousSizePctDistr = variousSizePctDistr;
-                return new SimuEventGeneratorBuilderFinal(_eventGenerator);
-            }
-        }
-
-        public class SimuEventGeneratorBuilderFinal
-        {
-            private readonly SimuEventGenerator _eventGenerator;
-
-            public SimuEventGeneratorBuilderFinal(SimuEventGenerator eventGenerator)
-            {
-                _eventGenerator = eventGenerator;
-            }
-
-            public SimuEventGenerator Build() => _eventGenerator;
+            return new PcbParams((int)Math.Round(Math.Max(0.0, _pcbElemsCountDistr.Sample())),
+                _pcbDimUsagePctDistr.Sample(), _pcbElemsIsVarSizeProb >= _random.NextDouble());
         }
     }
 }

@@ -1,15 +1,15 @@
 ﻿using System;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
+namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms
 {
     public class OneThreadPcbAlgorithm : PcbAlgorithm
     {
-        protected OneThreadPcbAlgorithm(IComplexityEstimator complexityEstimator) : base(complexityEstimator, 1)
+        protected OneThreadPcbAlgorithm(long totalComplexity) : base(totalComplexity, 1)
         {
         }
 
-        
+
         public sealed override void UpdateModelTime(TimeSpan deltaTime, double cpuPower) =>
             base.UpdateModelTime(deltaTime, cpuPower);
         

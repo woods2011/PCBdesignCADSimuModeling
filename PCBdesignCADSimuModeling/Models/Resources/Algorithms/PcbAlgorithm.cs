@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
+namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms
 {
     public interface IPcbAlgorithm
     {
@@ -15,14 +15,13 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
         private readonly long _totalComplexity;
         private double _completionRate = 0.0;
 
-
-        protected PcbAlgorithm(IComplexityEstimator complexityEstimator, int maxThreadUtilization)
+       
+        protected PcbAlgorithm(long totalComplexity, int maxThreadUtilization)
         {
-            _totalComplexity = complexityEstimator.EstimateComplexity();
-            Console.WriteLine(_totalComplexity);
+            _totalComplexity = totalComplexity;
             MaxThreadUtilization = maxThreadUtilization;
         }
-
+        
 
         public int MaxThreadUtilization { get; }
 
@@ -42,7 +41,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources.Algorithms
 
         public virtual TimeSpan EstimateEndTime(double cpuPower)
         {
-            return TimeSpan.FromSeconds(Math.Round((1 - CompletionRate) * _totalComplexity / cpuPower));
+            return TimeSpan.FromSeconds(Math.Min(TimeSpan.MaxValue.TotalSeconds / 2.0, Math.Round((1 - CompletionRate) * _totalComplexity / cpuPower)));
         }
     }
 }

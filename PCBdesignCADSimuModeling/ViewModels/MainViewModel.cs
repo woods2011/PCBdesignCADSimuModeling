@@ -2,237 +2,163 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using MathNet.Numerics.Distributions;
 using Newtonsoft.Json;
-using PCBdesignCADSimuModeling.Commands;
-using PCBdesignCADSimuModeling.Models.Loggers;
-using PCBdesignCADSimuModeling.Models.Resources;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
-using PCBdesignCADSimuModeling.Models.SimuSystem;
-using PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PcbDesignCADSimuModeling.Commands;
+using PcbDesignCADSimuModeling.Models.Loggers;
+using PcbDesignCADSimuModeling.Models.Resources;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
+using PcbDesignCADSimuModeling.Models.SimuSystem;
+using PcbDesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
 
-namespace PCBdesignCADSimuModeling.ViewModels
+namespace PcbDesignCADSimuModeling.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
-        private string _simuResultStr = String.Empty;
-        private string _simuResultSearchStr = "Технология: ";
-        private SimulationResult _lastSimulationResult = new SimulationResult();
-        private FileSimpleLogger _fileSimpleLogger;
+        private readonly Random _rndSource;
+
+        public MessageViewModel MessageViewModel { get; } = new();
+        public string LastResultLogPath { get; set; } = Directory.GetCurrentDirectory() + @"\LastSimulationLog.json";
+        public SimulationResult? LastSimulationResult { get; set; }
+        public string AllResultsPath { get; set; } = Directory.GetCurrentDirectory() + @"\AllSimulationResults.json";
+        public string? LastSimulationResultLog { get; set; }
+        public string LastSimulationResultLogSearch { get; set; } = String.Empty;
+        public string LastSimulationResultLogSearchTransformed => LastSimulationResultLogSearch.Replace(" ", ".");
 
 
-        public MainViewModel()
-        {
-        }
-
-
-        public ICommand BeginSimulation => new ActionCommand(_ => BeginSimulationHandler(), _ => DesignersList.Count >= 1);
-
-        public ICommand SaveSimuResult => new ActionCommand(_ => SaveSimuResultHandler(),
-            _ => LastSimulationResult is not null && !String.IsNullOrEmpty(SimuResultStr));
-
-        public ICommand SaveLastSimuLog => new ActionCommand(_ => SaveLastSimuLogHandler(),
-            _ => _fileSimpleLogger is not null && !String.IsNullOrEmpty(SimuResultStr));
-
-
-        //  
-
-
-        public ICommand AddDesigner =>
-            new ActionCommand(_ => DesignersList.Add(new Designer(Designer.ExperienceEn.Little)));
-
-        public ICommand RemoveDesigner => new ActionCommand(_ => DesignersList.Remove(DesignersList.LastOrDefault()));
-
-        public ObservableCollection<Designer> DesignersList { get; } = new()
-        {
-            new Designer(Designer.ExperienceEn.Little),
-            new Designer(Designer.ExperienceEn.Average),
-        };
-
-
-        public Server Server { get; } = new(150);
-        public CpuThreads Cpu { get; } = new(16, 2.5);
-
-
-        //
-
-
-        public TechIntervalBuilderDisplayModel TechIntervalDistr { get; } =
-            new(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0));
-
-        public DistributionBuilderDisplayModelDbl ElementCountDistr { get; } =
-            new DistributionBuilderDisplayModelDbl(150, 15);
-
-        public DistributionBuilderDisplayModelDbl DimensionUsagePctDistr { get; } =
-            new DistributionBuilderDisplayModelDbl(0.6, 0.1);
-
-        public double VariousSizePctMean { get; set; } = 0.8;
-        public TimeSpan FinalTime { get; set; } = TimeSpan.FromDays(30);
-
-
-        //
-
-
-        public IReadOnlyList<string> PlacingAlgsStrs { get; } = new List<string>()
-        {
-            PlacingAlgProviderFactory.PlacingSequentialStr, PlacingAlgProviderFactory.PlacingPartitioningStr
-        };
+        public IReadOnlyList<string> PlacingAlgStrList { get; } = new List<string>
+            { PlacingAlgProviderFactory.PlacingSequentialStr, PlacingAlgProviderFactory.PlacingPartitioningStr };
 
         public string SelectedPlacingAlgStr { get; set; } = PlacingAlgProviderFactory.PlacingSequentialStr;
 
-
-        public IReadOnlyList<string> WireRoutingAlgsStrs { get; } = new List<string>()
-        {
-            WireRoutingAlgProviderFactory.WireRoutingWaveStr, WireRoutingAlgProviderFactory.WireRoutingChannelStr
-        };
+        public IReadOnlyList<string> WireRoutingAlgStrList { get; } = new List<string>
+            { WireRoutingAlgProviderFactory.WireRoutingWaveStr, WireRoutingAlgProviderFactory.WireRoutingChannelStr };
 
         public string SelectedWireRoutingAlgStr { get; set; } = WireRoutingAlgProviderFactory.WireRoutingWaveStr;
 
 
-        //
+        public Server Server { get; } = new(150);
+        public CpuThreads Cpu { get; } = new(16, 2.5);
+        public int DesignersCount { get; set; } = 1;
 
-        public MessageViewModel MessageViewModel { get; } = new();
 
-        //
+        public TechIntervalBuilderVm TechIntervalDistr { get; }
+        public DblNormalDistributionBuilderVm ElementCountDistr { get; }
+        public DblNormalDistributionBuilderVm DimensionUsagePctDistr { get; }
+        public double VariousSizePctProb { get; set; } = 0.8;
+        public TimeSpan FinalTime { get; set; } = TimeSpan.FromDays(30);
 
-        public string SimuResultStr
+
+        public MainViewModel(Random? rndSource = null)
         {
-            get => _simuResultStr;
-            set
-            {
-                _simuResultStr = value;
-                OnPropertyChanged();
-            }
+            _rndSource = rndSource ?? new Random(1);
+            TechIntervalDistr =
+                new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0), _rndSource);
+            ElementCountDistr = new DblNormalDistributionBuilderVm(150, 15, _rndSource);
+            DimensionUsagePctDistr = new DblNormalDistributionBuilderVm(0.6, 0.1, _rndSource);
         }
 
-        public string SimuResultSearchStr
+
+        public ICommand BeginSimulation =>
+            new ActionCommand(_ => BeginSimulationHandler());
+
+        public ICommand SaveSimuResult => new ActionCommand(_ => SaveSimuResultHandler(),
+            _ => LastSimulationResult is not null && !String.IsNullOrEmpty(LastSimulationResultLog));
+
+        public ICommand SaveLastSimuLog => new ActionCommand(_ => SaveLastSimuLogHandler(),
+            _ => !String.IsNullOrEmpty(LastSimulationResultLog));
+
+        public void BeginSimulationHandler()
         {
-            get => _simuResultSearchStr;
-            set
+            try
             {
-                _simuResultSearchStr = value;
-                OnPropertyChanged(nameof(SimuResultSearchStrFake));
+                List<IResource> resourcePool = new() { Cpu, Server };
+                resourcePool.AddRange(Enumerable.Range(0, DesignersCount).Select(_ => new Designer()));
+                resourcePool = resourcePool.Select(resource => resource.Clone()).ToList();
+
+                var pcbAlgFactories = new PcbAlgFactories(
+                    placingAlgFactory: PlacingAlgProviderFactory.Create(SelectedPlacingAlgStr),
+                    wireRoutingAlgFactory: WireRoutingAlgProviderFactory.Create(SelectedWireRoutingAlgStr));
+
+                var simuEventGenerator = new SimuEventGenerator(
+                    timeBetweenTechsDistr: TechIntervalDistr.Build(),
+                    pcbElemsCountDistr: ElementCountDistr.Build(),
+                    pcbDimUsagePctDistr: DimensionUsagePctDistr.Build(),
+                    pcbElemsIsVarSizeProb: VariousSizePctProb,
+                    random: _rndSource);
+
+                InMemorySimpleLogger? inMemorySimpleLogger = new();
+                var simulator =
+                    new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories, inMemorySimpleLogger);
+                var simulationResult = simulator.Simulate(FinalTime);
+
+                LastSimulationResultLog = inMemorySimpleLogger?.GetData();
+
+                if (simulationResult.Values.Count < 1) return;
+
+                var productionTimesSec = simulationResult.Values;
+                var avgProductionTimeMilSec = productionTimesSec.Average(time => time.TotalMilliseconds);
+                var avgProductionTime = TimeSpan.FromMilliseconds(avgProductionTimeMilSec);
+                var devProductionTimeMilSec = Math.Sqrt(
+                    productionTimesSec.Sum(time => Math.Pow(time.TotalMilliseconds - avgProductionTimeMilSec, 2)) /
+                    productionTimesSec.Count);
+                var devProductionTime = TimeSpan.FromMilliseconds(devProductionTimeMilSec);
+
+                var totalConfigCost = resourcePool.Sum(resource => resource.Cost);
+
+                LastSimulationResult = new SimulationResult()
+                {
+                    RealTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss"),
+                    ResourcePool = resourcePool,
+                    SelectedPlacingAlgStr = SelectedPlacingAlgStr,
+                    SelectedWireRoutingAlgStr = SelectedWireRoutingAlgStr,
+                    TechIntervalDistr = TechIntervalDistr,
+                    ElementCountDistr = ElementCountDistr,
+                    DimensionUsagePctDistr = DimensionUsagePctDistr,
+                    VariousSizePctMean = VariousSizePctProb,
+                    FinalTime = FinalTime,
+                    AverageProductionTime = avgProductionTime,
+                    DevProductionTime = devProductionTime,
+                    TotalCost = totalConfigCost,
+                    // CostToTime = 0.4 * totalConfigCost / Math.Sqrt(totalConfigCost * totalConfigCost + avgProductionTime.Hours * avgProductionTime.Hours) + 
+                    //              0.6 * avgProductionTime.Hours / Math.Sqrt(totalConfigCost * totalConfigCost + avgProductionTime.Hours * avgProductionTime.Hours)
+                    //CostToTime = ((0.6 + 0.4 / (1.0 + totalConfigCost)) * (0.4 + 0.6 / (1 + Math.Pow(Math.Max(0, avgProductionTime.TotalDays - 9.0), 1))) - 0.6 * 0.4) / (1 - 0.6 * 0.4)
+                    CostToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost)
+                };
             }
-        }
-
-        public string SimuResultSearchStrFake => SimuResultSearchStr.Replace(" ", ".");
-
-        //
-
-        public string LastResultLogFileName { get; set; } = Directory.GetCurrentDirectory() + @"\LastSimulationLog.txt";
-
-        public string AllResultsFileName { get; set; } =
-            Directory.GetCurrentDirectory() + @"\AllSimulationResults.json";
-
-        public SimulationResult LastSimulationResult
-        {
-            get => _lastSimulationResult;
-            set
+            catch (Exception e)
             {
-                _lastSimulationResult = value;
-                OnPropertyChanged();
+                Debug.WriteLine(e);
             }
-        }
-        //
-
-        private void BeginSimulationHandler()
-        {
-            _fileSimpleLogger = new FileSimpleLogger();
-            ISimpleLogger logger = new CompositionSimpleLogger(new List<ISimpleLogger>()
-            {
-                _fileSimpleLogger, new DebugSimpleLogger()
-            });
-            PcbDesignTechnology.Id = 0;
-
-
-            //
-
-
-            List<IResource> resourcePool = new();
-            resourcePool.AddRange(DesignersList);
-            resourcePool.Add(Cpu);
-            resourcePool.Add(Server);
-
-
-            PcbAlgFactories pcbAlgFactories = new PcbAlgFactories(
-                PlacingAlgProviderFactory.Create(SelectedPlacingAlgStr),
-                WireRoutingAlgProviderFactory.Create(SelectedWireRoutingAlgStr));
-
-
-            var simuEventGenerator = new SimuEventGenerator.Builder()
-                .NewTechInterval(TechIntervalDistr.Build())
-                .PcbParams(ElementCountDistr.Build(),
-                    DimensionUsagePctDistr.Build(),
-                    variousSizePctDistr: new Beta(VariousSizePctMean, 1.0 - VariousSizePctMean))
-                .Build();
-
-            //
-
-            var simulator = new PcbDesignCadSimulator(simuEventGenerator,
-                resourcePool.Select(resource => resource.Clone()).ToList(), pcbAlgFactories, logger);
-            var simRes = simulator.Simulate(FinalTime);
-            SimuResultStr = _fileSimpleLogger.GetData();
-
-            
-            
-            var productionTimesSec =  simRes.Select(pair =>
-                pair.Value.Finish.TotalSeconds - pair.Value.Start.TotalSeconds).ToList();
-            var avgTimeSec = productionTimesSec.Average(time => time);
-            var devTimeSec = Math.Sqrt(productionTimesSec.Sum(time => Math.Pow(time - avgTimeSec, 2)) / productionTimesSec.Count);
-
-
-            var totalConfigCost = resourcePool.Sum(resource => resource.Cost) + DesignersList.Count * 10000.0;
-            var averageProductionTime = TimeSpan.FromSeconds(avgTimeSec);
-            var devProductionTime = TimeSpan.FromSeconds(devTimeSec);
-            
-            LastSimulationResult = new SimulationResult()
-            {
-                RealTime = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss"),
-                ResourcePool = resourcePool,
-                SelectedPlacingAlgStr = SelectedPlacingAlgStr,
-                SelectedWireRoutingAlgStr = SelectedWireRoutingAlgStr,
-                TechIntervalDistr = TechIntervalDistr,
-                ElementCountDistr = ElementCountDistr,
-                DimensionUsagePctDistr = DimensionUsagePctDistr,
-                VariousSizePctMean = VariousSizePctMean,
-                FinalTime = FinalTime,
-                AverageProductionTime = averageProductionTime,
-                DevProductionTime = devProductionTime,
-                TotalCost = totalConfigCost,    
-                CostToTime = 0.6 * (100000.0 / averageProductionTime.TotalDays) / (0.4 * totalConfigCost)
-            };
-
-            //
-
-            
-            var a = averageProductionTime;
         }
 
 
         private void SaveSimuResultHandler()
         {
-            var fileLogger = new FileSimpleLogger();
-            var serializeResult = JsonConvert.SerializeObject(LastSimulationResult, Formatting.Indented,
-                new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.Auto});
-            fileLogger.Log(serializeResult);
-            fileLogger.LogToFile(AllResultsFileName);
+            if (LastSimulationResult is null) return;
+
+            var serializedResult = JsonConvert.SerializeObject(LastSimulationResult, Formatting.Indented,
+                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
+
+            new AppendFileSimpleLogger(AllResultsPath).Log(serializedResult);
         }
 
         private void SaveLastSimuLogHandler()
         {
-            _fileSimpleLogger.Log("Сводка:");
-            var serializeResult = JsonConvert.SerializeObject(LastSimulationResult, Formatting.Indented,
-                new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.Auto});
-            _fileSimpleLogger.Log(serializeResult);
-            
-            _fileSimpleLogger.LogToFileTruncate(LastResultLogFileName);
+            if (LastSimulationResult is null) return;
+            if (LastSimulationResultLog is null) return;
 
+            var serializedResult = JsonConvert.SerializeObject(LastSimulationResult, Formatting.Indented,
+                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
+
+            new TruncateFileSimpleLogger(LastResultLogPath).Log($"{serializedResult}{LastSimulationResultLog}");
         }
     }
 }

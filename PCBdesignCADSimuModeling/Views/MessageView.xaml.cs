@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace PCBdesignCADSimuModeling.Views
+namespace PcbDesignCADSimuModeling.Views
 {
     public partial class MessageView : UserControl
     {

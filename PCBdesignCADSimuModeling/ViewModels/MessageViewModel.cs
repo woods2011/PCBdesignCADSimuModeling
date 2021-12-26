@@ -1,28 +1,16 @@
 ﻿using System;
 using System.Windows.Input;
-using PCBdesignCADSimuModeling.Commands;
+using PcbDesignCADSimuModeling.Commands;
 
-namespace PCBdesignCADSimuModeling.ViewModels
+namespace PcbDesignCADSimuModeling.ViewModels
 {
     public class MessageViewModel : BaseViewModel
     {
-        private string _message;
-
-
         public MessageViewModel()
         {
         }
-
         
-        public string Message
-        {
-            get => _message;
-            set
-            {
-                OnPropertyChanged(ref _message, value);
-                OnPropertyChanged(nameof(HasMessage));
-            }
-        }
+        public string Message { get; set; } = String.Empty;
 
         public bool HasMessage => !String.IsNullOrEmpty(Message);
 

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.ResourceRequests
+namespace PcbDesignCADSimuModeling.Models.Resources.ResourceRequests
 {
     public abstract class MixedResourceRequest<TMixedResources> : ResourceRequest<TMixedResources>
         where TMixedResources : MixedResource
     {
-        protected MixedResourceRequest(Guid procId) : base(procId)
+        protected MixedResourceRequest(int procId) : base(procId)
         {
         }
     }
@@ -17,7 +17,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources.ResourceRequests
         private readonly int _reqThreadCount;
 
         
-        public CpuThreadRequest(Guid procId, int reqThreadCount) : base(procId)
+        public CpuThreadRequest(int procId, int reqThreadCount) : base(procId)
         {
             _reqThreadCount = reqThreadCount;
         }

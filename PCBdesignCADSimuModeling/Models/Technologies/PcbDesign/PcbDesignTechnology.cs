@@ -1,99 +1,98 @@
 ﻿using System;
 using System.Collections.Generic;
-using PCBdesignCADSimuModeling.Models.Loggers;
-using PCBdesignCADSimuModeling.Models.Resources;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures;
+using System.Linq;
+using PcbDesignCADSimuModeling.Models.Loggers;
+using PcbDesignCADSimuModeling.Models.Resources;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures;
 
-namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
+namespace PcbDesignCADSimuModeling.Models.Technologies.PcbDesign
 {
     public class PcbDesignTechnology
     {
         private PcbDesignProcedure _curProcedure;
         private readonly IResourceManager _resourceManager;
-        private readonly ISimpleLogger _logger;
+        private readonly ISimpleLogger? _logger;
+        public IPcbAlgFactories PcbAlgFactories { get; }
+        public PcbParams PcbParams { get; }
+        public bool IsWaitForResources { get; private set; } = true;
+        public int TechId { get; }
 
 
-        public PcbDesignTechnology(IResourceManager resourceManager, PcbParams pcbParams,
-            IPcbAlgFactories pcbAlgFactories, ISimpleLogger logger)
+        public PcbDesignTechnology(IResourceManager resourceManager, IPcbAlgFactories pcbAlgFactories,
+            PcbParams pcbParams, int techId, ISimpleLogger? logger)
         {
             _resourceManager = resourceManager;
             _logger = logger;
+            TechId = techId;
             PcbParams = pcbParams;
             PcbAlgFactories = pcbAlgFactories;
-            CurProcedure = new PcbParamsInput(this);
+
+            _curProcedure = new PcbParamsInput(this);
         }
 
-
-        public int TechId { get; } = Id;
-
-        public PcbParams PcbParams { get; }
-        public IPcbAlgFactories PcbAlgFactories { get; }
 
         public PcbDesignProcedure CurProcedure
         {
             get => _curProcedure;
             set
             {
-                if (_curProcedure is not null)
-                    _resourceManager.FreeResources(_curProcedure.ProcedureId, _curProcedure.ActiveResources);
-
+                FreeResources();
                 _curProcedure = value;
-                if (_curProcedure is null) return;
-
-                IsWaitResources = !_resourceManager.TryGetResources(
-                    _curProcedure.ProcedureId, _curProcedure.RequiredResources, out var receivedResources);
-                if (!IsWaitResources)
-                    _curProcedure.ActiveResources.AddRange(receivedResources);
-                else
-                    _logger.Log(
-                        $"{_logger.ModelTime} | Технология: {TechId} - Ожидание ресурсов - Проектная процедура: {_curProcedure.Name}");
+                IsWaitForResources = true;
             }
         }
 
-        public bool IsWaitResources { get; private set; }
+        private void FreeResources()
+        {
+            _resourceManager.FreeResources(_curProcedure.ProcId, _curProcedure.ActiveResources);
+            _curProcedure.ActiveResources.Clear();
+        }
+
+        public void TryGetResources()
+        {
+            if (!IsWaitForResources) return;
+
+            IsWaitForResources = !_resourceManager.TryGetResources(
+                _curProcedure.ProcId, _curProcedure.RequiredResources, out var receivedResources);
+
+            if (!IsWaitForResources)
+            {
+                _curProcedure.ActiveResources.AddRange(receivedResources);
+                _curProcedure.InitResourcesPower();
+                _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (TechId - 1) % 15))}" +
+                             $"Технология: {TechId} - Ожидание ресурсов оконченно - Проектная процедура: {_curProcedure.Name}");
+                return;
+            }
+
+            _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (TechId - 1) % 15))}" +
+                         $"Технология: {TechId} - Ожидание ресурсов - Проектная процедура: {_curProcedure.Name}");
+        }
 
 
         public void UpdateModelTime(TimeSpan deltaTime)
         {
-            if (!IsWaitResources)
+            if (!IsWaitForResources)
                 CurProcedure.UpdateModelTime(deltaTime);
         }
 
 
         public TimeSpan EstimateEndTime()
         {
-            if (!IsWaitResources)
-                return CurProcedure.EstimateEndTime();
-
-            IsWaitResources = !_resourceManager.TryGetResources(
-                _curProcedure.ProcedureId, _curProcedure.RequiredResources, out var receivedResources);
-            if (!IsWaitResources)
-            {
-                _curProcedure.ActiveResources.AddRange(receivedResources);
-                _logger.Log(
-                    $"{_logger.ModelTime} | Технология: {TechId} - Ожидание ресурсов оконченно - Проектная процедура: {_curProcedure.Name}");
-            }
-
-            return IsWaitResources ? TimeSpan.MaxValue / 2.0 : CurProcedure.EstimateEndTime();
+            if (!IsWaitForResources) return CurProcedure.EstimateEndTime();
+            return TimeSpan.MaxValue / 2.0;
         }
 
 
-        public bool MoveToNextProcedure() => _curProcedure.NextProcedure();
-
-
-        private static int _id = 0;
-
-        public static int Id
+        public bool MoveToNextProcedure()
         {
-            get
-            {
-                _id++;
-                return _id;
-            }
-            set => _id = value;
+            var moveToNextProcedure = _curProcedure.NextProcedure();
+            if (!moveToNextProcedure) FreeResources();
+            return moveToNextProcedure;
         }
+
+        public static readonly TimeSpan TimeTol = TimeSpan.FromSeconds(0.5);
     }
 }

@@ -1,9 +1,9 @@
-﻿<Application x:Class="PCBdesignCADSimuModeling.App"
+﻿<Application x:Class="PcbDesignCADSimuModeling.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:PCBdesignCADSimuModeling"
-             xmlns:views="clr-namespace:PCBdesignCADSimuModeling.Views"
-             xmlns:viewModels="clr-namespace:PCBdesignCADSimuModeling.ViewModels"
+             xmlns:local="clr-namespace:PcbDesignCADSimuModeling"
+             xmlns:views="clr-namespace:PcbDesignCADSimuModeling.Views"
+             xmlns:viewModels="clr-namespace:PcbDesignCADSimuModeling.ViewModels"
              >
     <Application.Resources>
         <!-- <DataTemplate DataType="{x:Type viewModels:MessageViewModel}"> -->

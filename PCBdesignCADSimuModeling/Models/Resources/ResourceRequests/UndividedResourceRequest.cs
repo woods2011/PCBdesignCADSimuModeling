@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PCBdesignCADSimuModeling.Models.Resources.ResourceRequests
+namespace PcbDesignCADSimuModeling.Models.Resources.ResourceRequests
 {
     public abstract class UndividedResourceRequest<TResource> : ResourceRequest<TResource>
         where TResource : UndividedResource
     {
-        protected UndividedResourceRequest(Guid procId) : base(procId)
+        protected UndividedResourceRequest(int procId) : base(procId)
         {
         }
     }
@@ -14,17 +14,11 @@ namespace PCBdesignCADSimuModeling.Models.Resources.ResourceRequests
 
     public class DesignerRequest : UndividedResourceRequest<Designer>
     {
-        private readonly Designer.ExperienceEn _minDesignerExp;
-
-        
-        public DesignerRequest(Guid procId, Designer.ExperienceEn minDesignerExp = Designer.ExperienceEn.Little) :
-            base(procId)
+        public DesignerRequest(int procId) : base(procId)
         {
-            _minDesignerExp = minDesignerExp;
         }
 
-
         protected override bool TryGetResourceBody(Designer potentialResource) =>
-            potentialResource.Experience >= _minDesignerExp && potentialResource.TryGetResource(ProcId);
+            potentialResource.TryGetResource(ProcId);
     }
 }

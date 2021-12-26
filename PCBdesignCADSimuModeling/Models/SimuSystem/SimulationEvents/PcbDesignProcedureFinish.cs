@@ -1,14 +1,13 @@
 ﻿using System;
-using PCBdesignCADSimuModeling.Models.Technologies.PcbDesign;
+using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
 
-namespace PCBdesignCADSimuModeling.Models.SimuSystem.SimulationEvents
+namespace PcbDesignCADSimuModeling.Models.SimuSystem.SimulationEvents
 {
     public class PcbDesignProcedureFinish : SimulationEvent
     {
-        public PcbDesignProcedureFinish(PcbDesignTechnology pcbDesignTechnology, TimeSpan modelTime) : base(1)
+        public PcbDesignProcedureFinish(PcbDesignTechnology pcbDesignTechnology, TimeSpan activateTime) : base(1, activateTime)
         {
             PcbDesignTechnology = pcbDesignTechnology;
-            ActivateTime = modelTime + pcbDesignTechnology.EstimateEndTime();
         }
 
         public PcbDesignTechnology PcbDesignTechnology { get; }

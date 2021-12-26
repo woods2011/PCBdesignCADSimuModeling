@@ -1,26 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PCBdesignCADSimuModeling.Models.Resources;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms;
-using PCBdesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
-using PCBdesignCADSimuModeling.Models.Resources.ResourceRequests;
+using PcbDesignCADSimuModeling.Models.Resources;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
+using PcbDesignCADSimuModeling.Models.Resources.ResourceRequests;
 
-namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
+namespace PcbDesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedures
 {
     public class Placement : PcbDesignProcedure
     {
         private readonly IPlacingAlgorithm _placingAlg;
-        
+        private double _cpuPower;
+
         public Placement(PcbDesignTechnology context) : base(context)
         {
             _placingAlg = context.PcbAlgFactories.PlacingAlgFactory.Create(context.PcbParams);
-
-            //RequiredResources.Add(new DesignerRequest(ProcedureId));
-            RequiredResources.Add(new CpuThreadRequest(ProcedureId, _placingAlg.MaxThreadUtilization));
+            RequiredResources.AddRange(GetResourceRequestList());
         }
 
-        
+
         public override bool NextProcedure()
         {
             Context.CurProcedure = new WireRouting(Context);
@@ -29,25 +28,26 @@ namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
 
         public override void UpdateModelTime(TimeSpan deltaTime)
         {
-            // var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-            //     .Sum(resource => resource.ResValueForProc(ProcedureId));
-            var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
-                .Sum(resource => resource.ResValueForProc(ProcedureId));
-            
-            _placingAlg.UpdateModelTime(deltaTime, cpuPower);
+            _placingAlg.UpdateModelTime(deltaTime, _cpuPower);
         }
 
         public override TimeSpan EstimateEndTime()
         {
-            // var designerPower = ActiveResources.FindAll(resource => resource is Designer)
-            //     .Sum(resource => resource.ResValueForProc(ProcedureId));
-            var cpuPower = ActiveResources.FindAll(resource => resource is CpuThreads)
-                .Sum(resource => resource.ResValueForProc(ProcedureId));
-            
-            return _placingAlg.EstimateEndTime(cpuPower);
+            _cpuPower = ActiveResources.OfType<CpuThreads>().Sum(resource => resource.ResValueForProc(ProcId));
+            return _placingAlg.EstimateEndTime(_cpuPower);
+        }
+
+        public override void InitResourcesPower()
+        {
         }
 
 
-        public override string Name { get; } = "Размещение";
+        private List<IResourceRequest> GetResourceRequestList() => new()
+        {
+            //RequiredResources.Add(new DesignerRequest(ProcedureId));
+            new CpuThreadRequest(ProcId, _placingAlg.MaxThreadUtilization),
+        };
+
+        public override string Name => "Размещение";
     }
 }

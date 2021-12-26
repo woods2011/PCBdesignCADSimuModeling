@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using PCBdesignCADSimuModeling.Annotations;
 
-namespace PCBdesignCADSimuModeling.Models.Resources
+namespace PcbDesignCADSimuModeling.Models.Resources
 {
     public abstract class MixedResource : IResource
     {
-        protected virtual List<Guid> UtilizingProcIds { get; } = new();
-        public abstract double ResValueForProc(Guid procId);
-        public abstract void FreeResource(Guid procId);
+        protected virtual List<int> UtilizingProcIds { get; } = new();
+        public abstract double ResValueForProc(int procId);
+        public abstract void FreeResource(int procId);
         public abstract IResource Clone();
         public abstract double Cost { get; }
     }
@@ -19,9 +18,9 @@ namespace PCBdesignCADSimuModeling.Models.Resources
 
     public class CpuThreads : MixedResource, INotifyPropertyChanged
     {
-        protected override List<Guid> UtilizingProcIds => _procIdAndThread.Keys.ToList();
+        protected override List<int> UtilizingProcIds => _procIdAndThread.Keys.ToList();
         private readonly int[] _threadAndTaskCount;
-        private readonly Dictionary<Guid, List<int>> _procIdAndThread = new();
+        private readonly Dictionary<int, List<int>> _procIdAndThread = new();
         private readonly double _oneThreadMultiTaskPenalty;
         private int _threadCount;
         private double _clockRate;
@@ -37,30 +36,11 @@ namespace PCBdesignCADSimuModeling.Models.Resources
         }
 
 
-        public int ThreadCount
-        {
-            get => _threadCount;
-            set
-            {
-                if (value == _threadCount) return;
-                _threadCount = value;
-                OnPropertyChanged(nameof(Cost));
-            }
-        }
+        public int ThreadCount { get; set; }
 
-        public double ClockRate
-        {
-            get => _clockRate;
-            set
-            {
-                if (value.Equals(_clockRate)) return;
-                _clockRate = value;
-                OnPropertyChanged(nameof(Cost));
-            }
-        }
+        public double ClockRate { get; set; }
 
-
-        public bool TryGetResource(Guid procId, int reqThreadCount)
+        public bool TryGetResource(int procId, int reqThreadCount)
         {
             var threadsList = new List<int>();
 
@@ -76,10 +56,10 @@ namespace PCBdesignCADSimuModeling.Models.Resources
             return true;
         }
 
-        public override double ResValueForProc(Guid procId)
+        public override double ResValueForProc(int procId)
         {
             var curProcThreads = _procIdAndThread[procId];
-            double threadSum = 0.0;
+            var threadSum = 0.0;
 
             foreach (var procThread in curProcThreads)
             {
@@ -90,7 +70,7 @@ namespace PCBdesignCADSimuModeling.Models.Resources
             return threadSum * ClockRate;
         }
 
-        public override void FreeResource(Guid procId)
+        public override void FreeResource(int procId)
         {
             var threadsList = _procIdAndThread[procId];
 
@@ -145,12 +125,6 @@ namespace PCBdesignCADSimuModeling.Models.Resources
             Math.Pow(ThreadCount, 0.87)
             * 1500);
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

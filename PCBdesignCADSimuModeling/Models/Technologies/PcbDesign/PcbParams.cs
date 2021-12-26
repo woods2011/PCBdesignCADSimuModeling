@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PCBdesignCADSimuModeling.Models.Technologies.PcbDesign
+namespace PcbDesignCADSimuModeling.Models.Technologies.PcbDesign
 {
     public class PcbParams
     {

@@ -3,19 +3,20 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using MathNet.Numerics.Distributions;
 
-namespace PCBdesignCADSimuModeling.ViewModels
+namespace PcbDesignCADSimuModeling.ViewModels
 {
-    public abstract class DistributionBuilderDisplayModel<T> : INotifyPropertyChanged
+    public abstract class DistributionBuilderVm<T> : INotifyPropertyChanged
     {
+        protected readonly Random RndSource;
         private T _mean;
         private T _std;
 
-        protected DistributionBuilderDisplayModel(T mean, T std)
+        protected DistributionBuilderVm(T mean, T std, Random rndSource)
         {
             _mean = mean;
             _std = std;
+            RndSource = rndSource;
         }
-
 
         public virtual T Mean
         {
@@ -29,59 +30,19 @@ namespace PCBdesignCADSimuModeling.ViewModels
             set => _std = value;
         }
 
+        public abstract IContinuousDistribution Build();
 
-        public abstract IContinuousDistribution Build(Func<double, double, IContinuousDistribution> func = null);
 
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) => 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-    
-    
-    public class DistributionBuilderDisplayModelTs : DistributionBuilderDisplayModel<TimeSpan>
-    {
-        public DistributionBuilderDisplayModelTs(TimeSpan mean, TimeSpan std) : base(mean, std)
-        {
-        }
-
-        
-        public override TimeSpan Mean
-        {
-            get => base.Mean;
-            set
-            {
-                if (value.Equals(base.Mean)) return;
-                base.Mean = value;
-                OnPropertyChanged();
-                Std = TimeSpan.FromMinutes(Math.Round(base.Mean.TotalMinutes * 0.15));
-            }
-        }
-
-        public override TimeSpan Std
-        {
-            get => base.Std;
-            set
-            {
-                if (value.Equals(base.Std)) return;
-                base.Std = value;
-                OnPropertyChanged();
-            }
-        }
-        
-        
-        public override IContinuousDistribution Build(Func<double, double, IContinuousDistribution> func = null)
-            => func?.Invoke(Mean.TotalSeconds, Std.TotalSeconds) ?? new Normal(Mean.TotalSeconds, Std.TotalSeconds);
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 
-    
-    public class TechIntervalBuilderDisplayModel : DistributionBuilderDisplayModelTs
+
+    public abstract class TimeSpanDistributionBuilderVm : DistributionBuilderVm<TimeSpan>
     {
-        public TechIntervalBuilderDisplayModel(TimeSpan mean, TimeSpan std) : base(mean, std)
+        protected TimeSpanDistributionBuilderVm(TimeSpan mean, TimeSpan std, Random rndSource) : base(mean, std,
+            rndSource)
         {
         }
-        
 
         public override TimeSpan Mean
         {
@@ -89,46 +50,64 @@ namespace PCBdesignCADSimuModeling.ViewModels
             set
             {
                 base.Mean = value;
-                OnPropertyChanged(nameof(TechPerYear));
+                if (AutoStdChange) Std = TimeSpan.FromMinutes(Math.Round(base.Mean.TotalMinutes * 0.15));
             }
         }
-        
-        public double TechPerYear => Math.Round(TimeSpan.FromDays(366.65) / Mean, 1) ;
+
+        public bool AutoStdChange { get; set; } = true;
     }
-    
-    
-    public class DistributionBuilderDisplayModelDbl : DistributionBuilderDisplayModel<double>
+
+    public class TimeSpanNormalDistributionBuilderVm : TimeSpanDistributionBuilderVm
     {
-        public DistributionBuilderDisplayModelDbl(double mean, double std) : base(mean, std)
+        public TimeSpanNormalDistributionBuilderVm(TimeSpan mean, TimeSpan std, Random rndSource) : base(mean, std,
+            rndSource)
         {
         }
 
-        
+        public override IContinuousDistribution Build() =>
+            new Normal(Mean.TotalSeconds, Std.TotalSeconds, RndSource);
+    }
+
+
+    public class TechIntervalBuilderVm : TimeSpanNormalDistributionBuilderVm
+    {
+        public TechIntervalBuilderVm(TimeSpan mean, TimeSpan std, Random rndSource) : base(mean, std, rndSource)
+        {
+            TechPerYear = Math.Round(TimeSpan.FromDays(366.65) / mean, 1);
+        }
+
+        public override TimeSpan Mean
+        {
+            get => base.Mean;
+            set
+            {
+                base.Mean = value;
+                TechPerYear = Math.Round(TimeSpan.FromDays(366.65) / Mean, 1);
+            }
+        }
+
+        public double TechPerYear { get; set; }
+    }
+
+
+    public class DblNormalDistributionBuilderVm : DistributionBuilderVm<double>
+    {
+        public DblNormalDistributionBuilderVm(double mean, double std, Random rndSource) : base(mean, std, rndSource)
+        {
+        }
+
         public override double Mean
         {
             get => base.Mean;
             set
             {
-                if (value.Equals(base.Mean)) return;
                 base.Mean = value;
-                OnPropertyChanged();
-                Std = base.Mean * 0.15;
+                if (AutoStdChange) Std = base.Mean * 0.15;
             }
         }
 
-        public override double Std
-        {
-            get => base.Std;
-            set
-            {
-                if (value.Equals(base.Std)) return;
-                base.Std = value;
-                OnPropertyChanged();
-            }
-        }
-        
-        
-        public override IContinuousDistribution Build(Func<double, double, IContinuousDistribution> func = null)
-            => func?.Invoke(Mean, Std) ?? new Normal(Mean, Std);
+        public bool AutoStdChange { get; set; } = true;
+
+        public override IContinuousDistribution Build() => new Normal(Mean, Std, RndSource);
     }
 }
