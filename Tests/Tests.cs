@@ -5,6 +5,7 @@ using NUnit.Framework;
 using NUnit.Framework.Constraints;
 using PcbDesignCADSimuModeling.Models;
 using PcbDesignCADSimuModeling.Models.Loggers;
+using PcbDesignCADSimuModeling.Models.OptimizationModule;
 using PcbDesignCADSimuModeling.Models.Resources;
 using PcbDesignCADSimuModeling.Models.Resources.Algorithms;
 using PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
@@ -278,6 +279,57 @@ public class Tests
         // Assert.AreEqual(51234429275254, avgProductionTime.Ticks);
         // Assert.AreEqual(27233277143173, devProductionTime.Ticks);
         // Assert.AreEqual(100671.0, totalConfigCost, Tol);
+    }
+    
+    [Test]
+    public void TestFuncWrapper()
+    {
+        var simuSystemFuncWrapper = new SimuSystemFuncWrapper();
+        var objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
+        
+        var result = -1.0 * objectiveFunction(16, 2.5, 150, 0, 0, 1);
+        Console.WriteLine(result);
+        
+        Assert.AreEqual(0.14439743817354914, result, Tol);
+    }
+    
+    
+    [Test]
+    public void TestAbcOptimization()
+    {
+        var random = new Random();
+        
+        var simuSystemFuncWrapper = new SimuSystemFuncWrapper();
+        var objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
+        
+        var algorithmParameters = new AlgorithmParameters()
+        {
+            PopulationSize = 50,
+            NumOfIterations = 200
+        };
+        var abcAlgorithm = new AbcAlgorithm(algorithmParameters, random, objectiveFunction);
+        var result = abcAlgorithm.FindMinimum().ToList().LastOrDefault();
+
+        if (result is null)
+        {
+            Console.WriteLine("no res");
+            return;
+        }
+        
+        Console.WriteLine(-1.0 * result.Cost);
+        Console.WriteLine();
+        Console.WriteLine(Math.Round(result.X1));
+        Console.WriteLine(result.X2);
+        Console.WriteLine(Math.Round(result.X3));
+        Console.WriteLine(Math.Round(result.X4));
+        Console.WriteLine(Math.Round(result.X5));
+        Console.WriteLine(Math.Round(result.X6));
+        // Console.WriteLine(result.X1);
+        // Console.WriteLine(result.X2);
+        // Console.WriteLine(result.X3);
+        // Console.WriteLine(result.X4);
+        // Console.WriteLine(result.X5);
+        // Console.WriteLine(result.X6);
     }
     
     [Test]
