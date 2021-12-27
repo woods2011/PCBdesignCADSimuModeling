@@ -19,7 +19,7 @@ namespace PcbDesignCADSimuModeling.Models.Resources
     public class Server : SharedResource, INotifyPropertyChanged
     {
         [JsonIgnore]
-        public Func<Server, double> ResValueConvolution { get; init; } = server => server.InternetSpeed;
+        public Func<Server, double> ResValueConvolution { get; init; } = server => server.InternetSpeed; // Todo: Fix
 
         public int InternetSpeed { get; set; }
         
@@ -37,7 +37,7 @@ namespace PcbDesignCADSimuModeling.Models.Resources
         public override IResource Clone() => new Server(InternetSpeed) {ResValueConvolution = ResValueConvolution};
 
         public override double Cost => Math.Round(
-            Math.Exp(1.0 + 125.0 / (InternetSpeed + 31.5)) * InternetSpeed * 3.5);
+            Math.Exp(1.0 + 125.0 / (InternetSpeed + 31.5)) * InternetSpeed * 3.5); // ToDo : or fix this
 
         public event PropertyChangedEventHandler? PropertyChanged;
     }

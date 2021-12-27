@@ -33,7 +33,7 @@ namespace PcbDesignCADSimuModeling.Models.Technologies.PcbDesign.ProjectProcedur
         {
             _designerPower = ActiveResources.OfType<Designer>().Sum(resource => resource.ResValueForProc(ProcId));
             var serverPower = ActiveResources.OfType<Server>().Sum(resource => resource.ResValueForProc(ProcId));
-            _serverPower = 0.4 + 0.6 * (1.8 / Math.Exp(80.0 / serverPower));
+            _serverPower = 0.4 + 0.6 * (1.8 / Math.Exp(80.0 / serverPower)); // ToDo: Fix
         }
 
         private List<IResourceRequest> GetResourceRequestList() => new()

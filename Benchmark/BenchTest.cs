@@ -30,7 +30,6 @@ namespace Benchmark
         private Server _server = new(150);
         private int _designersCount = 2;
         private readonly TimeSpan? _timeTol = TimeSpan.FromDays(15);
-        private SimuSystemFuncWrapper _simuSystemFuncWrapper = new();
         private Func<double, double, double, double, double, double, double> _objectiveFunction;
 
         public BenchTest()
@@ -48,10 +47,10 @@ namespace Benchmark
                 pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, _random).Build(),
                 pcbElemsIsVarSizeProb: 0.8,
                 random: _random);
-
             _preCalcEvent = _simuEventGenerator.GeneratePcbDesignTech(_finalTime);
-            
-            _objectiveFunction = _simuSystemFuncWrapper.ObjectiveFunction;
+
+            var simuSystemFuncWrapper = new SimuSystemFuncWrapper(_simuEventGenerator, _finalTime, _preCalcEvent);
+            _objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
         }
 
 

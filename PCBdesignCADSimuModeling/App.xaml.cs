@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using PcbDesignCADSimuModeling.ViewModels;
+using PcbDesignCADSimuModeling.Views;
 
 namespace PcbDesignCADSimuModeling
 {
@@ -10,7 +11,7 @@ namespace PcbDesignCADSimuModeling
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            Window window = new MainWindow();
+            Window window = new MainView();
             window.DataContext = new MainViewModel();
             window.Show();
 

@@ -1,24 +1,22 @@
 ﻿<UserControl x:Class="PcbDesignCADSimuModeling.Views.MessageView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:PcbDesignCADSimuModeling.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:PcbDesignCADSimuModeling.ViewModels"
-             
+
              Background="White"             
              mc:Ignorable="d" 
-             Height="150" Width="300"
+             d:DesignHeight="150" d:DesignWidth="300"
              d:DataContext="{d:DesignInstance Type=viewModels:MessageViewModel, IsDesignTimeCreatable=True}" BorderBrush="{DynamicResource {x:Static SystemColors.MenuHighlightBrushKey}}">
 
     
-    <Grid Margin="5" Background="#FFF1D7D7">
+    <Grid Background="#FFF1D7D7">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        
 
         <Label Grid.Row="0" Content="Сообщение" FontSize="16" Width="auto" HorizontalContentAlignment="Left"/>
         
@@ -27,7 +25,7 @@
         </ScrollViewer>
 
 
-        <Button Grid.Row="2" Width="50" HorizontalAlignment="Right" FontSize="14"
+        <Button Grid.Row="2" Margin="5,0,5,5" Padding="10,2" HorizontalAlignment="Right" FontSize="14"
                 Command="{Binding OkCommand, UpdateSourceTrigger=PropertyChanged}" Content="OK"/>
     </Grid>
 </UserControl>

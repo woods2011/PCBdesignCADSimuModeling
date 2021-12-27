@@ -45,7 +45,7 @@ namespace PcbDesignCADSimuModeling.Models.SimuSystem
             {
                 _deltaTime = value - _modelTime;
                 _modelTime = value;
-                _logger?.Log($">ТЕКУЩЕЕ МОДЕЛЬНОЕ ВРЕМЯ: {ModelTime}");
+                _logger?.Log($">ТЕКУЩЕЕ МОДЕЛЬНОЕ ВРЕМЯ: {ModelTime:d\\.hh\\:mm\\:ss}");
             }
         }
 

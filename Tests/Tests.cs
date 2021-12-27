@@ -132,15 +132,15 @@ public class Tests
     public void Test3()
     {
         var rndSource = new Random(1);
-        
+
         List<IResource> resourcePool = new() { new CpuThreads(16, 2.5), new Server(150) };
         resourcePool.AddRange(Enumerable.Range(0, 1).Select(_ => new Designer()));
-        
+
         var pcbAlgFactories = new PcbAlgFactories(
             placingAlgFactory: PlacingAlgProviderFactory.Create(PlacingAlgProviderFactory.PlacingSequentialStr),
             wireRoutingAlgFactory: WireRoutingAlgProviderFactory.Create(
                 WireRoutingAlgProviderFactory.WireRoutingWaveStr));
-        
+
         var simuEventGenerator = new SimuEventGenerator(
             timeBetweenTechsDistr: new TechIntervalBuilderVm(new TimeSpan(0, 10, 0, 0), new TimeSpan(1, 30, 0),
                 rndSource).Build(),
@@ -148,31 +148,31 @@ public class Tests
             pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, rndSource).Build(),
             pcbElemsIsVarSizeProb: 0.8,
             random: rndSource);
-        
+
         var simulator = new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
         var simulationResult = simulator.Simulate(TimeSpan.FromDays(30));
-        
-        
+
+
         if (simulationResult.Values.Count < 1) Assert.Fail();
-        
+
         var productionTimesSec = simulationResult.Values;
-        
+
         var avgProductionTimeMilSec = productionTimesSec.Average(time => time.TotalMilliseconds);
         var avgProductionTime = TimeSpan.FromMilliseconds(avgProductionTimeMilSec);
         var devProductionTimeMilSec = Math.Sqrt(
             productionTimesSec.Sum(time => Math.Pow(time.TotalMilliseconds - avgProductionTimeMilSec, 2)) /
             productionTimesSec.Count);
         var devProductionTime = TimeSpan.FromMilliseconds(devProductionTimeMilSec);
-        
+
         var totalConfigCost = resourcePool.Sum(resource => resource.Cost);
-        
+
         var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost);
-        
+
         Console.WriteLine(costToTime);
         Console.WriteLine($"{avgProductionTime} | {avgProductionTime.Ticks}");
         Console.WriteLine($"{devProductionTime} | {devProductionTime.Ticks}");
         Console.WriteLine(totalConfigCost);
-        
+
         Assert.AreEqual(0.02512688870583971, costToTime, Tol);
         Assert.AreEqual(51234429275254, avgProductionTime.Ticks);
         Assert.AreEqual(27233277143173, devProductionTime.Ticks);
@@ -229,20 +229,20 @@ public class Tests
         Assert.AreEqual(473566999976137, devProductionTime.Ticks);
         Assert.AreEqual(68256.0, totalConfigCost, Tol);
     }
-    
+
     [Test]
     public void Test5Profile()
     {
         var rndSource = new Random(1);
-        
+
         List<IResource> resourcePool = new() { new CpuThreads(1, 2.5), new Server(150) };
         resourcePool.AddRange(Enumerable.Range(0, 1).Select(_ => new Designer()));
-        
+
         var pcbAlgFactories = new PcbAlgFactories(
             placingAlgFactory: PlacingAlgProviderFactory.Create(PlacingAlgProviderFactory.PlacingSequentialStr),
             wireRoutingAlgFactory: WireRoutingAlgProviderFactory.Create(
                 WireRoutingAlgProviderFactory.WireRoutingWaveStr));
-        
+
         var simuEventGenerator = new SimuEventGenerator(
             timeBetweenTechsDistr: new TechIntervalBuilderVm(new TimeSpan(0, 8, 0, 0), new TimeSpan(1, 30, 0),
                 rndSource).Build(),
@@ -250,72 +250,89 @@ public class Tests
             pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, rndSource).Build(),
             pcbElemsIsVarSizeProb: 1.0,
             random: rndSource);
-        
-        var simulator = new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories, timeTol: TimeSpan.FromDays(15));
+
+        var simulator = new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories,
+            timeTol: TimeSpan.FromDays(15));
         var simulationResult = simulator.Simulate(TimeSpan.FromDays(30));
-        
-        
+
+
         if (simulationResult.Values.Count < 1) return;
-        
+
         var productionTimesSec = simulationResult.Values;
-        
+
         var avgProductionTimeMilSec = productionTimesSec.Average(time => time.TotalMilliseconds);
         var avgProductionTime = TimeSpan.FromMilliseconds(avgProductionTimeMilSec);
         var devProductionTimeMilSec = Math.Sqrt(
             productionTimesSec.Sum(time => Math.Pow(time.TotalMilliseconds - avgProductionTimeMilSec, 2)) /
             productionTimesSec.Count);
         var devProductionTime = TimeSpan.FromMilliseconds(devProductionTimeMilSec);
-        
+
         var totalConfigCost = resourcePool.Sum(resource => resource.Cost);
-        
+
         var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost);
-        
+
         Console.WriteLine(costToTime);
         Console.WriteLine($"{avgProductionTime} | {avgProductionTime.Ticks}");
         Console.WriteLine($"{devProductionTime} | {devProductionTime.Ticks}");
         Console.WriteLine(totalConfigCost);
-        
+
         // Assert.AreEqual(0.02512688870583971, costToTime, Tol);
         // Assert.AreEqual(51234429275254, avgProductionTime.Ticks);
         // Assert.AreEqual(27233277143173, devProductionTime.Ticks);
         // Assert.AreEqual(100671.0, totalConfigCost, Tol);
     }
-    
+
     [Test]
     public void TestFuncWrapper()
     {
-        var simuSystemFuncWrapper = new SimuSystemFuncWrapper();
+        var random = new Random(1);
+
+        var simuEventGenerator = new SimuEventGenerator(
+            timeBetweenTechsDistr: new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0),
+                random).Build(),
+            pcbElemsCountDistr: new DblNormalDistributionBuilderVm(150, 15, random).Build(),
+            pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, random).Build(),
+            pcbElemsIsVarSizeProb: 0.8,
+            random: random);
+
+        var simuSystemFuncWrapper = new SimuSystemFuncWrapper(simuEventGenerator, TimeSpan.FromDays(30));
         var objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
-        
+
         var result = -1.0 * objectiveFunction(16, 2.5, 150, 0, 0, 1);
         Console.WriteLine(result);
-        
+
         Assert.AreEqual(0.14439743817354914, result, Tol);
     }
-    
-    
+
+
     [Test]
     public void TestAbcOptimization()
     {
-        var random = new Random();
-        
-        var simuSystemFuncWrapper = new SimuSystemFuncWrapper();
+        var random = new Random(1);
+
+        var simuEventGenerator = new SimuEventGenerator(
+            timeBetweenTechsDistr:
+            new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(2, 30, 0), random).Build(),
+            pcbElemsCountDistr: new DblNormalDistributionBuilderVm(150, 15, random).Build(),
+            pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, random).Build(),
+            pcbElemsIsVarSizeProb: 0.8,
+            random: random);
+
+        var simuSystemFuncWrapper = new SimuSystemFuncWrapper(simuEventGenerator, finalTime: TimeSpan.FromDays(30));
         var objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
-        
-        var algorithmParameters = new AlgorithmParameters()
+
+        var algorithmParameters = new AlgorithmSettings()
         {
-            PopulationSize = 50,
+            PopulationSize = 30,
             NumOfIterations = 200
         };
-        var abcAlgorithm = new AbcAlgorithm(algorithmParameters, random, objectiveFunction);
-        var result = abcAlgorithm.FindMinimum().ToList().LastOrDefault();
 
-        if (result is null)
-        {
-            Console.WriteLine("no res");
-            return;
-        }
-        
+        var abcAlgorithm = new AbcAlgorithm(algorithmParameters, random, objectiveFunction);
+        var resultList = abcAlgorithm.FindMinimum().ToList();
+        var result = abcAlgorithm.BestFoodSource;
+
+        if (resultList.Count == 0) Assert.Fail($"{nameof(resultList)} has no elements");
+
         Console.WriteLine(-1.0 * result.Cost);
         Console.WriteLine();
         Console.WriteLine(Math.Round(result.X1));
@@ -330,15 +347,17 @@ public class Tests
         // Console.WriteLine(result.X4);
         // Console.WriteLine(result.X5);
         // Console.WriteLine(result.X6);
+
+        Assert.AreEqual(0.43149588242867026, -1.0 * result.Cost, Tol);
     }
-    
+
     [Test]
     public void TestTimeSpanMultiplyAndClamp()
     {
         var time = TimeSpan.FromDays(5);
         Console.WriteLine(time.MultiplyAndClamp(Int64.MaxValue));
     }
-    
+
     [Test]
     public void TestTimeSpanAddAndClamp()
     {

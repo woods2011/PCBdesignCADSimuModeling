@@ -18,22 +18,19 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
         private readonly Random _random = new(1);
 
         private readonly SimuEventGenerator _simuEventGenerator;
-
         private readonly List<SimulationEvent> _preCalcEvent;
-        private readonly TimeSpan _finalTime = TimeSpan.FromDays(30);
-        private readonly TimeSpan? _timeTol = TimeSpan.FromDays(15);
 
-        public SimuSystemFuncWrapper()
+        private readonly TimeSpan _finalTime;
+        private readonly TimeSpan _timeTol;
+
+        public SimuSystemFuncWrapper(SimuEventGenerator simuEventGenerator, TimeSpan finalTime,
+            List<SimulationEvent>? preCalcEvent = null, TimeSpan? timeTol = null)
         {
-            _simuEventGenerator = new SimuEventGenerator(
-                timeBetweenTechsDistr: new TechIntervalBuilderVm(new TimeSpan(0, 12, 0, 0), new TimeSpan(6, 30, 0),
-                    _random).Build(),
-                pcbElemsCountDistr: new DblNormalDistributionBuilderVm(150, 15, _random).Build(),
-                pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, _random).Build(),
-                pcbElemsIsVarSizeProb: 0.8,
-                random: _random);
+            _simuEventGenerator = simuEventGenerator;
+            _finalTime = finalTime;
+            _timeTol = timeTol ?? TimeSpan.FromDays(15);
 
-            _preCalcEvent = _simuEventGenerator.GeneratePcbDesignTech(_finalTime);
+            _preCalcEvent = preCalcEvent ?? _simuEventGenerator.GeneratePcbDesignTech(_finalTime);
         }
 
         public double ObjectiveFunction(double x1, double x2, double x3, double x4, double x5, double x6)

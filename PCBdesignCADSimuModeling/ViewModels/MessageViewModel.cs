@@ -6,17 +6,12 @@ namespace PcbDesignCADSimuModeling.ViewModels
 {
     public class MessageViewModel : BaseViewModel
     {
-        public MessageViewModel()
-        {
-        }
-        
         public string Message { get; set; } = String.Empty;
 
         public bool HasMessage => !String.IsNullOrEmpty(Message);
 
-
-        public ICommand OkCommand => new ActionCommand(_ => Message = String.Empty);
-
+        public ICommand OkCommand => new ActionCommand(p => Message = String.Empty);
+        
 
         public override string Error => String.Empty;
         public override bool IsValid => true;

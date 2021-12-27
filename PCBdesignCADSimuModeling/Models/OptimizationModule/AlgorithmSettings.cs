@@ -2,7 +2,7 @@
 
 namespace PcbDesignCADSimuModeling.Models.OptimizationModule
 {
-    public class AlgorithmParameters : INotifyPropertyChanged
+    public class AlgorithmSettings : INotifyPropertyChanged
     {
         public IntervalsOfVariables SearchIntervals { get; set; } = new();
 
@@ -11,14 +11,12 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
 
         public double InitTemperature { get; set; } = 200;
 
-        public double MinimalTemperature { get; set; } = 1;
-
         public double Alpha { get; set; } = 1.0;
 
 
-        public AlgorithmParameters Copy()
+        public AlgorithmSettings Copy()
         {
-            var algorithmParameters = (AlgorithmParameters)MemberwiseClone();
+            var algorithmParameters = (AlgorithmSettings)MemberwiseClone();
             algorithmParameters.SearchIntervals = SearchIntervals.Copy();
             return algorithmParameters;
         }
@@ -28,14 +26,14 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
 
     public class IntervalsOfVariables : INotifyPropertyChanged
     {
-        public double X1Low { get; set; } = 1;
-        public double X1Up { get; set; } = 100;
+        public double ThreadsCountMin { get; set; } = 1;
+        public double ThreadsCountMax { get; set; } = 100;
 
-        public double X2Low { get; set; } = 1.2;
-        public double X2Up { get; set; } = 4.5;
+        public double FreqMin { get; set; } = 1.2;
+        public double FreqMax { get; set; } = 4.5;
 
-        public double X3Low { get; set; } = 25;
-        public double X3Up { get; set; } = 200;
+        public double ServerSpeedMin { get; set; } = 25;
+        public double ServerSpeedMax { get; set; } = 1000;
 
         public double X4Low { get; set; } = 0;
         public double X4Up { get; set; } = 1;
@@ -43,8 +41,8 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
         public double X5Low { get; set; } = 0;
         public double X5Up { get; set; } = 1;
 
-        public double X6Low { get; set; } = 1;
-        public double X6Up { get; set; } = 10;
+        public double DesignersCountMin { get; set; } = 1;
+        public double DesignersCountMax { get; set; } = 10;
 
         public IntervalsOfVariables Copy() => (IntervalsOfVariables)MemberwiseClone();
 
