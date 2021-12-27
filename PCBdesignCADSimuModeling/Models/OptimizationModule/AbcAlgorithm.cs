@@ -9,17 +9,17 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
     {
         private readonly Random _rnd;
 
-        private readonly Func<double, double, double, double, double, double, double> _objectiveFunction;
+        private readonly Func<int, double, double, int, int, int, double> _objectiveFunction;
         private readonly AlgorithmSettings _algSettings;
         private readonly IntervalsOfVariables _intervals;
-        private List<FoodSource> _foodSources = new();
+        private List<FoodSource> _foodSources;
         private double _curTemperature;
 
         public FoodSource BestFoodSource { get; private set; }
 
 
         public AbcAlgorithm(AlgorithmSettings algSettings, Random rnd,
-            Func<double, double, double, double, double, double, double> objectiveFunction)
+            Func<int, double, double, int, int, int, double> objectiveFunction)
         {
             _algSettings = algSettings;
             _intervals = _algSettings.SearchIntervals;
@@ -27,20 +27,20 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
             _objectiveFunction = objectiveFunction;
             _curTemperature = _algSettings.InitTemperature;
 
-            _foodSources = Enumerable.Range(0, _algSettings.PopulationSize)
+            _foodSources = Enumerable.Range(0, _algSettings.FoodSourceCount)
                 .Select(_ => GenerateNewFoodSource()).ToList();
 
-            BestFoodSource = _foodSources.MinBy(source => source.Cost).Copy();
+            BestFoodSource = _foodSources.MinBy(source => source.FuncValue).Copy();
         }
 
         private FoodSource GenerateNewFoodSource()
         {
-            var x1 = ContinuousUniform.Sample(_rnd, _intervals.ThreadsCountMin, _intervals.ThreadsCountMax);
-            var x2 = ContinuousUniform.Sample(_rnd, _intervals.FreqMin, _intervals.FreqMax);
+            var x1 = DiscreteUniform.Sample(_rnd, _intervals.ThreadsCountMin, _intervals.ThreadsCountMax);
+            var x2 = ContinuousUniform.Sample(_rnd, _intervals.ClockRateMin, _intervals.ClockRateMax);
             var x3 = ContinuousUniform.Sample(_rnd, _intervals.ServerSpeedMin, _intervals.ServerSpeedMax);
-            var x4 = ContinuousUniform.Sample(_rnd, _intervals.X4Low, _intervals.X4Up);
-            var x5 = ContinuousUniform.Sample(_rnd, _intervals.X5Low, _intervals.X5Up);
-            var x6 = ContinuousUniform.Sample(_rnd, _intervals.DesignersCountMin, _intervals.DesignersCountMax);
+            var x4 = _intervals.PlacingAlgsIndexes.FisherYatesShuffle(_rnd).First();
+            var x5 = _intervals.WireRoutingAlgsIndexes.FisherYatesShuffle(_rnd).First();
+            var x6 = DiscreteUniform.Sample(_rnd, _intervals.DesignersCountMin, _intervals.DesignersCountMax);
             return new FoodSource(x1, x2, x3, x4, x5, x6, _objectiveFunction);
         }
 
@@ -53,37 +53,40 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
                 //Поиск лучшего решения в окрестности текущего
                 _foodSources = SearchNeighborsFoodSources();
                 _foodSources.RemoveAll(source =>
-                    source.CurNumOfUses >= _algSettings.PopulationSize && source != BestFoodSource);
+                    source.NumberOfVisits >= _algSettings.FoodSourceCount && source != BestFoodSource);
 
                 //Генерируем скаутов, вместо источившихся источников еды
-                var scoutsBeesCount = _algSettings.PopulationSize - _foodSources.Count;
+                var scoutsBeesCount = _algSettings.FoodSourceCount - _foodSources.Count;
                 _foodSources.AddRange(Enumerable.Range(0, scoutsBeesCount).Select(_ => GenerateNewFoodSource()));
 
+                //var best = _foodSources.MinBy(chromosome => chromosome.FuncValue).Copy();
+                
                 //Селекция
                 var (ii, selectedWorkers, selectedCount) = (0, new List<FoodSource>(), 0);
-                while (selectedCount < _algSettings.PopulationSize)
+                while (selectedCount < _algSettings.FoodSourceCount)
                 {
                     var curWorker = _foodSources[ii];
                     var anotherWorker = _foodSources.FisherYatesShuffleExcept(curWorker, _rnd).First();
 
-                    if (curWorker.Cost <= anotherWorker.Cost ||
-                        Math.Exp(-Math.Abs(curWorker.Cost - anotherWorker.Cost) / _curTemperature) > _rnd.NextDouble())
+                    if (curWorker.FuncValue <= anotherWorker.FuncValue ||
+                        Math.Exp(-Math.Abs(curWorker.FuncValue - anotherWorker.FuncValue) / _curTemperature) >
+                        _rnd.NextDouble())
                     {
                         selectedWorkers.Add(curWorker);
                         selectedCount++;
                     }
 
-                    ii = (ii + 1) % _algSettings.PopulationSize;
+                    ii = (ii + 1) % _algSettings.FoodSourceCount;
                 }
 
                 _foodSources = selectedWorkers;
 
                 //Выбор лучшего и обновление температуры
-                var iterBest = _foodSources.MinBy(chromosome => chromosome.Cost).Copy();
-                if (iterBest.Cost < BestFoodSource.Cost) BestFoodSource = iterBest;
+                var iterBest = _foodSources.MinBy(chromosome => chromosome.FuncValue).Copy();
+                if (iterBest.FuncValue < BestFoodSource.FuncValue) BestFoodSource = iterBest;
                 yield return BestFoodSource.Copy();
 
-                _curTemperature = Math.Max(1e-4,
+                _curTemperature = Math.Max(1,
                     _algSettings.InitTemperature *
                     Math.Pow(1.0 - i / (double)_algSettings.NumOfIterations, _algSettings.Alpha));
             }
@@ -101,45 +104,40 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
                 switch (dim)
                 {
                     case 1:
-                        neighborFoodSource.X1 =
-                            Math.Clamp(
-                                curWorkerBee.X1 + (-1.0 + _rnd.NextDouble() * 2.0) *
-                                (curWorkerBee.X1 - neighborFoodSource.X1),
+                        neighborFoodSource.ThreadsCount =
+                            Math.Clamp((int)Math.Round(curWorkerBee.ThreadsCount +
+                                                       ContinuousUniform.Sample(_rnd, -1.0, 1.0) *
+                                                       (curWorkerBee.ThreadsCount - neighborFoodSource.ThreadsCount)),
                                 _intervals.ThreadsCountMin, _intervals.ThreadsCountMax);
                         break;
                     case 2:
-                        neighborFoodSource.X2 =
+                        neighborFoodSource.ClockRate =
                             Math.Clamp(
-                                curWorkerBee.X2 + (-1.0 + _rnd.NextDouble() * 2.0) *
-                                (curWorkerBee.X2 - neighborFoodSource.X2),
-                                _intervals.FreqMin, _intervals.FreqMax);
+                                curWorkerBee.ClockRate + (-1.0 + _rnd.NextDouble() * 2.0) *
+                                (curWorkerBee.ClockRate - neighborFoodSource.ClockRate),
+                                _intervals.ClockRateMin, _intervals.ClockRateMax);
                         break;
                     case 3:
-                        neighborFoodSource.X3 =
+                        neighborFoodSource.ServerSpeed =
                             Math.Clamp(
-                                curWorkerBee.X3 + (-1.0 + _rnd.NextDouble() * 2.0) *
-                                (curWorkerBee.X3 - neighborFoodSource.X3),
+                                curWorkerBee.ServerSpeed + (-1.0 + _rnd.NextDouble() * 2.0) *
+                                (curWorkerBee.ServerSpeed - neighborFoodSource.ServerSpeed),
                                 _intervals.ServerSpeedMin, _intervals.ServerSpeedMax);
                         break;
                     case 4:
-                        neighborFoodSource.X4 =
-                            Math.Clamp(
-                                curWorkerBee.X4 + (-1.0 + _rnd.NextDouble() * 2.0) *
-                                (curWorkerBee.X4 - neighborFoodSource.X4),
-                                _intervals.X4Low, _intervals.X4Up);
+                        neighborFoodSource.PlacingAlgIndex =
+                            _intervals.PlacingAlgsIndexes.FisherYatesShuffle(_rnd).First();
                         break;
                     case 5:
-                        neighborFoodSource.X5 =
-                            Math.Clamp(
-                                curWorkerBee.X5 + (-1.0 + _rnd.NextDouble() * 2.0) *
-                                (curWorkerBee.X5 - neighborFoodSource.X5),
-                                _intervals.X5Low, _intervals.X5Up);
+                        neighborFoodSource.WireRoutingAlgIndex =
+                            _intervals.WireRoutingAlgsIndexes.FisherYatesShuffle(_rnd).First();
                         break;
                     case 6:
-                        neighborFoodSource.X6 =
-                            Math.Clamp(
-                                curWorkerBee.X6 + (-1.0 + _rnd.NextDouble() * 2.0) *
-                                (curWorkerBee.X6 - neighborFoodSource.X6),
+                        neighborFoodSource.DesignersCount =
+                            Math.Clamp((int)Math.Round(curWorkerBee.DesignersCount +
+                                                       ContinuousUniform.Sample(_rnd, -1.0, 1.0) *
+                                                       (curWorkerBee.DesignersCount -
+                                                        neighborFoodSource.DesignersCount)),
                                 _intervals.DesignersCountMin, _intervals.DesignersCountMax);
                         break;
 
@@ -148,14 +146,14 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
 
                 neighborFoodSource.CalculateCost(_objectiveFunction);
 
-                if (neighborFoodSource.Cost >= curWorkerBee.Cost)
+                if (neighborFoodSource.FuncValue >= curWorkerBee.FuncValue)
                 {
-                    curWorkerBee.CurNumOfUses++;
+                    curWorkerBee.NumberOfVisits++;
                     result.Add(curWorkerBee);
                 }
                 else
                 {
-                    neighborFoodSource.CurNumOfUses = 0;
+                    neighborFoodSource.NumberOfVisits = 0;
                     result.Add(neighborFoodSource);
                 }
             }

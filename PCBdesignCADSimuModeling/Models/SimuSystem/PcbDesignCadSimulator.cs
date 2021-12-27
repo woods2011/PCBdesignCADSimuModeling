@@ -23,7 +23,7 @@ namespace PcbDesignCADSimuModeling.Models.SimuSystem
         private readonly ISimuEventGenerator _simuEventGenerator;
         private readonly List<PcbDesignTechnology> _activePcbDesignTechs = new();
         private readonly List<SimulationEvent> _simulationEvents = new();
-        private readonly Dictionary<PcbDesignTechnology, TimeSpan> _techStart = new(); // ToDo: remove
+        private readonly Dictionary<PcbDesignTechnology, TimeSpan> _techStart = new();
         private readonly Dictionary<PcbDesignTechnology, TimeSpan> _techDuration = new();
 
 

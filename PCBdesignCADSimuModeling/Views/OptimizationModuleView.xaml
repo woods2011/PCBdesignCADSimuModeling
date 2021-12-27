@@ -7,6 +7,7 @@
              xmlns:viewModels="clr-namespace:PcbDesignCADSimuModeling.ViewModels"
              xmlns:wpfTool="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
              xmlns:wpfsharp="clr-namespace:WpfSharp.Controls;assembly=WpfSharp.Controls"
+             xmlns:oxy="http://oxyplot.org/wpf"
              mc:Ignorable="d"
              d:DesignWidth="1580" d:DesignHeight="720"
              d:DataContext="{d:DesignInstance Type=viewModels:OptimizationModuleViewModel, IsDesignTimeCreatable=True}">
@@ -31,7 +32,7 @@
             <TextBlock Margin="0,0,0,5" FontSize="14" FontWeight="Bold" Text="ПАРАМЕТРЫ ОПТИМИЗАЦИИ" />
 
             <StackPanel Margin="0,0,0,5" Orientation="Vertical">
-                <Label Margin="-5,0,0,0" Content="Параметры алгоритма:" FontWeight="SemiBold" />
+                <Label Margin="-5,0,0,0" Content="Параметры алгоритма (колонии пчел):" FontWeight="SemiBold" />
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition />
@@ -47,16 +48,17 @@
                         <ColumnDefinition Width="75" />
                     </Grid.ColumnDefinitions>
 
+
+                    <Label Grid.Row="1" Grid.Column="0" Margin="0,0,0,5" Content="Число итераций:" />
+                    <wpfTool:IntegerUpDown Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"
+                                           Value="{Binding AlgSettings.FoodSourceCount}"
+                                           Increment="10" Minimum="4" Maximum="1000" />
+
                     <Label Grid.Row="0" Grid.Column="0" Margin="0,0,0,5"
                            Content="Число источников пищи:" />
                     <wpfTool:IntegerUpDown Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
-                                           Value="{Binding AlgSettings.PopulationSize}"
-                                           Increment="5" Minimum="2" Maximum="1000" />
-                    
-                    <Label Grid.Row="1" Grid.Column="0" Margin="0,0,0,5" Content="Число итераций:" />
-                    <wpfTool:IntegerUpDown Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"
                                            Value="{Binding AlgSettings.NumOfIterations}"
-                                           Increment="10" Minimum="4" Maximum="10000" />
+                                           Increment="5" Minimum="5" Maximum="1000" />
 
                     <Label Grid.Row="3" Grid.Column="0" Margin="0,0,0,5"
                            Content="Начальная температура:" />
@@ -101,15 +103,15 @@
                         <WrapPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="Мин:" />
-                                <wpfTool:DoubleUpDown Value="{Binding AlgSettings.SearchIntervals.FreqMin}"
+                                <wpfTool:DoubleUpDown Value="{Binding AlgSettings.SearchIntervals.ClockRateMin}"
                                                       Minimum="1.2"
-                                                      Maximum="{Binding AlgSettings.SearchIntervals.FreqMax}"
+                                                      Maximum="{Binding AlgSettings.SearchIntervals.ClockRateMax}"
                                                       ClipValueToMinMax="True" Increment="0.25" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="Макс:" />
-                                <wpfTool:DoubleUpDown Value="{Binding AlgSettings.SearchIntervals.FreqMax}"
-                                                      Minimum="{Binding AlgSettings.SearchIntervals.FreqMin}"
+                                <wpfTool:DoubleUpDown Value="{Binding AlgSettings.SearchIntervals.ClockRateMax}"
+                                                      Minimum="{Binding AlgSettings.SearchIntervals.ClockRateMin}"
                                                       Maximum="4.5"
                                                       ClipValueToMinMax="True" Increment="0.25" />
                             </StackPanel>
@@ -123,13 +125,15 @@
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Мин:" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.ServerSpeedMin}"
-                                                   Minimum="25" Maximum="{Binding AlgSettings.SearchIntervals.ServerSpeedMax}"
+                                                   Minimum="25"
+                                                   Maximum="{Binding AlgSettings.SearchIntervals.ServerSpeedMax}"
                                                    ClipValueToMinMax="True" Increment="25" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Макс:" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.ServerSpeedMax}"
-                                                   Minimum="{Binding AlgSettings.SearchIntervals.ServerSpeedMin}" Maximum="500"
+                                                   Minimum="{Binding AlgSettings.SearchIntervals.ServerSpeedMin}"
+                                                   Maximum="1000"
                                                    ClipValueToMinMax="True" Increment="25" />
                         </StackPanel>
                     </WrapPanel>
@@ -162,14 +166,16 @@
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Мин:" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.DesignersCountMin}"
-                                                   Minimum="1" Maximum="{Binding AlgSettings.SearchIntervals.DesignersCountMax}"
+                                                   Minimum="1"
+                                                   Maximum="{Binding AlgSettings.SearchIntervals.DesignersCountMax}"
                                                    ClipValueToMinMax="True"
                                                    Increment="1" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Макс:" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.DesignersCountMax}"
-                                                   Minimum="{Binding AlgSettings.SearchIntervals.DesignersCountMin}" Maximum="10"
+                                                   Minimum="{Binding AlgSettings.SearchIntervals.DesignersCountMin}"
+                                                   Maximum="10"
                                                    ClipValueToMinMax="True"
                                                    Increment="1" />
                         </StackPanel>
@@ -321,7 +327,7 @@
             </StackPanel>
 
             <StackPanel>
-                <DockPanel Margin="0,20,0,10">
+                <DockPanel Margin="0,10,0,20">
                     <TextBlock Margin="0,0,5,0" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"
                                TextAlignment="Center"
                                Text="Время моделирования:" />
@@ -331,7 +337,7 @@
                 <Button VerticalAlignment="Bottom" Width="auto"
                         HorizontalAlignment="Stretch" FontSize="14" Padding="5"
                         Command="{Binding BeginOptimizationCommand, UpdateSourceTrigger=PropertyChanged}"
-                        Content="Начать Моделирование" />
+                        Content="Поиск оптимальной конфигурации" />
             </StackPanel>
         </StackPanel>
 
@@ -339,58 +345,42 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Margin="0,0,0,5"
-                       FontSize="14" FontWeight="Bold" Text="РЕЗУЛЬТАТЫ ОПТИМИЗАЦИИ" />
+            <TextBlock Grid.Row="0" Margin="0,0,0,5" FontSize="14" FontWeight="Bold" Text="РЕЗУЛЬТАТЫ ОПТИМИЗАЦИИ" />
 
-            <WrapPanel Grid.Row="1" Margin="0,3">
-                <TextBlock Text="Оценка выбранной конфигурации САПР:" FontWeight="Bold" VerticalAlignment="Center" />
-                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2"
-                         Text="{Binding LastSimulationResult.CostToTime, FallbackValue=...}" />
-            </WrapPanel>
+            <StackPanel Grid.Row="1">
+                <Label Content="Лучшая конфигурация САПР:" FontWeight="Bold" />
+                <!-- <StackPanel Margin="0,0,0,3" Orientation="Horizontal"> -->
+                <!--     <TextBlock Text="Оценка выбранной конфигурации САПР:" FontWeight="DemiBold" -->
+                <!--                VerticalAlignment="Center" /> -->
+                <!--     <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" -->
+                <!--              Text="{Binding LastResult.FuncValue, FallbackValue=...}" /> -->
+                <!-- </StackPanel> -->
+                <TextBox IsReadOnly="True" VerticalAlignment="Center" HorizontalAlignment="Left"
+                         Text="{Binding LastResult, FallbackValue=..., Mode=OneWay}" />
+            </StackPanel>
 
-            <WrapPanel Grid.Row="2" Margin="0,3">
-                <TextBlock Text="Суммарная стоимость выбранной конфигурации САПР:" FontWeight="SemiBold"
-                           VerticalAlignment="Center" />
-                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2"
-                         Text="{Binding LastSimulationResult.TotalCost, FallbackValue=...}" />
-            </WrapPanel>
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
+                <oxy:PlotView Grid.Row="0" Margin="0,10,0,5" Model="{Binding PlotModel}" Width="auto" Height="auto">
+                </oxy:PlotView>
 
-            <WrapPanel Grid.Row="3" Margin="0,3">
-                <TextBlock Text="Среднее время проектирование одной Печатной Платы:" FontWeight="SemiBold"
-                           VerticalAlignment="Center" />
-                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2"
-                         Text="{Binding LastSimulationResult.AverageProductionTime, StringFormat={}{0:dd}.{0:hh}:{0:mm}:{0:ss}, FallbackValue=...}" />
-            </WrapPanel>
+                <Border Grid.Row="1" BorderThickness="2" BorderBrush="LightGray">
+                    <StackPanel Orientation="Vertical" Margin="15,0,5,0">
+                        <Label Content="Ход работы алгоритма:" FontWeight="Bold" FontSize="14" />
+                        <ScrollViewer MaxHeight="150">
+                            <TextBlock Text="{Binding AlgTextLog}" />
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
 
-            <WrapPanel Grid.Row="4" Margin="0,3">
-                <TextBlock Text="СКО от времени проектирования одной Печатной Платы:"
-                           VerticalAlignment="Center" />
-                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2"
-                         Text="{Binding LastSimulationResult.DevProductionTime, StringFormat={}{0:dd}.{0:hh}:{0:mm}:{0:ss}, FallbackValue=...}" />
-            </WrapPanel>
-
-            <WrapPanel Grid.Row="5" Margin="0,10,0,5">
-                <TextBlock Text="Поиск:" FontWeight="DemiBold" VerticalAlignment="Center" />
-                <TextBox Margin="5,0,0,0" MinWidth="150" Padding="2"
-                         Text="{Binding LastSimulationResultLogSearch, UpdateSourceTrigger=LostFocus}" />
-            </WrapPanel>
-
-            <ScrollViewer Grid.Row="6" Margin="0,5"
-                          CanContentScroll="True" HorizontalScrollBarVisibility="Visible"
-                          VerticalScrollBarVisibility="Visible">
-                <wpfsharp:SearchableTextBlock
-                    Background="White"
-                    HighlightableText="{Binding LastSimulationResultLog}"
-                    SearchWords="{Binding LastSimulationResultLogSearchTransformed, Converter={StaticResource ResourceKey=StringToWordsConverter}}" />
-            </ScrollViewer>
+            </Grid>
         </Grid>
 
         <Grid Grid.Row="1" IsSharedSizeScope="True" Grid.Column="0" Grid.ColumnSpan="3">
@@ -414,7 +404,7 @@
 
                     <Button Grid.Column="3" VerticalAlignment="Stretch" Width="auto"
                             FontSize="14"
-                            Command="{Binding SaveSimuResult, UpdateSourceTrigger=PropertyChanged}"
+                            Command="{Binding SaveLastOptimizationResultCommand}"
                             Content="Сохранить результат моделирования" />
                 </Grid>
                 <Grid Margin="5">
@@ -436,7 +426,7 @@
 
                     <Button Grid.Column="3" VerticalAlignment="Stretch" Width="auto"
                             FontSize="14"
-                            Command="{Binding SaveLastSimuLog, UpdateSourceTrigger=PropertyChanged}"
+                            Command="{Binding SaveLastOptimizationLogCommand}"
                             Content="Сохранить подробный лог" />
                 </Grid>
             </StackPanel>

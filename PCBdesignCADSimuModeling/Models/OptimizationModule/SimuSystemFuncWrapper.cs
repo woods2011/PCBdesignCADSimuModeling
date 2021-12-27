@@ -21,46 +21,42 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
         private readonly List<SimulationEvent> _preCalcEvent;
 
         private readonly TimeSpan _finalTime;
+        private readonly int _minFinishedTechs;
         private readonly TimeSpan _timeTol;
 
-        public SimuSystemFuncWrapper(SimuEventGenerator simuEventGenerator, TimeSpan finalTime,
+        public SimuSystemFuncWrapper(SimuEventGenerator simuEventGenerator, TimeSpan finalTime, int minFinishedTechs,
             List<SimulationEvent>? preCalcEvent = null, TimeSpan? timeTol = null)
         {
             _simuEventGenerator = simuEventGenerator;
             _finalTime = finalTime;
-            _timeTol = timeTol ?? TimeSpan.FromDays(15);
+            _minFinishedTechs = minFinishedTechs;
+            _timeTol = timeTol ?? finalTime * 0.15;
 
             _preCalcEvent = preCalcEvent ?? _simuEventGenerator.GeneratePcbDesignTech(_finalTime);
         }
 
-        public double ObjectiveFunction(double x1, double x2, double x3, double x4, double x5, double x6)
+        public double ObjectiveFunction(int threadsCount, double clockRate, double serverSpeed, int placingAlgIndex,
+            int wireRoutingAlgIndex, int designersCount)
         {
-            var threadsCount = (int)Math.Round(x1);
-            var clockRate = x2;
-            var internetSpeed = (int)Math.Round(x3);
-            var placingAlgIndex = (int)Math.Round(x4);
-            var wireRoutingAlgIndex = (int)Math.Round(x5);
-            var designersCount = (int)Math.Round(x6);
-
             var pcbAlgFactories = new PcbAlgFactories(
                 placingAlgFactory: PlacingAlgProviderFactory.Create(
                     placingAlgIndex switch
                     {
                         0 => PlacingAlgProviderFactory.PlacingSequentialStr,
                         1 => PlacingAlgProviderFactory.PlacingPartitioningStr,
-                        _ => throw new ArgumentOutOfRangeException($"{nameof(placingAlgIndex)} | {nameof(x5)}")
+                        _ => throw new ArgumentOutOfRangeException($"{nameof(placingAlgIndex)} | {nameof(placingAlgIndex)}")
                     }),
                 wireRoutingAlgFactory: WireRoutingAlgProviderFactory.Create(
                     wireRoutingAlgIndex switch
                     {
                         0 => WireRoutingAlgProviderFactory.WireRoutingWaveStr,
                         1 => WireRoutingAlgProviderFactory.WireRoutingChannelStr,
-                        _ => throw new ArgumentOutOfRangeException($"{nameof(wireRoutingAlgIndex)} | {nameof(x6)}")
+                        _ => throw new ArgumentOutOfRangeException($"{nameof(wireRoutingAlgIndex)} | {nameof(wireRoutingAlgIndex)}")
                     })
             );
 
             var resourcePool = new List<IResource>
-                { new CpuThreads(threadsCount, clockRate), new Server(internetSpeed) };
+                { new CpuThreads(threadsCount, clockRate), new Server(serverSpeed) };
             resourcePool.AddRange(Enumerable.Range(0, designersCount).Select(_ => new Designer()));
 
 
@@ -68,7 +64,7 @@ namespace PcbDesignCADSimuModeling.Models.OptimizationModule
                 new PcbDesignCadSimulator(_simuEventGenerator, resourcePool, pcbAlgFactories, timeTol: _timeTol);
             var simulationResult = simulator.SimulateOptimized1(_finalTime, _preCalcEvent);
 
-            if (simulationResult.Values.Count < 1) return Double.MaxValue;
+            if (simulationResult.Values.Count <= _minFinishedTechs) return Double.MaxValue;
 
 
             var productionTimesSec = simulationResult.Values;

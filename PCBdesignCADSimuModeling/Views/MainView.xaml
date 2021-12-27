@@ -23,10 +23,12 @@
         </Grid.RowDefinitions>
 
 
-        <Menu Grid.Row="0" Background="#FFD0E3F6" Margin="5,0,5,5" FontSize="14">
-            <MenuItem Background="#FFB9D7F3" Header="Имитационное моделирование" BorderBrush="Gray"
+        <Menu Grid.Row="0" Background="#FFD0E3F6" Margin="10,10,10,5" FontSize="14">
+            <MenuItem Padding="7" Margin="0,0,2,0" Background="#FFB9D7F3" Header="Имитационное моделирование" BorderBrush="Gray"
+                      BorderThickness="2" FontWeight="DemiBold"
                       Command="{Binding UpdateViewCommand}" CommandParameter="SimuSystem" />
-            <MenuItem Background="#FFB9D7F3" Header="Модуль оптимизации" BorderBrush="Gray"
+            <MenuItem Padding="7" Background="#FFB9D7F3" Header="Модуль оптимизации" BorderBrush="Gray"
+                      BorderThickness="2" FontWeight="DemiBold"
                       Command="{Binding UpdateViewCommand}" CommandParameter="OptimizationModule" />
         </Menu>
 

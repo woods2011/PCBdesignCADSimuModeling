@@ -7,12 +7,17 @@ namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgori
     public static class WireRoutingAlgProviderFactory
     {
         private static readonly Dictionary<string, Func<IWireRoutingAlgFactory>> Map = new();
-
-        
+  
         static WireRoutingAlgProviderFactory()
         {
             Map[WireRoutingWaveStr] = () => new WireRoutingAlgFactory(WireRoutingOneThreadAlgorithm.WireRoutingWave);
             Map[WireRoutingChannelStr] = () => new WireRoutingAlgFactory(WireRoutingMultiThreadAlgorithm.WireRoutingChannel);
+
+            AlgNameIndexMap[WireRoutingWaveStr] = 0;
+            AlgIndexNameMap[0] = WireRoutingWaveStr;
+            
+            AlgNameIndexMap[WireRoutingChannelStr] = 1;
+            AlgIndexNameMap[1] = WireRoutingChannelStr;
         }
 
         
@@ -26,11 +31,14 @@ namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgori
         private static Func<IWireRoutingAlgFactory> GetCreator(string wireRoutingAlgName)
         {
             Map.TryGetValue(wireRoutingAlgName, out var creator);
-            return creator;
+            return creator ?? throw new InvalidOperationException(nameof(wireRoutingAlgName));
         }
-        
-        
-        public static string WireRoutingWaveStr = "Волновой метод";
-        public static string WireRoutingChannelStr = "Канальный (параллельный)";
+    
+
+        public const string WireRoutingWaveStr = "Волновой метод";
+        public const string WireRoutingChannelStr = "Канальная (параллельная)";
+            
+        public static readonly Dictionary<string, int> AlgNameIndexMap = new();
+        public static readonly Dictionary<int, string> AlgIndexNameMap = new();
     }
 }

@@ -90,7 +90,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,5,5"
                                FontSize="12" VerticalAlignment="Center" Text="Скорость (Мбит/с):" />
-                    <wpfTool:IntegerUpDown Grid.Column="1" Margin="0,0,0,5"
+                    <wpfTool:DoubleUpDown Grid.Column="1" Margin="0,0,0,5"
                                            HorizontalAlignment="Left"
                                            MinWidth="50"
                                            Minimum="25" Maximum="2000" Increment="25"

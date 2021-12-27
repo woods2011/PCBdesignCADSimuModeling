@@ -71,10 +71,10 @@ public class Tests
         Console.WriteLine($"{devProductionTime} | {devProductionTime.Ticks}");
         Console.WriteLine(totalConfigCost);
 
-        Assert.AreEqual(0.12020492411155898, costToTime, Tol);
-        Assert.AreEqual(6710351134732, avgProductionTime.Ticks);
-        Assert.AreEqual(1462291470957, devProductionTime.Ticks);
-        Assert.AreEqual(160671.0, totalConfigCost, Tol);
+        Assert.AreEqual(0.07388813617651108, costToTime, Tol);
+        Assert.AreEqual(10968138862302, avgProductionTime.Ticks);
+        Assert.AreEqual(2263543331178, devProductionTime.Ticks);
+        Assert.AreEqual(159918.0, totalConfigCost, Tol);
     }
 
     [Test]
@@ -122,10 +122,10 @@ public class Tests
         Console.WriteLine($"{devProductionTime} | {devProductionTime.Ticks}");
         Console.WriteLine(totalConfigCost);
 
-        Assert.AreEqual(0.14439743817354914, costToTime, Tol);
-        Assert.AreEqual(8915406108239, avgProductionTime.Ticks);
-        Assert.AreEqual(1254596905072, devProductionTime.Ticks);
-        Assert.AreEqual(100671.0, totalConfigCost, Tol);
+        Assert.AreEqual(0.09572926510257336, costToTime, Tol);
+        Assert.AreEqual(13549290185773, avgProductionTime.Ticks);
+        Assert.AreEqual(2650890720744, devProductionTime.Ticks);
+        Assert.AreEqual(99918.0, totalConfigCost, Tol);
     }
 
     [Test]
@@ -173,10 +173,10 @@ public class Tests
         Console.WriteLine($"{devProductionTime} | {devProductionTime.Ticks}");
         Console.WriteLine(totalConfigCost);
 
-        Assert.AreEqual(0.02512688870583971, costToTime, Tol);
-        Assert.AreEqual(51234429275254, avgProductionTime.Ticks);
-        Assert.AreEqual(27233277143173, devProductionTime.Ticks);
-        Assert.AreEqual(100671.0, totalConfigCost, Tol);
+        Assert.AreEqual(0.02089286768013731, costToTime, Tol);
+        Assert.AreEqual(62081644894476, avgProductionTime.Ticks);
+        Assert.AreEqual(31901818217638, devProductionTime.Ticks);
+        Assert.AreEqual(99918.0, totalConfigCost, Tol);
     }
 
     [Test]
@@ -224,10 +224,10 @@ public class Tests
         Console.WriteLine($"{devProductionTime} | {devProductionTime.Ticks}");
         Console.WriteLine(totalConfigCost);
 
-        Assert.AreEqual(0.0005923184795413121, costToTime, Tol);
-        Assert.AreEqual(3205596723380230, avgProductionTime.Ticks);
-        Assert.AreEqual(473566999976137, devProductionTime.Ticks);
-        Assert.AreEqual(68256.0, totalConfigCost, Tol);
+        Assert.AreEqual(0.000260382923574954, costToTime, Tol);
+        Assert.AreEqual( 7373427735196400, avgProductionTime.Ticks);
+        Assert.AreEqual(732277861977545, devProductionTime.Ticks);
+        Assert.AreEqual(67503.0, totalConfigCost, Tol);
     }
 
     [Test]
@@ -276,10 +276,10 @@ public class Tests
         Console.WriteLine($"{devProductionTime} | {devProductionTime.Ticks}");
         Console.WriteLine(totalConfigCost);
 
-        // Assert.AreEqual(0.02512688870583971, costToTime, Tol);
-        // Assert.AreEqual(51234429275254, avgProductionTime.Ticks);
-        // Assert.AreEqual(27233277143173, devProductionTime.Ticks);
-        // Assert.AreEqual(100671.0, totalConfigCost, Tol);
+        Assert.AreEqual(0.02512688870583971, costToTime, Tol);
+        Assert.AreEqual(51234429275254, avgProductionTime.Ticks);
+        Assert.AreEqual(27233277143173, devProductionTime.Ticks);
+        Assert.AreEqual(100671.0, totalConfigCost, Tol);
     }
 
     [Test]
@@ -287,21 +287,26 @@ public class Tests
     {
         var random = new Random(1);
 
+        var techIntervalDistr =
+            new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0), random);
+
         var simuEventGenerator = new SimuEventGenerator(
-            timeBetweenTechsDistr: new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0),
-                random).Build(),
+            timeBetweenTechsDistr: techIntervalDistr.Build(),
             pcbElemsCountDistr: new DblNormalDistributionBuilderVm(150, 15, random).Build(),
             pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, random).Build(),
             pcbElemsIsVarSizeProb: 0.8,
             random: random);
 
-        var simuSystemFuncWrapper = new SimuSystemFuncWrapper(simuEventGenerator, TimeSpan.FromDays(30));
+        var finalTime = TimeSpan.FromDays(30);
+        var minFinishedTechs = (int)Math.Round(finalTime / techIntervalDistr.Mean * 0.5);
+
+        var simuSystemFuncWrapper = new SimuSystemFuncWrapper(simuEventGenerator, finalTime, minFinishedTechs);
         var objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
 
         var result = -1.0 * objectiveFunction(16, 2.5, 150, 0, 0, 1);
         Console.WriteLine(result);
 
-        Assert.AreEqual(0.14439743817354914, result, Tol);
+        Assert.AreEqual(0.10498959186073112, result, Tol);
     }
 
 
@@ -310,21 +315,26 @@ public class Tests
     {
         var random = new Random(1);
 
+        var techIntervalDistr = new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0), random);
+        
         var simuEventGenerator = new SimuEventGenerator(
             timeBetweenTechsDistr:
-            new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(2, 30, 0), random).Build(),
+            techIntervalDistr.Build(),
             pcbElemsCountDistr: new DblNormalDistributionBuilderVm(150, 15, random).Build(),
             pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, random).Build(),
             pcbElemsIsVarSizeProb: 0.8,
             random: random);
 
-        var simuSystemFuncWrapper = new SimuSystemFuncWrapper(simuEventGenerator, finalTime: TimeSpan.FromDays(30));
+        var finalTime = TimeSpan.FromDays(30);
+        var minFinishedTechs = (int)Math.Round(finalTime / techIntervalDistr.Mean * 0.5);
+        
+        var simuSystemFuncWrapper = new SimuSystemFuncWrapper(simuEventGenerator, finalTime, minFinishedTechs);
         var objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
 
         var algorithmParameters = new AlgorithmSettings()
         {
-            PopulationSize = 30,
-            NumOfIterations = 200
+            FoodSourceCount = 100,
+            NumOfIterations = 400
         };
 
         var abcAlgorithm = new AbcAlgorithm(algorithmParameters, random, objectiveFunction);
@@ -333,22 +343,10 @@ public class Tests
 
         if (resultList.Count == 0) Assert.Fail($"{nameof(resultList)} has no elements");
 
-        Console.WriteLine(-1.0 * result.Cost);
-        Console.WriteLine();
-        Console.WriteLine(Math.Round(result.X1));
-        Console.WriteLine(result.X2);
-        Console.WriteLine(Math.Round(result.X3));
-        Console.WriteLine(Math.Round(result.X4));
-        Console.WriteLine(Math.Round(result.X5));
-        Console.WriteLine(Math.Round(result.X6));
-        // Console.WriteLine(result.X1);
-        // Console.WriteLine(result.X2);
-        // Console.WriteLine(result.X3);
-        // Console.WriteLine(result.X4);
-        // Console.WriteLine(result.X5);
-        // Console.WriteLine(result.X6);
+        result.FuncValue *= -1.0;
+        Console.WriteLine(result);
 
-        Assert.AreEqual(0.43149588242867026, -1.0 * result.Cost, Tol);
+        Assert.AreEqual(0.15519400985236761, result.FuncValue, Tol);
     }
 
     [Test]

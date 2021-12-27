@@ -19,9 +19,9 @@ namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgori
                 pcbParams.ElementsCount * pcbParams.ElementsCount / Math.Log2(pcbParams.ElementsCount) /
                 Math.Sqrt(Math.Log2(pcbParams.ElementsCount)) * 2.25 * Math.Sqrt(2)
                 * (Math.Exp(1.0 / (1.0 - (Math.Pow(pcbParams.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811)
-                * (pcbParams.IsVariousSize ? 2.2 : 1)
-                * 60 * 2.0),
-            maxThreadUtilization: 16,
+                * (pcbParams.IsVariousSize ? 2.0 : 1.0)
+                * 150 * 2.0 * 1.25),
+            maxThreadUtilization: 12,
             parallelismRatio: 0.8
         );
     }
@@ -37,8 +37,8 @@ namespace PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgori
                 pcbParams.ElementsCount * Math.Log2(pcbParams.ElementsCount) * Math.Log2(pcbParams.ElementsCount) /
                 4.0 *
                 (Math.Exp(1.0 / (1.0 - (Math.Pow(pcbParams.DimensionUsagePercent, 1.1) - 0.3))) / 2.15811) *
-                (pcbParams.IsVariousSize ? 2.0 : 1.0)
-                * 60 * 2.0)
+                (pcbParams.IsVariousSize ? 1.4 : 1.0)
+                * 150 * 2.0)
         );
     }
 }

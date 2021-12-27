@@ -30,7 +30,7 @@ namespace Benchmark
         private Server _server = new(150);
         private int _designersCount = 2;
         private readonly TimeSpan? _timeTol = TimeSpan.FromDays(15);
-        private Func<double, double, double, double, double, double, double> _objectiveFunction;
+        private Func<int, double, double, int, int, int, double> _objectiveFunction;
 
         public BenchTest()
         {
@@ -40,16 +40,19 @@ namespace Benchmark
                 PlacingAlgProviderFactory.Create(PlacingAlgProviderFactory.PlacingSequentialStr),
                 WireRoutingAlgProviderFactory.Create(WireRoutingAlgProviderFactory.WireRoutingWaveStr));
 
+            var techIntervalDistr = new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0),
+                _random);
             _simuEventGenerator = new SimuEventGenerator(
-                timeBetweenTechsDistr: new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0),
-                    _random).Build(),
+                timeBetweenTechsDistr: techIntervalDistr.Build(),
                 pcbElemsCountDistr: new DblNormalDistributionBuilderVm(150, 15, _random).Build(),
                 pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, _random).Build(),
                 pcbElemsIsVarSizeProb: 0.8,
                 random: _random);
             _preCalcEvent = _simuEventGenerator.GeneratePcbDesignTech(_finalTime);
+            
+            var minFinishedTechs = (int)Math.Round(_finalTime / techIntervalDistr.Mean * 0.5);
 
-            var simuSystemFuncWrapper = new SimuSystemFuncWrapper(_simuEventGenerator, _finalTime, _preCalcEvent);
+            var simuSystemFuncWrapper = new SimuSystemFuncWrapper(_simuEventGenerator, _finalTime, minFinishedTechs, _preCalcEvent);
             _objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
         }
 

@@ -2,55 +2,67 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
+using PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
 
 namespace PcbDesignCADSimuModeling.Models.OptimizationModule
 {
-    public class FoodSource : IComparable<FoodSource>
+    public class FoodSource
     {
-        public double X1 { get; set; }
-        public double X2 { get; set; }
+        public int ThreadsCount { get; set; }
+        public double ClockRate { get; set; }
 
-        public double X3 { get; set; }
+        public double ServerSpeed { get; set; }
 
-        public double X4 { get; set; }
+        [JsonIgnore]
+        public int PlacingAlgIndex { get; set; }
 
-        public double X5 { get; set; }
+        [JsonIgnore]
+        public int WireRoutingAlgIndex { get; set; }
 
-        public double X6 { get; set; }
+        public int DesignersCount { get; set; }
 
-        public FoodSource(double x1, double x2, double x3, double x4, double x5, double x6)
+        public FoodSource(int threadsCount, double clockRate, double serverSpeed, int placingAlgIndex,
+            int wireRoutingAlgIndex, int designersCount)
         {
-            X1 = x1;
-            X2 = x2;
-            X3 = x3;
-            X4 = x4;
-            X5 = x5;
-            X6 = x6;
+            ThreadsCount = threadsCount;
+            ClockRate = clockRate;
+            ServerSpeed = serverSpeed;
+            PlacingAlgIndex = placingAlgIndex;
+            WireRoutingAlgIndex = wireRoutingAlgIndex;
+            DesignersCount = designersCount;
         }
 
-        [JsonProperty("Function Value")]
-        public double Cost { get; set; }
+        public double FuncValue { get; set; }
 
-        public int CurNumOfUses { get; set; }
+        public int NumberOfVisits { get; set; } = 0;
 
-        public FoodSource(double x1, double x2, double x3, double x4, double x5, double x6,
-            Func<double, double, double, double, double, double, double> objectiveFunction)
-            : this(x1, x2, x3, x4, x5, x6) => Cost = objectiveFunction(x1, x2, x3, x4, x5, x6);
+        public FoodSource(int threadsCount, double clockRate, double serverSpeed,
+            int placingAlgIndex, int wireRoutingAlgIndex, int designersCount,
+            Func<int, double, double, int, int, int, double> objectiveFunction)
+            : this(threadsCount, clockRate, serverSpeed, placingAlgIndex, wireRoutingAlgIndex, designersCount) =>
+            FuncValue = objectiveFunction(threadsCount, clockRate, serverSpeed, placingAlgIndex, wireRoutingAlgIndex,
+                designersCount);
 
-        public void CalculateCost(Func<double, double, double, double, double, double, double> objectiveFunction) =>
-            Cost = objectiveFunction(X1, X2, X3, X4, X5, X6);
-
-
-        public int CompareTo(FoodSource? otherBacteria)
-        {
-            if (otherBacteria == null) throw new ArgumentNullException(nameof(otherBacteria));
-
-            if (Cost > otherBacteria.Cost) return 1;
-            if (Cost < otherBacteria.Cost) return -1;
-            return 0;
-        }
+        public void CalculateCost(Func<int, double, double, int, int, int, double> objectiveFunction) =>
+            FuncValue = objectiveFunction(ThreadsCount, ClockRate, ServerSpeed, PlacingAlgIndex, WireRoutingAlgIndex,
+                DesignersCount);
 
         public FoodSource Copy() => (FoodSource)MemberwiseClone();
+
+        public override string ToString()
+        {
+            return $"Оценка: {FuncValue}{Environment.NewLine}" +
+                   $"Конфигурация:{Environment.NewLine}" +
+                   $"   Потоков: {ThreadsCount} ; Частота: {ClockRate}{Environment.NewLine}" +
+                   $"   Скорость сервера: {ServerSpeed}{Environment.NewLine}" +
+                   $"   Размещение: {PlacingAlgProviderFactory.AlgIndexNameMap[PlacingAlgIndex]} ; Трассировка: {WireRoutingAlgProviderFactory.AlgIndexNameMap[WireRoutingAlgIndex]}{Environment.NewLine}" +
+                   $"   Количество проектировщиков: {DesignersCount}{Environment.NewLine}";
+        }
+
+
+        public string PlacingAlgStr => PlacingAlgProviderFactory.AlgIndexNameMap[PlacingAlgIndex];
+        public string WireRoutingAlgStr => WireRoutingAlgProviderFactory.AlgIndexNameMap[WireRoutingAlgIndex];
     }
 
 

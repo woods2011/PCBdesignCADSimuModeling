@@ -41,12 +41,12 @@ namespace PcbDesignCADSimuModeling.ViewModels
         public IReadOnlyList<string> PlacingAlgStrList { get; } = new List<string>
             { PlacingAlgProviderFactory.PlacingSequentialStr, PlacingAlgProviderFactory.PlacingPartitioningStr };
 
-        public List<string> SelectedPlacingAlgStrList { get; set; } = new();
+        public List<string> SelectedPlacingAlgStrList { get; set; }
 
         public IReadOnlyList<string> WireRoutingAlgStrList { get; } = new List<string>
             { WireRoutingAlgProviderFactory.WireRoutingWaveStr, WireRoutingAlgProviderFactory.WireRoutingChannelStr };
 
-        public List<string> SelectedWireRoutingAlgStrList { get; set; } = new();
+        public List<string> SelectedWireRoutingAlgStrList { get; set; }
 
 
         public TechIntervalBuilderVm TechIntervalDistr { get; }
@@ -58,6 +58,9 @@ namespace PcbDesignCADSimuModeling.ViewModels
 
         public OptimizationModuleViewModel(Random? rndSource = null)
         {
+            SelectedPlacingAlgStrList = PlacingAlgStrList.ToList();
+            SelectedWireRoutingAlgStrList = WireRoutingAlgStrList.ToList();
+
             _rndSource = rndSource ?? new Random(1);
             _savedAlgSettings = AlgSettings.Copy();
 
@@ -73,7 +76,8 @@ namespace PcbDesignCADSimuModeling.ViewModels
 
 
         public ICommand BeginOptimizationCommand =>
-            new ActionCommand(_ => BeginOptimizationHandler());
+            new ActionCommand(_ => BeginOptimizationHandler(),
+                _ => SelectedPlacingAlgStrList.Count >= 1 && SelectedWireRoutingAlgStrList.Count >= 1);
 
         public ICommand SaveLastOptimizationResultCommand => new ActionCommand(_ => SaveLastOptimizationResultHandler(),
             _ => LastResult is not null);
@@ -86,6 +90,10 @@ namespace PcbDesignCADSimuModeling.ViewModels
         {
             try
             {
+                AlgSettings.SearchIntervals.PlacingAlgsIndexes = SelectedPlacingAlgStrList
+                    .Select(str => PlacingAlgProviderFactory.AlgNameIndexMap[str]).ToArray();
+                AlgSettings.SearchIntervals.WireRoutingAlgsIndexes = SelectedWireRoutingAlgStrList
+                    .Select(str => WireRoutingAlgProviderFactory.AlgNameIndexMap[str]).ToArray();
                 _savedAlgSettings = AlgSettings.Copy();
 
                 var simuEventGenerator = new SimuEventGenerator(
@@ -95,8 +103,10 @@ namespace PcbDesignCADSimuModeling.ViewModels
                     pcbElemsIsVarSizeProb: VariousSizePctProb,
                     random: _rndSource);
 
-                var simuSystemFuncWrapper = new SimuSystemFuncWrapper(simuEventGenerator, FinalTime);
-                Func<double, double, double, double, double, double, double> objectiveFunction =
+                var minFinishedTechs = (int)Math.Round(FinalTime / TechIntervalDistr.Mean * 0.8);
+
+                var simuSystemFuncWrapper = new SimuSystemFuncWrapper(simuEventGenerator, FinalTime, minFinishedTechs);
+                Func<int, double, double, int, int, int, double> objectiveFunction =
                     simuSystemFuncWrapper.ObjectiveFunction;
 
                 var abcAlgorithm = new AbcAlgorithm(_savedAlgSettings, _rndSource, objectiveFunction);
@@ -104,11 +114,13 @@ namespace PcbDesignCADSimuModeling.ViewModels
                 _lastResultLog = abcAlgorithm.FindMinimum().Select(foodSource =>
                 {
                     var source = foodSource.Copy();
-                    source.Cost *= -1.0;
+                    source.FuncValue *= -1.0;
                     return source;
                 }).ToList();
-                LastResult = abcAlgorithm.BestFoodSource.Copy(); // ToDo: check
-                LastResult.Cost *= -1.0;
+                var lastResult = abcAlgorithm.BestFoodSource.Copy();
+                lastResult.FuncValue *= -1.0; // ToDo: fix
+                LastResult = lastResult;
+
                 // LastResult = _lastResultLog.LastOrDefault();
 
                 DrawLog();
@@ -125,24 +137,17 @@ namespace PcbDesignCADSimuModeling.ViewModels
             if (LastResult is null) return;
             if (_lastResultLog is null) return;
 
-            var tempLastResult = LastResult.Copy();
-            tempLastResult.Cost *= -1.0;
-            var tempLastResultLog = _lastResultLog.Select(foodSource =>
-            {
-                var source = foodSource.Copy();
-                source.Cost *= -1.0;
-                return source;
-            }).ToList();
 
             PlotModel = new PlotModel { Title = "Значение Функции / Итерация" };
             PlotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Итерация" });
-            if (LastResult.Cost >= -1e-20)
+            if (LastResult.FuncValue >= -1e-20)
                 PlotModel.Axes.Add(new LogarithmicAxis { Position = AxisPosition.Left, Title = "Значение Функции" });
             else
                 PlotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Значение Функции" });
 
             var lineSeries = new LineSeries { Color = OxyColors.Blue, MarkerType = MarkerType.Cross };
-            lineSeries.Points.AddRange(_lastResultLog.Select((foodSource, i) => new DataPoint(i, foodSource.Cost)));
+            lineSeries.Points.AddRange(_lastResultLog.Select((foodSource, i) =>
+                new DataPoint(i, foodSource.FuncValue)));
 
             PlotModel.Series.Add(lineSeries);
             PlotModel.InvalidatePlot(true);
@@ -153,15 +158,16 @@ namespace PcbDesignCADSimuModeling.ViewModels
             if (_lastResultLog is null) return;
 
             var (curIter, stringBuilder, divider) =
-                (0, new StringBuilder(), Math.Max(1, Math.Ceiling(_lastResultLog.Count / 500.0)));
+                (0, new StringBuilder(), Math.Max(1, Math.Ceiling(_lastResultLog.Count / 300.0)));
 
-            foreach (var iterBestBacteria in _lastResultLog)
+            foreach (var curIterFoodSource in _lastResultLog)
             {
                 if (curIter % divider == 0 || curIter == _lastResultLog.Count - 1)
                     stringBuilder.Append(
-                        $"Итерация {curIter}: Лучший результат: {iterBestBacteria.Cost} в точке:" +
-                        $"({iterBestBacteria.X1} ; {iterBestBacteria.X2} ; {iterBestBacteria.X3} ; {iterBestBacteria.X4} ; {iterBestBacteria.X5} ; {iterBestBacteria.X6})" +
-                        $"{Environment.NewLine}"
+                        $">>>Итерация {curIter}:{Environment.NewLine}{curIterFoodSource}{Environment.NewLine}"
+                        // $"Итерация {curIter}: Лучший результат: {iterBestBacteria.FuncValue} в точке:" +
+                        // $"({iterBestBacteria.ThreadsCount} ; {iterBestBacteria.ClockRate} ; {iterBestBacteria.ServerSpeed} ; {iterBestBacteria.PlacingAlgIndex} ; {iterBestBacteria.WireRoutingAlgIndex} ; {iterBestBacteria.DesignersCount})" +
+                        // $"{Environment.NewLine}"
                     );
 
                 curIter++;
@@ -177,7 +183,7 @@ namespace PcbDesignCADSimuModeling.ViewModels
 
             var serializedResult = JsonConvert.SerializeObject(
                 new { SaveTime = DateTime.Now, AlgorithmInput = _savedAlgSettings, OptimizationResult = LastResult },
-                Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
+                Formatting.Indented);
 
             try
             {
@@ -207,7 +213,7 @@ namespace PcbDesignCADSimuModeling.ViewModels
                             }),
                     OptimizationResult = LastResult
                 },
-                Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
+                Formatting.Indented);
 
             try
             {
