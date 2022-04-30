@@ -6,5 +6,5 @@ public abstract class SharedResource : IResource
 
     public abstract void FreeResource(int requestId);
     public abstract IResource Clone();
-    public abstract double Cost { get; }
+    public abstract decimal Cost { get; }
 }

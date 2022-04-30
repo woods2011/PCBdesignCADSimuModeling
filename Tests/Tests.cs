@@ -63,7 +63,7 @@ public class Tests
             productionTimesSec.Count);
         var devProductionTime = TimeSpan.FromMilliseconds(devProductionTimeMilSec);
 
-        var totalConfigCost = resourcePool.Sum(resource => resource.Cost);
+        var totalConfigCost = (double) resourcePool.Sum(resource => resource.Cost);
 
         var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost);
 
@@ -114,7 +114,7 @@ public class Tests
             productionTimesSec.Count);
         var devProductionTime = TimeSpan.FromMilliseconds(devProductionTimeMilSec);
 
-        var totalConfigCost = resourcePool.Sum(resource => resource.Cost);
+        var totalConfigCost = (double) resourcePool.Sum(resource => resource.Cost);
 
         var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost);
 
@@ -165,7 +165,7 @@ public class Tests
             productionTimesSec.Count);
         var devProductionTime = TimeSpan.FromMilliseconds(devProductionTimeMilSec);
 
-        var totalConfigCost = resourcePool.Sum(resource => resource.Cost);
+        var totalConfigCost = (double) resourcePool.Sum(resource => resource.Cost);
 
         var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost);
 
@@ -216,7 +216,7 @@ public class Tests
             productionTimesSec.Count);
         var devProductionTime = TimeSpan.FromMilliseconds(devProductionTimeMilSec);
 
-        var totalConfigCost = resourcePool.Sum(resource => resource.Cost);
+        var totalConfigCost = (double) resourcePool.Sum(resource => resource.Cost);
 
         var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost);
 
@@ -268,7 +268,7 @@ public class Tests
             productionTimesSec.Count);
         var devProductionTime = TimeSpan.FromMilliseconds(devProductionTimeMilSec);
 
-        var totalConfigCost = resourcePool.Sum(resource => resource.Cost);
+        var totalConfigCost = (double) resourcePool.Sum(resource => resource.Cost);
 
         var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost);
 

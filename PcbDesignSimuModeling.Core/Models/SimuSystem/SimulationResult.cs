@@ -43,7 +43,7 @@ public class SimulationResult
     public TimeSpan? DevProductionTime { get; set; }        
         
     [JsonProperty("Результат моделирования: Стоимость конфигурации")]
-    public double? TotalCost { get; set; }
+    public decimal? TotalCost { get; set; }
         
     [JsonProperty("Результат моделирования: Оценка по критериям производоительность и стоимость")]
     public double? CostToTime { get; set; }

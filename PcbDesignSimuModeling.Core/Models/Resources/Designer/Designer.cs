@@ -23,7 +23,7 @@ public class Designer : UndividedResource, INotifyPropertyChanged
 
     public override IResource Clone() => new Designer();
 
-    public override double Cost => 60000;
+    public override decimal Cost => 60000;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 }

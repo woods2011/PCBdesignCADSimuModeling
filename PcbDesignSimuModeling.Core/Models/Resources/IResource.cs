@@ -10,7 +10,7 @@ public interface IResource
     public IResource Clone();
         
     [JsonIgnore]
-    public double Cost { get; }
+    public decimal Cost { get; }
 }
 
 public interface IPotentialFailureResource

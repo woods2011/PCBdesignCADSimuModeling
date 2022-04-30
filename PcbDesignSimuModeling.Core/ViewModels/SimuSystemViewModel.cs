@@ -125,7 +125,7 @@ public class SimuSystemViewModel : BaseViewModel
                 // CostToTime = 0.4 * totalConfigCost / Math.Sqrt(totalConfigCost * totalConfigCost + avgProductionTime.Hours * avgProductionTime.Hours) + 
                 //              0.6 * avgProductionTime.Hours / Math.Sqrt(totalConfigCost * totalConfigCost + avgProductionTime.Hours * avgProductionTime.Hours)
                 //CostToTime = ((0.6 + 0.4 / (1.0 + totalConfigCost)) * (0.4 + 0.6 / (1 + Math.Pow(Math.Max(0, avgProductionTime.TotalDays - 9.0), 1))) - 0.6 * 0.4) / (1 - 0.6 * 0.4)
-                CostToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost)
+                CostToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * (double) totalConfigCost)
             };
         }
         catch (Exception e) when (!Debugger.IsAttached)

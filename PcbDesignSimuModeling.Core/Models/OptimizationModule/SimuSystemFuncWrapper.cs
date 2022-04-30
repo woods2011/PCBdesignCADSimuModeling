@@ -71,7 +71,7 @@ public class SimuSystemFuncWrapper
 
         var totalConfigCost = resourcePool.Sum(resource => resource.Cost);
 
-        var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost);
+        var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * (double) totalConfigCost);
 
         return -1.0 * costToTime;
     }

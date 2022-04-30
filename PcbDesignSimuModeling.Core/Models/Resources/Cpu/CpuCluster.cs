@@ -31,7 +31,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
     public double ClockRate { get; set; }
 
 
-    public bool TryGetResource(int procId, int reqThreadCount, double avgOneThreadUtil = 1.0)
+    public bool TryGetResource(int requestId, int reqThreadCount, double avgOneThreadUtil = 1.0)
     {
         var threadsList = new List<CpuThread>();
 
@@ -40,11 +40,11 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
             var unloadedCore = _cpuCores.FirstOrDefault(core => core.ActiveTasks == 0);
             var optimalThread = unloadedCore?.Threads.Th0 ?? _threadPool.MinBy(thread => thread.RealTaskCount)!;
 
-            optimalThread.UtilizationByProcessList.Add(new ThreadUtilizationByProcess(procId, avgOneThreadUtil));
+            optimalThread.UtilizationByProcessList.Add(new ThreadUtilizationByProcess(requestId, avgOneThreadUtil));
             threadsList.Add(optimalThread);
         }
 
-        _processIdAndThreads.Add(procId, threadsList);
+        _processIdAndThreads.Add(requestId, threadsList);
         BalanceRes();
         return true;
     }
@@ -117,7 +117,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
 
     public override IResource Clone() => new CpuCluster(this.ThreadCount, this.ClockRate);
 
-    public override double Cost => Math.Round(
+    public override decimal Cost => (decimal) Math.Round(
         (Math.Exp(ClockRate / 5.0) * 1.0 / ThreadCount +
          Math.Exp(ClockRate / 3.0) * (ThreadCount - 1.0) / ThreadCount) *
         Math.Pow(ThreadCount, 0.87)
