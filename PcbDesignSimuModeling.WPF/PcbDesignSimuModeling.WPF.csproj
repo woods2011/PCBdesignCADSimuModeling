@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <UseWPF>true</UseWPF>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Extended.Wpf.Toolkit" Version="4.1.0" />
+      <PackageReference Include="OxyPlot.Wpf" Version="2.1.0" />
+      <PackageReference Include="WpfSharp.Controls" Version="1.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PcbDesignSimuModeling.Core\PcbDesignSimuModeling.Core.csproj" />
+    </ItemGroup>
+
+</Project>
