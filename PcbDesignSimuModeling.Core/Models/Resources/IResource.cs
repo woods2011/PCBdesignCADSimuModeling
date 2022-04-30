@@ -4,8 +4,8 @@ namespace PcbDesignSimuModeling.Core.Models.Resources;
 
 public interface IResource
 {
-    public double ResValueForProc(int procId);
-    public void FreeResource(int procId);
+    public double ResValueForProc(int requestId);
+    public void FreeResource(int requestId);
         
     public IResource Clone();
         

@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.Diagnostics;
+using System.Windows.Input;
 using Newtonsoft.Json;
 using PcbDesignSimuModeling.Core.Commands;
 using PcbDesignSimuModeling.Core.Models.Loggers;
@@ -124,7 +125,7 @@ public class SimuSystemViewModel : BaseViewModel
                 CostToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * totalConfigCost)
             };
         }
-        catch (Exception e)
+        catch (Exception e) when (!Debugger.IsAttached)
         {
             MessageViewModel.Message = e.Message;
         }

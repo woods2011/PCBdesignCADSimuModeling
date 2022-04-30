@@ -5,9 +5,9 @@ namespace PcbDesignSimuModeling.Core.Models.Resources;
 public abstract class UndividedResource : IResource
 {
     protected int? UtilizingProcId;
-    public abstract double ResValueForProc(int procId);
+    public abstract double ResValueForProc(int requestId);
 
-    public abstract void FreeResource(int procId);
+    public abstract void FreeResource(int requestId);
 
     public abstract IResource Clone();
     public abstract double Cost { get; }
@@ -28,9 +28,9 @@ public class Designer : UndividedResource, INotifyPropertyChanged
         return true;
     }
 
-    public override double ResValueForProc(int _) => 1.0;
+    public override double ResValueForProc(int requestId) => 1.0;
 
-    public override void FreeResource(int procId) => UtilizingProcId = null;
+    public override void FreeResource(int requestId) => UtilizingProcId = null;
 
 
     public override IResource Clone() => new Designer();

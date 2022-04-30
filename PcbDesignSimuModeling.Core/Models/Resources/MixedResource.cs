@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using System.ComponentModel;
+using MathNet.Numerics.LinearAlgebra.Double.Solvers;
 
 namespace PcbDesignSimuModeling.Core.Models.Resources;
 
 public abstract class MixedResource : IResource
 {
     protected virtual List<int> UtilizingProcIds { get; } = new();
-    public abstract double ResValueForProc(int procId);
-    public abstract void FreeResource(int procId);
+    public abstract double ResValueForProc(int requestId);
+    public abstract void FreeResource(int requestId);
     public abstract IResource Clone();
     public abstract double Cost { get; }
 }
@@ -107,7 +108,13 @@ public class ThreadUtilizationList : IList<ThreadUtilizationByProcess>
     public void RecalculateUtilization()
     {
         var taskCount = ActiveTasks;
-        if (taskCount < 1) return;
+        if (taskCount < 1)
+        {
+            RealTaskCount = 0.0;
+            IdlePercent = 1.0;
+            return;
+        }
+
         _listImplementation.ForEach(utilization => utilization.CurUtil = 1.0 / taskCount);
 
         var shift = 0;
@@ -191,10 +198,10 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
     {
         ThreadCount = threadCount;
         ClockRate = clockRate;
-        _hyperThreadingPenalty = hyperThreadingPenalty;
+        _hyperThreadingPenalty = 1;
         _contextSwitchPenalty = contextSwitchPenalty;
 
-        _cpuCores = Enumerable.Repeat(new CpuCore(), threadCount / 2).ToArray();
+        _cpuCores = Enumerable.Range(0, ThreadCount / 2).Select(_ => new CpuCore()).ToArray();
         _threadPool = _cpuCores.SelectMany(core => new[] {core.Threads.Th0, core.Threads.Th1}).ToArray();
     }
 
@@ -203,7 +210,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
     public double ClockRate { get; set; }
 
 
-    public bool TryGetResource(int procId, int reqThreadCount, double maxOneThreadUtil = 1.0)
+    public bool TryGetResource(int procId, int reqThreadCount, double avgOneThreadUtil = 1.0)
     {
         var threadsList = new List<CpuThread>();
 
@@ -212,11 +219,12 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
             var unloadedCore = _cpuCores.FirstOrDefault(core => core.ActiveTasks == 0);
             var optimalThread = unloadedCore?.Threads.Th0 ?? _threadPool.MinBy(thread => thread.RealTaskCount)!;
 
-            optimalThread.UtilizationByProcessList.Add(new ThreadUtilizationByProcess(procId, maxOneThreadUtil));
+            optimalThread.UtilizationByProcessList.Add(new ThreadUtilizationByProcess(procId, avgOneThreadUtil));
             threadsList.Add(optimalThread);
         }
 
-        _processIdAndThreads.Add(procId, threadsList.ToList());
+        _processIdAndThreads.Add(procId, threadsList);
+        BalanceRes();
         return true;
     }
 
@@ -233,7 +241,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
 
             threadSummaryUsageByTheProcess *=
                 1.0 - Math.Max(0.0, _contextSwitchPenalty * (thread.ActiveTasks - 1) - thread.IdlePercent);
-
+            
             if (thread.IsInHyperThreadingMode)
                 threadSummaryUsageByTheProcess *=
                     thread.CpuCore.IdlePercent * _hyperThreadingPenalty + (1.0 - thread.CpuCore.IdlePercent);
@@ -241,28 +249,29 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
             threadSum += threadSummaryUsageByTheProcess;
         }
 
-        return threadSum * 1.0;
-        return threadSum * ClockRate; // ToDo
+        return threadSum * ClockRate;
     }
 
-    public override void FreeResource(int procId)
+    public override void FreeResource(int requestId)
     {
-        var threadsList = _processIdAndThreads[procId];
+        var threadsList = _processIdAndThreads[requestId].Distinct();
 
         foreach (var thread in threadsList)
-            thread.UtilizationByProcessList.RemoveAll(utilization => utilization.ProcessId == procId);
-        _processIdAndThreads.Remove(procId);
+            thread.UtilizationByProcessList.RemoveAll(utilization => utilization.ProcessId == requestId);
+        _processIdAndThreads.Remove(requestId);
 
         BalanceRes();
     }
 
 
-    public virtual void BalanceRes()
+    protected virtual void BalanceRes()
     {
-        (CpuThread Thread, double TaskCount) maxLoadThread = _threadPool.MaxByAndKey(thread => thread.RealTaskCount);
-        (CpuThread Thread, double TaskCount) minLoadThread = _threadPool.MinByAndKey(thread => thread.RealTaskCount);
-        var deltaLoad = (maxLoadThread.TaskCount - minLoadThread.TaskCount) / 2.0;
-        //var realDeltaLoad = maxLoad.TaskCount - minLoad.TaskCount - 1;
+        (CpuThread Thread, double RealTaskCount)
+            maxLoadThread = _threadPool.MaxByAndKey(thread => thread.RealTaskCount);
+        (CpuThread Thread, double RealTaskCount)
+            minLoadThread = _threadPool.MinByAndKey(thread => thread.RealTaskCount);
+        var deltaLoad = (maxLoadThread.RealTaskCount - minLoadThread.RealTaskCount) / 2.0;
+        if (deltaLoad < 1e-12) return;
 
         while (deltaLoad - 1e-12 > maxLoadThread.Thread.UtilizationByProcessList.First().MaxUtil / 2.0)
         {
@@ -280,10 +289,8 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
 
             maxLoadThread = _threadPool.MaxByAndKey(thread => thread.RealTaskCount);
             minLoadThread = _threadPool.MinByAndKey(thread => thread.RealTaskCount);
-            deltaLoad = (maxLoadThread.TaskCount - minLoadThread.TaskCount) / 2.0;
+            deltaLoad = (maxLoadThread.RealTaskCount - minLoadThread.RealTaskCount) / 2.0;
         }
-        
-        
     }
 
 

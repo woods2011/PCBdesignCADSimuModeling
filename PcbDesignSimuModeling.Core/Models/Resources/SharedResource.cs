@@ -5,9 +5,9 @@ namespace PcbDesignSimuModeling.Core.Models.Resources;
 
 public abstract class SharedResource : IResource
 {
-    public abstract double ResValueForProc(int procId);
+    public abstract double ResValueForProc(int requestId);
 
-    public abstract void FreeResource(int procId);
+    public abstract void FreeResource(int requestId);
     public abstract IResource Clone();
     public abstract double Cost { get; }
 }
@@ -26,9 +26,9 @@ public class Server : SharedResource, INotifyPropertyChanged
 
     public bool TryGetResource(int _) => true;
 
-    public override double ResValueForProc(int procId) => ResValueConvolution(this);
+    public override double ResValueForProc(int requestId) => ResValueConvolution(this);
 
-    public override void FreeResource(int _) {}
+    public override void FreeResource(int requestId) {}
 
 
     public override IResource Clone() => new Server(InternetSpeed) {ResValueConvolution = ResValueConvolution};
