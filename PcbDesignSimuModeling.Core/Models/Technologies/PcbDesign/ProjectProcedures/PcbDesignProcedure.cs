@@ -1,5 +1,4 @@
 ﻿using PcbDesignSimuModeling.Core.Models.Resources;
-using PcbDesignSimuModeling.Core.Models.Resources.ResourceRequests;
 
 namespace PcbDesignSimuModeling.Core.Models.Technologies.PcbDesign.ProjectProcedures;
 

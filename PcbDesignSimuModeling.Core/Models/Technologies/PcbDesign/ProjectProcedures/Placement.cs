@@ -1,6 +1,6 @@
 ﻿using PcbDesignSimuModeling.Core.Models.Resources;
 using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.PlacingAlgorithms;
-using PcbDesignSimuModeling.Core.Models.Resources.ResourceRequests;
+using PcbDesignSimuModeling.Core.Models.Resources.Cpu;
 
 namespace PcbDesignSimuModeling.Core.Models.Technologies.PcbDesign.ProjectProcedures;
 
@@ -41,7 +41,7 @@ public class Placement : PcbDesignProcedure
     private List<IResourceRequest> GetResourceRequestList() => new()
     {
         //RequiredResources.Add(new DesignerRequest(ProcedureId));
-        new CpuThreadRequest(ProcId, _placingAlg.MaxThreadUtilization),
+        new CpuRequest(ProcId, _placingAlg.MaxThreadUtilization),
     };
 
     public override string Name => "Размещение";

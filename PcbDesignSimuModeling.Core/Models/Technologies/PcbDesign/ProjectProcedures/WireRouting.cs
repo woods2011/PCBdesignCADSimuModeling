@@ -1,6 +1,6 @@
 ﻿using PcbDesignSimuModeling.Core.Models.Resources;
 using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.WireRoutingAlgorithms;
-using PcbDesignSimuModeling.Core.Models.Resources.ResourceRequests;
+using PcbDesignSimuModeling.Core.Models.Resources.Cpu;
 
 namespace PcbDesignSimuModeling.Core.Models.Technologies.PcbDesign.ProjectProcedures;
 
@@ -40,7 +40,7 @@ public class WireRouting : PcbDesignProcedure
     private List<IResourceRequest> GetResourceRequestList() => new()
     {
         //RequiredResources.Add(new DesignerRequest(ProcedureId));
-        new CpuThreadRequest(ProcId, _wireRoutingAlg.MaxThreadUtilization),
+        new CpuRequest(ProcId, _wireRoutingAlg.MaxThreadUtilization),
     };
 
     public override string Name => "Трассировка";

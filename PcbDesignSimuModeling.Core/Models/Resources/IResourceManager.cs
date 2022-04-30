@@ -1,6 +1,12 @@
-﻿using PcbDesignSimuModeling.Core.Models.Resources.ResourceRequests;
+﻿namespace PcbDesignSimuModeling.Core.Models.Resources;
 
-namespace PcbDesignSimuModeling.Core.Models.Resources;
+public interface IResourceManager
+{
+    bool TryGetResources(int procId, List<IResourceRequest> resourceRequests,
+        out List<IResource> receivedResources);
+
+    void FreeResources(int procId, List<IResource> resources);
+}
 
 public class ResourceManager : IResourceManager
 {
@@ -19,7 +25,7 @@ public class ResourceManager : IResourceManager
         var receivedResources = new List<IResource>();
         var tempPool = _resourcePool.ToList();
         var poolIsTemped = false;
-            
+
         foreach (var resourceRequest in resourceRequests)
         {
             if (!resourceRequest.TryGetResource(tempPool, out var receivedResource))
@@ -28,30 +34,21 @@ public class ResourceManager : IResourceManager
                 receivedResourcesOut = new List<IResource>();
                 return false;
             }
-            
+
             if (!poolIsTemped)
             {
                 tempPool = _resourcePool.ToList();
                 poolIsTemped = true;
             }
-                
+
             tempPool.Remove(receivedResource!);
             receivedResources.Add(receivedResource!);
         }
-            
+
         receivedResourcesOut = receivedResources;
         return true;
     }
 
     public void FreeResources(int procId, List<IResource> resources) =>
         resources.ForEach(resource => resource.FreeResource(procId));
-}
-
-
-public interface IResourceManager
-{
-    bool TryGetResources(int procId, List<IResourceRequest> resourceRequests,
-        out List<IResource> receivedResources);
-
-    void FreeResources(int procId, List<IResource> resources);
 }

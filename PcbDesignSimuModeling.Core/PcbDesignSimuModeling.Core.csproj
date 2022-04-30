@@ -19,4 +19,8 @@
       <PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Models\Resources\Ram" />
+    </ItemGroup>
+
 </Project>
