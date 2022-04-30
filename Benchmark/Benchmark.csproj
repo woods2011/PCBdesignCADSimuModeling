@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling.csproj" />
+      <ProjectReference Include="..\PcbDesignSimuModeling.Core\PcbDesignSimuModeling.Core.csproj" />
     </ItemGroup>
 
 </Project>

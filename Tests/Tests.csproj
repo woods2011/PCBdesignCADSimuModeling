@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
 
         <IsPackable>false</IsPackable>
@@ -15,7 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PCBdesignCADSimuModeling\PCBdesignCADSimuModeling.csproj" />
+      <ProjectReference Include="..\PcbDesignSimuModeling.Core\PcbDesignSimuModeling.Core.csproj" />
     </ItemGroup>
 
 </Project>

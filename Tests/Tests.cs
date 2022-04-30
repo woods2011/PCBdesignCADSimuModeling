@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
-using PcbDesignCADSimuModeling.Models;
-using PcbDesignCADSimuModeling.Models.Loggers;
-using PcbDesignCADSimuModeling.Models.OptimizationModule;
-using PcbDesignCADSimuModeling.Models.Resources;
-using PcbDesignCADSimuModeling.Models.Resources.Algorithms;
-using PcbDesignCADSimuModeling.Models.Resources.Algorithms.PlacingAlgorithms;
-using PcbDesignCADSimuModeling.Models.Resources.Algorithms.WireRoutingAlgorithms;
-using PcbDesignCADSimuModeling.Models.SimuSystem;
-using PcbDesignCADSimuModeling.Models.SimuSystem.SimulationEvents;
-using PcbDesignCADSimuModeling.Models.Technologies.PcbDesign;
-using PcbDesignCADSimuModeling.ViewModels;
+using PcbDesignSimuModeling.Core.Models;
+using PcbDesignSimuModeling.Core.Models.OptimizationModule;
+using PcbDesignSimuModeling.Core.Models.Resources;
+using PcbDesignSimuModeling.Core.Models.Resources.Algorithms;
+using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.PlacingAlgorithms;
+using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.WireRoutingAlgorithms;
+using PcbDesignSimuModeling.Core.Models.SimuSystem;
+using PcbDesignSimuModeling.Core.Models.SimuSystem.SimulationEvents;
+using PcbDesignSimuModeling.Core.ViewModels;
 
 namespace Tests;
 
@@ -31,7 +29,7 @@ public class Tests
     {
         var rndSource = new Random(1);
 
-        List<IResource> resourcePool = new() { new CpuThreads(16, 2.5), new Server(150) };
+        List<IResource> resourcePool = new() { new CpuCluster(16, 2.5), new Server(150) };
         resourcePool.AddRange(Enumerable.Range(0, 2).Select(_ => new Designer()));
 
         var pcbAlgFactories = new PcbAlgFactories(
@@ -47,7 +45,7 @@ public class Tests
             pcbElemsIsVarSizeProb: 0.8,
             random: rndSource);
 
-        var simulator = new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
+        var simulator = new PcbDesignSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
         var simulationResult = simulator.Simulate(TimeSpan.FromDays(30));
 
 
@@ -82,7 +80,7 @@ public class Tests
     {
         var rndSource = new Random(1);
 
-        List<IResource> resourcePool = new() { new CpuThreads(16, 2.5), new Server(150) };
+        List<IResource> resourcePool = new() { new CpuCluster(16, 2.5), new Server(150) };
         resourcePool.AddRange(Enumerable.Range(0, 1).Select(_ => new Designer()));
 
         var pcbAlgFactories = new PcbAlgFactories(
@@ -98,7 +96,7 @@ public class Tests
             pcbElemsIsVarSizeProb: 0.8,
             random: rndSource);
 
-        var simulator = new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
+        var simulator = new PcbDesignSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
         var simulationResult = simulator.Simulate(TimeSpan.FromDays(30));
 
 
@@ -133,7 +131,7 @@ public class Tests
     {
         var rndSource = new Random(1);
 
-        List<IResource> resourcePool = new() { new CpuThreads(16, 2.5), new Server(150) };
+        List<IResource> resourcePool = new() { new CpuCluster(16, 2.5), new Server(150) };
         resourcePool.AddRange(Enumerable.Range(0, 1).Select(_ => new Designer()));
 
         var pcbAlgFactories = new PcbAlgFactories(
@@ -149,7 +147,7 @@ public class Tests
             pcbElemsIsVarSizeProb: 0.8,
             random: rndSource);
 
-        var simulator = new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
+        var simulator = new PcbDesignSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
         var simulationResult = simulator.Simulate(TimeSpan.FromDays(30));
 
 
@@ -184,7 +182,7 @@ public class Tests
     {
         var rndSource = new Random(1);
 
-        List<IResource> resourcePool = new() { new CpuThreads(2, 2.5), new Server(150) };
+        List<IResource> resourcePool = new() { new CpuCluster(2, 2.5), new Server(150) };
         resourcePool.AddRange(Enumerable.Range(0, 1).Select(_ => new Designer()));
 
         var pcbAlgFactories = new PcbAlgFactories(
@@ -200,7 +198,7 @@ public class Tests
             pcbElemsIsVarSizeProb: 0.8,
             random: rndSource);
 
-        var simulator = new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
+        var simulator = new PcbDesignSimulator(simuEventGenerator, resourcePool, pcbAlgFactories);
         var simulationResult = simulator.Simulate(TimeSpan.FromDays(30));
 
 
@@ -235,7 +233,7 @@ public class Tests
     {
         var rndSource = new Random(1);
 
-        List<IResource> resourcePool = new() { new CpuThreads(1, 2.5), new Server(150) };
+        List<IResource> resourcePool = new() { new CpuCluster(1, 2.5), new Server(150) };
         resourcePool.AddRange(Enumerable.Range(0, 1).Select(_ => new Designer()));
 
         var pcbAlgFactories = new PcbAlgFactories(
@@ -251,7 +249,7 @@ public class Tests
             pcbElemsIsVarSizeProb: 1.0,
             random: rndSource);
 
-        var simulator = new PcbDesignCadSimulator(simuEventGenerator, resourcePool, pcbAlgFactories,
+        var simulator = new PcbDesignSimulator(simuEventGenerator, resourcePool, pcbAlgFactories,
             timeTol: TimeSpan.FromDays(15));
         var simulationResult = simulator.Simulate(TimeSpan.FromDays(30));
 
