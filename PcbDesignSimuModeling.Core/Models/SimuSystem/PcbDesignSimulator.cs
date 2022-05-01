@@ -19,7 +19,6 @@ public class PcbDesignSimulator
     private readonly Dictionary<PcbDesignTechnology, TimeSpan> _techStart = new();
     private readonly Dictionary<PcbDesignTechnology, TimeSpan> _techDuration = new();
 
-
     public PcbDesignSimulator(ISimuEventGenerator simuEventGenerator, List<IResource> recoursePool,
         IPcbAlgFactories pcbAlgFactories, ISimpleLogger? logger = null, TimeSpan? timeTol = null)
     {
@@ -75,9 +74,13 @@ public class PcbDesignSimulator
             //Estimate time until procedure finish and generate event if its closest
             if (_activePcbDesignTechs.Count <= 0) continue;
 
-            var (closestFinishTechs, closestTechEndTime) = _activePcbDesignTechs
-                .Where(technology => !technology.IsWaitForResources)
-                .MinsByAndKey(technology => technology.EstimateEndTime());
+            var technologiesWithResources = _activePcbDesignTechs
+                .Where(technology => !technology.IsWaitForResources).ToList();
+
+            if (technologiesWithResources.Count <= 0) continue;
+
+            var (closestFinishTechs, closestTechEndTime) =
+                technologiesWithResources.MinsByAndKey(technology => technology.EstimateRemainingTime());
             closestTechEndTime += _modelTime;
 
             if (_simulationEvents.Count == 0 ||
@@ -128,7 +131,7 @@ public class PcbDesignSimulator
 
             var (closestFinishTechs, closestTechEndTime) = _activePcbDesignTechs
                 .Where(technology => !technology.IsWaitForResources)
-                .MinsByAndKey(technology => technology.EstimateEndTime());
+                .MinsByAndKey(technology => technology.EstimateRemainingTime());
             closestTechEndTime += _modelTime;
 
             if (_simulationEvents.Count != 0)
@@ -164,10 +167,10 @@ public class PcbDesignSimulator
     {
         switch (curEvent)
         {
-            case PcbDesignTechnologyStart pcbDesignTechnologyStart:
+            case PcbDesignTechnologyStart technologyStart:
             {
                 var newTechnology = new PcbDesignTechnology(_resourceManager, _pcbAlgFactories,
-                    pcbDesignTechnologyStart.GeneratedPcb, NewId, _logger);
+                    technologyStart.GeneratedPcb, NewId, _logger);
                 _activePcbDesignTechs.Add(newTechnology);
                 _techStart.Add(newTechnology, ModelTime);
                 _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (newTechnology.TechId - 1) % 15))}" +
@@ -175,9 +178,9 @@ public class PcbDesignSimulator
                 break;
             }
 
-            case PcbDesignProcedureFinish pcbDesignProcedureFinish:
+            case PcbDesignProcedureFinish procedureFinish:
             {
-                var tech = pcbDesignProcedureFinish.PcbDesignTechnology;
+                var tech = procedureFinish.PcbDesignTechnology;
                 _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (tech.TechId - 1) % 15))}" +
                              $"Технология: {tech.TechId} - Финиш проектной процедуры: {tech.CurProcedure.Name}");
 
@@ -191,11 +194,13 @@ public class PcbDesignSimulator
 
                 break;
             }
-            
+
             case ResourceFailure resourceFailure:
+                resourceFailure.Resource.IsActive = false;
                 break;
-            
+
             case ResourceRestored resourceRestored:
+                resourceRestored.Resource.IsActive = true;
                 break;
 
             default: throw new ArgumentOutOfRangeException(nameof(curEvent));

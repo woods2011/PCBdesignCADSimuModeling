@@ -2,7 +2,7 @@
 
 public abstract class SharedResource : IResource
 {
-    public abstract double ResValueForProc(int requestId);
+    public abstract double PowerForRequest(int requestId);
 
     public abstract void FreeResource(int requestId);
     public abstract IResource Clone();

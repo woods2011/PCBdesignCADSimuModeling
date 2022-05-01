@@ -29,7 +29,7 @@ public class WireRouting : PcbDesignProcedure
 
     public override TimeSpan EstimateEndTime()
     {
-        _cpuPower = ActiveResources.OfType<CpuCluster>().Sum(resource => resource.ResValueForProc(ProcId));
+        _cpuPower = ActiveResources.OfType<CpuCluster>().Sum(resource => resource.PowerForRequest(ProcId));
         return _wireRoutingAlg.EstimateEndTime(_cpuPower);
     }
 

@@ -24,8 +24,8 @@ public class DocumentationProduction : PcbDesignProcedure
 
     public override void InitResourcesPower()
     {
-        _designerPower = ActiveResources.OfType<Designer>().Sum(resource => resource.ResValueForProc(ProcId));
-        var serverPower = ActiveResources.OfType<Server>().Sum(resource => resource.ResValueForProc(ProcId));
+        _designerPower = ActiveResources.OfType<Designer>().Sum(resource => resource.PowerForRequest(ProcId));
+        var serverPower = ActiveResources.OfType<Server>().Sum(resource => resource.PowerForRequest(ProcId));
         _serverPower = 0.6 + 0.4 * (1.0 / Math.Exp(30.0 / serverPower));
     }
 

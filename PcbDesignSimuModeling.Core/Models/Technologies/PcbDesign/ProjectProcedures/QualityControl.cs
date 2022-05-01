@@ -25,7 +25,7 @@ public class QualityControl : PcbDesignProcedure
         _remainTime < TimeTol ? TimeSpan.Zero : _remainTime / _designerPower;
 
     public override void InitResourcesPower() => _designerPower =
-        ActiveResources.OfType<Designer>().Sum(resource => resource.ResValueForProc(ProcId));
+        ActiveResources.OfType<Designer>().Sum(resource => resource.PowerForRequest(ProcId));
 
     private List<IResourceRequest> GetResourceRequestList() => new()
     {

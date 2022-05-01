@@ -28,7 +28,7 @@ public class Ram : SharedResource, INotifyPropertyChanged
         return true;
     }
 
-    public override double ResValueForProc(int requestId) => _requestIdAndAllocatedAmount[requestId];
+    public override double PowerForRequest(int requestId) => _requestIdAndAllocatedAmount[requestId];
 
     public override void FreeResource(int requestId)
     {

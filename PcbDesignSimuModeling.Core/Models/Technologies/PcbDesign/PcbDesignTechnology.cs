@@ -36,14 +36,14 @@ public class PcbDesignTechnology
         {
             FreeResources();
             _curProcedure = value;
-            IsWaitForResources = true;
         }
     }
 
-    private void FreeResources()
+    public void FreeResources()
     {
         _resourceManager.FreeResources(_curProcedure.ProcId, _curProcedure.ActiveResources);
         _curProcedure.ActiveResources.Clear();
+        IsWaitForResources = true;
     }
 
     public void TryGetResources()
@@ -53,17 +53,17 @@ public class PcbDesignTechnology
         IsWaitForResources = !_resourceManager.TryGetResources(
             _curProcedure.ProcId, _curProcedure.RequiredResources, out var receivedResources);
 
-        if (!IsWaitForResources)
+        if (IsWaitForResources)
         {
-            _curProcedure.ActiveResources.AddRange(receivedResources);
-            _curProcedure.InitResourcesPower();
             _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (TechId - 1) % 15))}" +
-                         $"Технология: {TechId} - Ожидание ресурсов оконченно - Проектная процедура: {_curProcedure.Name}");
+                         $"Технология: {TechId} - Ожидание ресурсов - Проектная процедура: {_curProcedure.Name}");
             return;
         }
 
+        _curProcedure.ActiveResources.AddRange(receivedResources);
+        _curProcedure.InitResourcesPower();
         _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (TechId - 1) % 15))}" +
-                     $"Технология: {TechId} - Ожидание ресурсов - Проектная процедура: {_curProcedure.Name}");
+                     $"Технология: {TechId} - Ожидание ресурсов оконченно - Проектная процедура: {_curProcedure.Name}");
     }
 
 
@@ -74,10 +74,10 @@ public class PcbDesignTechnology
     }
 
 
-    public TimeSpan EstimateEndTime()
+    public TimeSpan EstimateRemainingTime()
     {
-        if (!IsWaitForResources) return CurProcedure.EstimateEndTime();
-        return TimeSpan.MaxValue / 2.0;
+        if (IsWaitForResources) return TimeSpan.MaxValue / 2.0;
+        return CurProcedure.EstimateEndTime();
     }
 
 

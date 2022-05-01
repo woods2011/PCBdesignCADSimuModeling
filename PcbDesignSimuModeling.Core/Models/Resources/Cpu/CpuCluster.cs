@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using PcbDesignSimuModeling.Core.Models.Resources.Cpu.SubClasses;
 
 namespace PcbDesignSimuModeling.Core.Models.Resources.Cpu;
@@ -19,7 +20,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
     {
         ThreadCount = threadCount;
         ClockRate = clockRate;
-        _hyperThreadingPenalty = 1;
+        _hyperThreadingPenalty = hyperThreadingPenalty;
         _contextSwitchPenalty = contextSwitchPenalty;
 
         _cpuCores = Enumerable.Range(0, ThreadCount / 2).Select(_ => new CpuCore()).ToArray();
@@ -49,7 +50,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
         return true;
     }
 
-    public override double ResValueForProc(int requestId)
+    public override double PowerForRequest(int requestId)
     {
         var processThreads = _processIdAndThreads[requestId];
         var threadSum = 0.0;
@@ -62,14 +63,15 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
 
             threadSummaryUsageByTheProcess *=
                 1.0 - Math.Max(0.0, _contextSwitchPenalty * (thread.ActiveTasks - 1) - thread.IdlePercent);
-            
+
             if (thread.IsInHyperThreadingMode)
                 threadSummaryUsageByTheProcess *=
-                    thread.CpuCore.IdlePercent * _hyperThreadingPenalty + (1.0 - thread.CpuCore.IdlePercent);
+                    thread.CpuCore.IdlePercent + (1.0 - thread.CpuCore.IdlePercent) * _hyperThreadingPenalty;
 
             threadSum += threadSummaryUsageByTheProcess;
         }
 
+        Debug.WriteLine(threadSum);
         return threadSum * ClockRate;
     }
 
@@ -85,32 +87,35 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
     }
 
 
-    protected virtual void BalanceRes()
+    public virtual void BalanceRes()
     {
-        (CpuThread Thread, double RealTaskCount)
-            maxLoadThread = _threadPool.MaxByAndKey(thread => thread.RealTaskCount);
-        (CpuThread Thread, double RealTaskCount)
-            minLoadThread = _threadPool.MinByAndKey(thread => thread.RealTaskCount);
-        var deltaLoad = (maxLoadThread.RealTaskCount - minLoadThread.RealTaskCount) / 2.0;
-        if (deltaLoad < 1e-12) return;
+        var unloadedCore = _cpuCores.FirstOrDefault(core => core.ActiveTasks == 0);
+        var maxLoadThread = _threadPool.MaxBy(thread => thread.RealTaskCount)!;
+        var minLoadThread = unloadedCore?.Threads.Th0 ?? _threadPool.MinBy(thread => thread.RealTaskCount)!;
 
-        while (deltaLoad - 1e-12 > maxLoadThread.Thread.UtilizationByProcessList.First().MaxUtil / 2.0)
+        var deltaLoad = (maxLoadThread.RealTaskCount - minLoadThread.RealTaskCount) / 2.0;
+        if (deltaLoad < 1e-12) return; // Check for skip exception (when sequence is empty)
+
+        while (deltaLoad - 1e-12 > maxLoadThread.UtilizationByProcessList.First().MaxUtil / 2.0)
         {
             var utilizationToRemove =
-                maxLoadThread.Thread.UtilizationByProcessList.Take(Math.Max(1, (int) Math.Round(deltaLoad))).ToList();
+                maxLoadThread.UtilizationByProcessList.Take(Math.Max(1, (int) Math.Round(deltaLoad))).ToList();
 
-            utilizationToRemove.ForEach(utilization =>
+            foreach (var utilization in utilizationToRemove)
             {
-                _processIdAndThreads[utilization.ProcessId].Remove(maxLoadThread.Thread);
-                _processIdAndThreads[utilization.ProcessId].Add(minLoadThread.Thread);
-            });
+                _processIdAndThreads[utilization.ProcessId].Remove(maxLoadThread);
+                _processIdAndThreads[utilization.ProcessId].Add(minLoadThread);
+            }
 
-            maxLoadThread.Thread.UtilizationByProcessList.RemoveRange(utilizationToRemove);
-            minLoadThread.Thread.UtilizationByProcessList.AddRange(utilizationToRemove);
+            maxLoadThread.UtilizationByProcessList.RemoveRange(utilizationToRemove);
+            minLoadThread.UtilizationByProcessList.AddRange(utilizationToRemove);
 
-            maxLoadThread = _threadPool.MaxByAndKey(thread => thread.RealTaskCount);
-            minLoadThread = _threadPool.MinByAndKey(thread => thread.RealTaskCount);
+            unloadedCore = _cpuCores.FirstOrDefault(core => core.ActiveTasks == 0);
+            maxLoadThread = _threadPool.MaxBy(thread => thread.RealTaskCount)!;
+            minLoadThread = unloadedCore?.Threads.Th0 ?? _threadPool.MinBy(thread => thread.RealTaskCount)!;
+            
             deltaLoad = (maxLoadThread.RealTaskCount - minLoadThread.RealTaskCount) / 2.0;
+            if (deltaLoad < 1e-12) return;
         }
     }
 

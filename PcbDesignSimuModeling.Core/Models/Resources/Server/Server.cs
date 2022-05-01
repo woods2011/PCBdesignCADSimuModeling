@@ -16,7 +16,7 @@ public class Server : SharedResource, INotifyPropertyChanged
 
     public bool TryGetResource(int _) => true;
 
-    public override double ResValueForProc(int requestId) => ResValueConvolution(this);
+    public override double PowerForRequest(int requestId) => ResValueConvolution(this);
 
     public override void FreeResource(int requestId) {}
 

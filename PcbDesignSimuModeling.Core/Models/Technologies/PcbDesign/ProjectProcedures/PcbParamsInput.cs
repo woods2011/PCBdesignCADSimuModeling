@@ -21,16 +21,18 @@ public class PcbParamsInput : PcbDesignProcedure
 
     private TimeSpan _remainTime = TimeSpan.FromDays(1);
 
-    public override void UpdateModelTime(TimeSpan deltaTime) =>
+    public override void UpdateModelTime(TimeSpan deltaTime)
+    {
         _remainTime -= deltaTime * _designerPower * _serverPower;
+    }
 
     public override TimeSpan EstimateEndTime() =>
         _remainTime < TimeTol ? TimeSpan.Zero : _remainTime / _designerPower / _serverPower;
 
     public override void InitResourcesPower()
     {
-        _designerPower = ActiveResources.OfType<Designer>().Sum(resource => resource.ResValueForProc(ProcId));
-        var serverPower = ActiveResources.OfType<Server>().Sum(resource => resource.ResValueForProc(ProcId));
+        _designerPower = ActiveResources.OfType<Designer>().Sum(resource => resource.PowerForRequest(ProcId));
+        var serverPower = ActiveResources.OfType<Server>().Sum(resource => resource.PowerForRequest(ProcId));
         _serverPower = 0.5 + 0.5 * (1.0 / Math.Exp(30.0 / serverPower));
     }
 

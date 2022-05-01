@@ -11,14 +11,14 @@ public abstract class SimulationEvent
 
 public class ResourceFailure : SimulationEvent
 {
-    public ResourceFailure(TimeSpan activateTime, IResource resource) : base(activateTime) => Resource = resource;
+    public ResourceFailure(TimeSpan activateTime, IPotentialFailureResource resource) : base(activateTime) => Resource = resource;
 
-    public IResource Resource { get; }
+    public IPotentialFailureResource Resource { get; }
 }
 
 public class ResourceRestored : SimulationEvent
 {
-    public ResourceRestored(TimeSpan activateTime, IResource resource) : base(activateTime) => Resource = resource;
+    public ResourceRestored(TimeSpan activateTime, IPotentialFailureResource resource) : base(activateTime) => Resource = resource;
 
-    public IResource Resource { get; }
+    public IPotentialFailureResource Resource { get; }
 }

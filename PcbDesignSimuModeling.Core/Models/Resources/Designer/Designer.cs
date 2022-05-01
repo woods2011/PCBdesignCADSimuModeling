@@ -2,23 +2,21 @@
 
 namespace PcbDesignSimuModeling.Core.Models.Resources.Designer;
 
-public class Designer : UndividedResource, INotifyPropertyChanged
+public class Designer : UndividedResource, IPotentialFailureResource, INotifyPropertyChanged
 {
-    public Designer()
-    { 
-    }
-
     public bool TryGetResource(int procId)
     {
-        if (UtilizingProcId.HasValue) return false;
+        if (UtilizingResourceId.HasValue || !IsActive) return false;
 
-        UtilizingProcId = procId;
+        UtilizingResourceId = procId;
         return true;
     }
 
-    public override double ResValueForProc(int requestId) => 1.0;
+    public bool IsActive { get; set; } = true;
 
-    public override void FreeResource(int requestId) => UtilizingProcId = null;
+    public override double PowerForRequest(int requestId) => 1.0;
+
+    public override void FreeResource(int requestId) => UtilizingResourceId = null;
 
 
     public override IResource Clone() => new Designer();
@@ -26,4 +24,5 @@ public class Designer : UndividedResource, INotifyPropertyChanged
     public override decimal Cost => 60000;
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
 }
