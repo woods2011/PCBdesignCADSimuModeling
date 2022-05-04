@@ -84,7 +84,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="Мин:" />
                                 <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.ThreadsCountMin}"
-                                                       Minimum="1"
+                                                       Minimum="2"
                                                        Maximum="{Binding AlgSettings.SearchIntervals.ThreadsCountMax}"
                                                        ClipValueToMinMax="True" Increment="2" />
                             </StackPanel>
@@ -292,21 +292,21 @@
                                           HorizontalAlignment="Left"
                                           MinWidth="50"
                                           Minimum="0" Maximum="1" Increment="0.05" FormatString="F3"
-                                          Value="{Binding DimensionUsagePctDistr.Mean}" />
+                                          Value="{Binding AreaUsagePctDistr.Mean}" />
 
                     <DockPanel Grid.Row="5" Grid.Column="0" Margin="0,0,5,5">
                         <TextBlock FontSize="12" VerticalAlignment="Center" Text="СКО:" />
                         <WrapPanel HorizontalAlignment="Right">
                             <Label Content="Авто:" />
                             <CheckBox VerticalAlignment="Center"
-                                      IsChecked="{Binding DimensionUsagePctDistr.AutoStdChange, FallbackValue=true}" />
+                                      IsChecked="{Binding AreaUsagePctDistr.AutoStdChange, FallbackValue=true}" />
                         </WrapPanel>
                     </DockPanel>
                     <wpfTool:DoubleUpDown Grid.Row="5" Grid.Column="1" Margin="0,0,0,5"
                                           HorizontalAlignment="Left"
                                           MinWidth="50"
                                           Minimum="0" Maximum="1" Increment="0.05" FormatString="F3"
-                                          Value="{Binding DimensionUsagePctDistr.Std}" />
+                                          Value="{Binding AreaUsagePctDistr.Std}" />
 
 
                     <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5"

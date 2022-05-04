@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Windows.Input;
+using MathNet.Numerics.Distributions;
 using Newtonsoft.Json;
 using PcbDesignSimuModeling.Core.Commands;
+using PcbDesignSimuModeling.Core.Models;
 using PcbDesignSimuModeling.Core.Models.Loggers;
 using PcbDesignSimuModeling.Core.Models.Resources;
 using PcbDesignSimuModeling.Core.Models.Resources.Algorithms;
@@ -29,12 +31,12 @@ public class SimuSystemViewModel : BaseViewModel
 
 
     public IReadOnlyList<string> PlacingAlgStrList { get; } = new List<string>
-        { PlacingAlgProviderFactory.PlacingSequentialStr, PlacingAlgProviderFactory.PlacingPartitioningStr };
+        {PlacingAlgProviderFactory.PlacingSequentialStr, PlacingAlgProviderFactory.PlacingPartitioningStr};
 
     public string SelectedPlacingAlgStr { get; set; } = PlacingAlgProviderFactory.PlacingSequentialStr;
 
     public IReadOnlyList<string> WireRoutingAlgStrList { get; } = new List<string>
-        { WireRoutingAlgProviderFactory.WireRoutingWaveStr, WireRoutingAlgProviderFactory.WireRoutingChannelStr };
+        {WireRoutingAlgProviderFactory.WireRoutingWaveStr, WireRoutingAlgProviderFactory.WireRoutingChannelStr};
 
     public string SelectedWireRoutingAlgStr { get; set; } = WireRoutingAlgProviderFactory.WireRoutingWaveStr;
 
@@ -45,8 +47,10 @@ public class SimuSystemViewModel : BaseViewModel
 
 
     public TechIntervalBuilderVm TechIntervalDistr { get; }
+
+    public int TechPerYear { get; set; } = 200;
     public DblNormalDistributionBuilderVm ElementCountDistr { get; }
-    public DblNormalDistributionBuilderVm DimensionUsagePctDistr { get; }
+    public DblNormalDistributionBuilderVm AreaUsagePctDistr { get; }
     public double VariousSizePctProb { get; set; } = 0.8;
     public TimeSpan FinalTime { get; set; } = TimeSpan.FromDays(30);
 
@@ -57,7 +61,7 @@ public class SimuSystemViewModel : BaseViewModel
         TechIntervalDistr =
             new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0), _rndSource);
         ElementCountDistr = new DblNormalDistributionBuilderVm(150, 15, _rndSource);
-        DimensionUsagePctDistr = new DblNormalDistributionBuilderVm(0.6, 0.1, _rndSource);
+        AreaUsagePctDistr = new DblNormalDistributionBuilderVm(0.6, 0.1, _rndSource);
     }
 
 
@@ -74,7 +78,7 @@ public class SimuSystemViewModel : BaseViewModel
     {
         try
         {
-            List<IResource> resourcePool = new() { Cpu, Server };
+            List<IResource> resourcePool = new() {Cpu, Server};
             resourcePool.AddRange(Enumerable.Range(0, DesignersCount).Select(_ => new Designer()));
             resourcePool = resourcePool.Select(resource => resource.Clone()).ToList();
 
@@ -82,16 +86,26 @@ public class SimuSystemViewModel : BaseViewModel
                 placingAlgFactory: PlacingAlgProviderFactory.Create(SelectedPlacingAlgStr),
                 wireRoutingAlgFactory: WireRoutingAlgProviderFactory.Create(SelectedWireRoutingAlgStr));
 
-            var simuEventGenerator = new SimuEventGenerator(
-                timeBetweenTechsDistr: TechIntervalDistr.Build(),
+            var pcbGenerator = new PcbProbDistrBasedGenerator(
                 pcbElemsCountDistr: ElementCountDistr.Build(),
-                pcbDimUsagePctDistr: DimensionUsagePctDistr.Build(),
-                pcbElemsIsVarSizeProb: VariousSizePctProb,
-                random: _rndSource);
+                pcbAreaUsagePctDistr: AreaUsagePctDistr.Build(),
+                pcbElemsIsVarSize: new Bernoulli(VariousSizePctProb, _rndSource)
+            );
+
+            var pcbDesignTechGenerator = new PcbDesignTechGenerator(
+                requestsFlowDistrDays: new Exponential(TechPerYear / 365.0, _rndSource),
+                pcbGenerator: pcbGenerator,
+                rndSource: _rndSource
+            );
+            var preCalcEvents = pcbDesignTechGenerator.GenerateSimuEvent(FinalTime);
+
+            var resFailureGenerator = new ResourceFailureGenerator(resourcePool, _rndSource);
+            preCalcEvents.InsertRangeAfterCondition(resFailureGenerator.GenerateSimuEvent(FinalTime),
+                (itemSource, insItem) => insItem.ActivateTime > itemSource.ActivateTime);
 
             InMemorySimpleLogger? inMemorySimpleLogger = new();
-            var simulator =
-                new PcbDesignSimulator(simuEventGenerator, resourcePool, pcbAlgFactories, inMemorySimpleLogger);
+
+            var simulator = new PcbDesignSimulator(preCalcEvents, resourcePool, pcbAlgFactories, inMemorySimpleLogger);
             var simulationResult = simulator.Simulate(FinalTime);
 
             LastSimulationResultLog = inMemorySimpleLogger?.GetData();
@@ -116,7 +130,7 @@ public class SimuSystemViewModel : BaseViewModel
                 SelectedWireRoutingAlgStr = SelectedWireRoutingAlgStr,
                 TechIntervalDistr = TechIntervalDistr,
                 ElementCountDistr = ElementCountDistr,
-                DimensionUsagePctDistr = DimensionUsagePctDistr,
+                DimensionUsagePctDistr = AreaUsagePctDistr,
                 VariousSizePctMean = VariousSizePctProb,
                 FinalTime = FinalTime,
                 AverageProductionTime = avgProductionTime,
@@ -140,7 +154,7 @@ public class SimuSystemViewModel : BaseViewModel
         if (LastSimulationResult is null) return;
 
         var serializedResult = JsonConvert.SerializeObject(LastSimulationResult, Formatting.Indented,
-            new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
+            new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto});
 
         new AppendFileSimpleLogger(AllResultsPath).Log(serializedResult);
     }
@@ -151,7 +165,7 @@ public class SimuSystemViewModel : BaseViewModel
         if (LastSimulationResultLog is null) return;
 
         var serializedResult = JsonConvert.SerializeObject(LastSimulationResult, Formatting.Indented,
-            new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
+            new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto});
 
         new TruncateFileSimpleLogger(LastResultLogPath).Log($"{serializedResult}{LastSimulationResultLog}");
     }

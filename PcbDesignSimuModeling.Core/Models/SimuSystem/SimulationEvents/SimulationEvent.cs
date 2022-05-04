@@ -6,7 +6,7 @@ public abstract class SimulationEvent
 {
     protected SimulationEvent(TimeSpan activateTime) => ActivateTime = activateTime;
 
-    public TimeSpan ActivateTime { get; set; }
+    public TimeSpan ActivateTime { get; }
 }
 
 public class ResourceFailure : SimulationEvent

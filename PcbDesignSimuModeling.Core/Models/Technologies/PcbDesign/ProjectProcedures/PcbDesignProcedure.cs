@@ -5,17 +5,19 @@ namespace PcbDesignSimuModeling.Core.Models.Technologies.PcbDesign.ProjectProced
 public abstract class PcbDesignProcedure
 {
     protected readonly PcbDesignTechnology Context;
-    public int ProcId { get; } = NewId;
+    public int CommonResReqId { get; }
 
-        
+
     protected PcbDesignProcedure(PcbDesignTechnology context)
     {
         Context = context;
+        CommonResReqId = Context.NewRequestId;
     }
 
-        
+
     public List<IResourceRequest> RequiredResources { get; } = new();
-    public List<IResource> ActiveResources { get; } = new();
+    public List<(IResource Resource, int RequestId)> ActiveResources { get; } = new();
+    public List<IPotentialFailureResource> PotentialFailureResources { get; } = new();
 
     public abstract bool NextProcedure();
     public abstract void UpdateModelTime(TimeSpan deltaTime);
@@ -24,9 +26,6 @@ public abstract class PcbDesignProcedure
     public abstract void InitResourcesPower();
 
     public abstract string Name { get; }
-
-    private static int _newId;
-    public static int NewId => ++_newId;
 
     public static readonly TimeSpan TimeTol = PcbDesignTechnology.TimeTol;
 }

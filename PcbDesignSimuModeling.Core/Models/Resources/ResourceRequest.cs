@@ -3,6 +3,8 @@
 public interface IResourceRequest
 {
     bool TryGetResource(List<IResource> availableResources, out IResource? reqResource);
+    
+    public int RequestId { get; }
 }
 
 public abstract class ResourceRequest<TResource> : IResourceRequest where TResource : IResource

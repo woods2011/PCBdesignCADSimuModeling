@@ -23,6 +23,8 @@ public class Designer : UndividedResource, IPotentialFailureResource, INotifyPro
 
     public override decimal Cost => 60000;
 
+    public override string ToString() => "Проектировщик";
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
 }

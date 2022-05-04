@@ -7,13 +7,16 @@ namespace PcbDesignSimuModeling.Core.Models.Technologies.PcbDesign;
 
 public class PcbDesignTechnology
 {
-    private PcbDesignProcedure _curProcedure;
-    private readonly IResourceManager _resourceManager;
     private readonly ISimpleLogger? _logger;
+
+    private PcbDesignProcedure _curProcedure;
+
     public IPcbAlgFactories PcbAlgFactories { get; }
+    private readonly IResourceManager _resourceManager;
     public PcbParams PcbParams { get; }
     public bool IsWaitForResources { get; private set; } = true;
     public int TechId { get; }
+    public int NewRequestId => _resourceManager.NewRequestId;
 
 
     public PcbDesignTechnology(IResourceManager resourceManager, IPcbAlgFactories pcbAlgFactories,
@@ -36,43 +39,57 @@ public class PcbDesignTechnology
         {
             FreeResources();
             _curProcedure = value;
+            _isFirstVisit = true;
         }
     }
 
-    public void FreeResources()
+    private void FreeResources()
     {
-        _resourceManager.FreeResources(_curProcedure.ProcId, _curProcedure.ActiveResources);
+        _resourceManager.FreeResources(_curProcedure.ActiveResources);
         _curProcedure.ActiveResources.Clear();
         IsWaitForResources = true;
     }
 
+
     public void TryGetResources()
     {
-        if (!IsWaitForResources) return;
+        if (!IsWaitForResources)
+        {
+            if (CurProcedure.PotentialFailureResources.All(resource => resource.IsActive)) return;
 
-        IsWaitForResources = !_resourceManager.TryGetResources(
-            _curProcedure.ProcId, _curProcedure.RequiredResources, out var receivedResources);
+            _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (TechId - 1) % 15))}" +
+                         $"Технология: {TechId} - Отказ одного из ресурсов - Проектная процедура: {_curProcedure.Name}");
+            FreeResources();
+        }
+
+        IsWaitForResources =
+            !_resourceManager.TryGetResources(_curProcedure.RequiredResources, out var receivedResources);
 
         if (IsWaitForResources)
         {
+            if (!_isFirstVisit) return;
             _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (TechId - 1) % 15))}" +
                          $"Технология: {TechId} - Ожидание ресурсов - Проектная процедура: {_curProcedure.Name}");
+            _isFirstVisit = false;
             return;
         }
 
         _curProcedure.ActiveResources.AddRange(receivedResources);
+        _curProcedure.PotentialFailureResources.AddRange(
+            receivedResources.Select(pair => pair.Resource).OfType<IPotentialFailureResource>());
         _curProcedure.InitResourcesPower();
+
+        if (_isFirstVisit) return;
         _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (TechId - 1) % 15))}" +
-                     $"Технология: {TechId} - Ожидание ресурсов оконченно - Проектная процедура: {_curProcedure.Name}");
+                     $"Технология: {TechId} - Ожидание ресурсов Оконченно - Проектная процедура: {_curProcedure.Name}");
     }
 
 
     public void UpdateModelTime(TimeSpan deltaTime)
     {
-        if (!IsWaitForResources)
-            CurProcedure.UpdateModelTime(deltaTime);
+        if (IsWaitForResources) return;
+        CurProcedure.UpdateModelTime(deltaTime);
     }
-
 
     public TimeSpan EstimateRemainingTime()
     {
@@ -88,5 +105,7 @@ public class PcbDesignTechnology
         return moveToNextProcedure;
     }
 
+
+    private bool _isFirstVisit = true;
     public static readonly TimeSpan TimeTol = TimeSpan.FromSeconds(0.5);
 }

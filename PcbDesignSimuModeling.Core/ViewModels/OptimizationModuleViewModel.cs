@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using System.Windows.Input;
+using MathNet.Numerics.Distributions;
 using Newtonsoft.Json;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -43,8 +44,9 @@ public class OptimizationModuleViewModel : BaseViewModel
 
 
     public TechIntervalBuilderVm TechIntervalDistr { get; }
+    public double TechPerYear { get; set; } = 200;
     public DblNormalDistributionBuilderVm ElementCountDistr { get; }
-    public DblNormalDistributionBuilderVm DimensionUsagePctDistr { get; }
+    public DblNormalDistributionBuilderVm AreaUsagePctDistr { get; }
     public double VariousSizePctProb { get; set; } = 0.8;
     public TimeSpan FinalTime { get; set; } = TimeSpan.FromDays(30);
 
@@ -60,7 +62,7 @@ public class OptimizationModuleViewModel : BaseViewModel
         TechIntervalDistr =
             new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0), _rndSource);
         ElementCountDistr = new DblNormalDistributionBuilderVm(150, 15, _rndSource);
-        DimensionUsagePctDistr = new DblNormalDistributionBuilderVm(0.6, 0.1, _rndSource);
+        AreaUsagePctDistr = new DblNormalDistributionBuilderVm(0.6, 0.1, _rndSource);
 
         PlotModel = new PlotModel {Title = "Оценка конфигурации САПР (значение цеелевой функции) / Итерация"};
         PlotModel.Axes.Add(new LinearAxis {Position = AxisPosition.Bottom, Title = "Итерация"});
@@ -89,18 +91,23 @@ public class OptimizationModuleViewModel : BaseViewModel
                 .Select(str => WireRoutingAlgProviderFactory.AlgNameIndexMap[str]).ToArray();
             _savedAlgSettings = AlgSettings.Copy();
 
-            var simuEventGenerator = new SimuEventGenerator(
-                timeBetweenTechsDistr: TechIntervalDistr.Build(),
+            var pcbGenerator = new PcbProbDistrBasedGenerator(
                 pcbElemsCountDistr: ElementCountDistr.Build(),
-                pcbDimUsagePctDistr: DimensionUsagePctDistr.Build(),
-                pcbElemsIsVarSizeProb: VariousSizePctProb,
-                random: _rndSource);
+                pcbAreaUsagePctDistr: AreaUsagePctDistr.Build(),
+                pcbElemsIsVarSize: new Bernoulli(VariousSizePctProb, _rndSource)
+            );
 
-            var minFinishedTechs = (int) Math.Round(FinalTime / TechIntervalDistr.Mean * 0.8);
+            var simuEventGenerator = new PcbDesignTechGenerator(
+                requestsFlowDistrDays: new Exponential(TechPerYear / 365.0, _rndSource),
+                pcbGenerator: pcbGenerator,
+                rndSource: _rndSource
+            );
 
-            var simuSystemFuncWrapper = new SimuSystemFuncWrapper(simuEventGenerator, FinalTime, minFinishedTechs);
-            Func<int, double, double, int, int, int, double> objectiveFunction =
-                simuSystemFuncWrapper.ObjectiveFunction;
+            var minFinishedTechs = (int)Math.Round(FinalTime / TimeSpan.FromDays(365) * TechPerYear * 0.8);
+
+            var preCalcEventsList = Enumerable.Repeat(simuEventGenerator.GenerateSimuEvent(FinalTime), 5);
+            var simuSystemFuncWrapper = new SimuSystemFuncWrapper(preCalcEventsList, FinalTime, minFinishedTechs);
+            var objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
 
             var abcAlgorithm = new AbcAlgorithm(_savedAlgSettings, _rndSource, objectiveFunction);
 
@@ -119,7 +126,7 @@ public class OptimizationModuleViewModel : BaseViewModel
             DrawLog();
             DrawPlot();
         }
-        catch (Exception e)
+        catch (Exception e) when (!Debugger.IsAttached)
         {
             MessageViewModel.Message = e.Message;
         }

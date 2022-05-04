@@ -70,8 +70,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
 
             threadSum += threadSummaryUsageByTheProcess;
         }
-
-        Debug.WriteLine(threadSum);
+        
         return threadSum * ClockRate;
     }
 
@@ -120,7 +119,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
     }
 
 
-    public override IResource Clone() => new CpuCluster(this.ThreadCount, this.ClockRate);
+    public override IResource Clone() => new CpuCluster(ThreadCount, ClockRate);
 
     public override decimal Cost => (decimal) Math.Round(
         (Math.Exp(ClockRate / 5.0) * 1.0 / ThreadCount +

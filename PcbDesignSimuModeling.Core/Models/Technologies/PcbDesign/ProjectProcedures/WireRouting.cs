@@ -29,7 +29,7 @@ public class WireRouting : PcbDesignProcedure
 
     public override TimeSpan EstimateEndTime()
     {
-        _cpuPower = ActiveResources.OfType<CpuCluster>().Sum(resource => resource.PowerForRequest(ProcId));
+        _cpuPower = ActiveResources.Select(tuple => tuple.Resource).OfType<CpuCluster>().Sum(resource => resource.PowerForRequest(CommonResReqId));
         return _wireRoutingAlg.EstimateEndTime(_cpuPower);
     }
 
@@ -39,8 +39,7 @@ public class WireRouting : PcbDesignProcedure
 
     private List<IResourceRequest> GetResourceRequestList() => new()
     {
-        //RequiredResources.Add(new DesignerRequest(ProcedureId));
-        new CpuRequest(ProcId, _wireRoutingAlg.MaxThreadUtilization),
+        new CpuRequest(CommonResReqId, _wireRoutingAlg.MaxThreadUtilization),
     };
 
     public override string Name => "Трассировка";

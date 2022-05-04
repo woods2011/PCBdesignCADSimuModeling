@@ -29,7 +29,7 @@ public class Placement : PcbDesignProcedure
 
     public override TimeSpan EstimateEndTime()
     {
-        _cpuPower = ActiveResources.OfType<CpuCluster>().Sum(resource => resource.PowerForRequest(ProcId));
+        _cpuPower = ActiveResources.Select(tuple => tuple.Resource).OfType<CpuCluster>().Sum(resource => resource.PowerForRequest(CommonResReqId));
         return _placingAlg.EstimateEndTime(_cpuPower);
     }
 
@@ -41,7 +41,7 @@ public class Placement : PcbDesignProcedure
     private List<IResourceRequest> GetResourceRequestList() => new()
     {
         //RequiredResources.Add(new DesignerRequest(ProcedureId));
-        new CpuRequest(ProcId, _placingAlg.MaxThreadUtilization),
+        new CpuRequest(CommonResReqId, _placingAlg.MaxThreadUtilization),
     };
 
     public override string Name => "Размещение";

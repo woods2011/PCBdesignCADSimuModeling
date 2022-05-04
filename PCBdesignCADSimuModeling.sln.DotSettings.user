@@ -2,6 +2,8 @@
 	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/ActualSeverity/@EntryValue">INFO</s:String>
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Users\ArtemPC\.nuget\packages\mathnet.numerics\4.15.0\lib\netstandard2.0\MathNet.Numerics.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\6.0.2\PresentationFramework.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.2\ref\net6.0\Microsoft.Win32.Primitives.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:Boolean x:Key="/Default/Environment/Highlighting/HighlightingEnabled/@EntryValue">False</s:Boolean>
 	<s:String x:Key="/Default/Environment/Highlighting/HighlightingMode/@EntryValue">OnlyFullLine</s:String>

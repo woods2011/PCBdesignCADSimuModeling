@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 using Jace;
+using MathNet.Numerics.Distributions;
 using PcbDesignSimuModeling.Core.Models.OptimizationModule;
 using PcbDesignSimuModeling.Core.Models.Resources;
 using PcbDesignSimuModeling.Core.Models.Resources.Algorithms;
@@ -19,21 +20,19 @@ namespace Benchmark;
 
 public class BenchTest
 {
-    private Random _random = new(1);
+    private readonly Random _random = new(1);
 
-    private Func<double[], double> _func;
+    private readonly Func<double[], double> _func;
     private double[] _doubles = new double[1000];
 
-    private PcbAlgFactories _pcbAlgFactories;
-    private SimuEventGenerator _simuEventGenerator;
-
-    private List<SimulationEvent> _preCalcEvent;
-    private TimeSpan _finalTime = TimeSpan.FromDays(30);
-    private CpuCluster _cpuCluster = new(16, 2.5);
-    private Server _server = new(150);
-    private int _designersCount = 2;
+    private readonly PcbAlgFactories _pcbAlgFactories;
+    private readonly List<SimulationEvent> _preCalcEvents;
+    private readonly TimeSpan _finalTime = TimeSpan.FromDays(30);
+    private readonly CpuCluster _cpuCluster = new(16, 2.5);
+    private readonly Server _server = new(150);
+    private readonly int _designersCount = 2;
     private readonly TimeSpan? _timeTol = TimeSpan.FromDays(15);
-    private Func<int, double, double, int, int, int, double> _objectiveFunction;
+    private readonly Func<int, double, double, int, int, int, double> _objectiveFunction;
 
     public BenchTest()
     {
@@ -43,19 +42,26 @@ public class BenchTest
             PlacingAlgProviderFactory.Create(PlacingAlgProviderFactory.PlacingSequentialStr),
             WireRoutingAlgProviderFactory.Create(WireRoutingAlgProviderFactory.WireRoutingWaveStr));
 
-        var techIntervalDistr = new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0),
-            _random);
-        _simuEventGenerator = new SimuEventGenerator(
-            timeBetweenTechsDistr: techIntervalDistr.Build(),
+        var pcbGenerator = new PcbProbDistrBasedGenerator(
             pcbElemsCountDistr: new DblNormalDistributionBuilderVm(150, 15, _random).Build(),
-            pcbDimUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, _random).Build(),
-            pcbElemsIsVarSizeProb: 0.8,
-            random: _random);
-        _preCalcEvent = _simuEventGenerator.GeneratePcbDesignTech(_finalTime);
-            
-        var minFinishedTechs = (int)Math.Round(_finalTime / techIntervalDistr.Mean * 0.5);
+            pcbAreaUsagePctDistr: new DblNormalDistributionBuilderVm(0.6, 0.1, _random).Build(),
+            pcbElemsIsVarSize: new Bernoulli(0.8, _random)
+        );
 
-        var simuSystemFuncWrapper = new SimuSystemFuncWrapper(_simuEventGenerator, _finalTime, minFinishedTechs, _preCalcEvent);
+        var techPerYear = 200;
+        var pcbDesignTechGenerator = new PcbDesignTechGenerator(
+            requestsFlowDistrDays: new Exponential(techPerYear / 365.0, _random),
+            pcbGenerator: pcbGenerator,
+            rndSource: _random
+        );
+        _preCalcEvents = pcbDesignTechGenerator.GenerateSimuEvent(_finalTime);
+
+        //var resFailureGenerator = new ResourceFailureGenerator(resourcePool, _random);
+        //preCalcEvents.AddRange(resFailureGenerator.GenerateSimuEvent(_finalTime));
+            
+        var minFinishedTechs = (int)Math.Round(_finalTime / TimeSpan.FromDays(365) * techPerYear * 0.8);
+
+        var simuSystemFuncWrapper = new SimuSystemFuncWrapper(Enumerable.Repeat(_preCalcEvents, 5), _finalTime, minFinishedTechs);
         _objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
     }
 
@@ -77,25 +83,25 @@ public class BenchTest
     //[Benchmark]
     public void TestSimuSystem()
     {
-        var resourcePool = new List<IResource> { _cpuCluster, _server };
-        resourcePool.AddRange(Enumerable.Range(0, _designersCount).Select(_ => new Designer()));
-        resourcePool = resourcePool.Select(resource => resource.Clone()).ToList();
-
-        var simulator =
-            new PcbDesignSimulator(_simuEventGenerator, resourcePool, _pcbAlgFactories, timeTol: _timeTol);
-        simulator.Simulate(_finalTime, _preCalcEvent);
+        // var resourcePool = new List<IResource> { _cpuCluster, _server };
+        // resourcePool.AddRange(Enumerable.Range(0, _designersCount).Select(_ => new Designer()));
+        // resourcePool = resourcePool.Select(resource => resource.Clone()).ToList();
+        //
+        // var simulator =
+        //     new PcbDesignSimulator(_pcbDesignTechGenerator, resourcePool, _pcbAlgFactories, timeTol: _timeTol);
+        // simulator.Simulate(_finalTime, _preCalcEvent);
     }
 
-    [Benchmark]
+    //[Benchmark]
     public void TestSimuSystemOptimized1()
     {
-        var resourcePool = new List<IResource> { _cpuCluster, _server };
-        resourcePool.AddRange(Enumerable.Range(0, _designersCount).Select(_ => new Designer()));
-        resourcePool = resourcePool.Select(resource => resource.Clone()).ToList();
-
-        var simulator =
-            new PcbDesignSimulator(_simuEventGenerator, resourcePool, _pcbAlgFactories, timeTol: _timeTol);
-        simulator.SimulateForOptimization(_finalTime, _preCalcEvent);
+        // var resourcePool = new List<IResource> { _cpuCluster, _server };
+        // resourcePool.AddRange(Enumerable.Range(0, _designersCount).Select(_ => new Designer()));
+        // resourcePool = resourcePool.Select(resource => resource.Clone()).ToList();
+        //
+        // var simulator =
+        //     new PcbDesignSimulator(_pcbDesignTechGenerator, resourcePool, _pcbAlgFactories, timeTol: _timeTol);
+        // simulator.SimulateForOptimization(_finalTime, _preCalcEvent);
     }
 
     [Benchmark]

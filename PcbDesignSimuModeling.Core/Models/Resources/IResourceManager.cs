@@ -2,10 +2,11 @@
 
 public interface IResourceManager
 {
-    bool TryGetResources(int procId, List<IResourceRequest> resourceRequests,
-        out List<IResource> receivedResources);
+    bool TryGetResources(List<IResourceRequest> resourceRequests,
+        out List<(IResource Resource, int RequestId)> receivedResources);
 
-    void FreeResources(int procId, List<IResource> resources);
+    void FreeResources(List<(IResource Resource, int RequestId)> resources);
+    public int NewRequestId { get; }
 }
 
 public class ResourceManager : IResourceManager
@@ -19,10 +20,10 @@ public class ResourceManager : IResourceManager
     }
 
 
-    public bool TryGetResources(int procId, List<IResourceRequest> resourceRequests,
-        out List<IResource> receivedResourcesOut)
+    public bool TryGetResources(List<IResourceRequest> resourceRequests,
+        out List<(IResource Resource, int RequestId)> receivedResourcesOut)
     {
-        var receivedResources = new List<IResource>();
+        var receivedResources = new List<(IResource Resource, int RequestId)>();
         var tempPool = _resourcePool.ToList();
         var poolIsTemped = false;
 
@@ -30,8 +31,8 @@ public class ResourceManager : IResourceManager
         {
             if (!resourceRequest.TryGetResource(tempPool, out var receivedResource))
             {
-                receivedResources.ForEach(resource => resource.FreeResource(procId));
-                receivedResourcesOut = new List<IResource>();
+                receivedResources.ForEach(tuple => tuple.Resource.FreeResource(resourceRequest.RequestId));
+                receivedResourcesOut = new List<(IResource Resource, int RequestId)>();
                 return false;
             }
 
@@ -42,13 +43,16 @@ public class ResourceManager : IResourceManager
             }
 
             tempPool.Remove(receivedResource!);
-            receivedResources.Add(receivedResource!);
+            receivedResources.Add((receivedResource!, resourceRequest.RequestId));
         }
 
         receivedResourcesOut = receivedResources;
         return true;
     }
 
-    public void FreeResources(int procId, List<IResource> resources) =>
-        resources.ForEach(resource => resource.FreeResource(procId));
+    public void FreeResources(List<(IResource Resource, int RequestId)> resources) =>
+        resources.ForEach(tuple => tuple.Resource.FreeResource(tuple.RequestId));
+    
+    public int NewRequestId => _curId++;
+    private int _curId = 1;
 }

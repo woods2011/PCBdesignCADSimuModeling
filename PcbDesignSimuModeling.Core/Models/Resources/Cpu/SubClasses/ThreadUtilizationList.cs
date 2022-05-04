@@ -16,10 +16,7 @@ public class ThreadUtilizationList : IList<ThreadUtilizationByProcess>
 
     public void Add(ThreadUtilizationByProcess item)
     {
-        var index = _listImplementation
-            .TakeWhile(threadByProcUtilization => item.MaxUtil - 1e-12 > threadByProcUtilization.MaxUtil).Count();
-        _listImplementation.Insert(index, item);
-
+        _listImplementation.InsertAfterCondition(item, utilization => item.MaxUtil - 1e-12 > utilization.MaxUtil);
         RecalculateUtilization();
     }
 

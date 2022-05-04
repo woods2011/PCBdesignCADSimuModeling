@@ -24,15 +24,15 @@ public class DocumentationProduction : PcbDesignProcedure
 
     public override void InitResourcesPower()
     {
-        _designerPower = ActiveResources.OfType<Designer>().Sum(resource => resource.PowerForRequest(ProcId));
-        var serverPower = ActiveResources.OfType<Server>().Sum(resource => resource.PowerForRequest(ProcId));
+        _designerPower = ActiveResources.Select(tuple => tuple.Resource).OfType<Designer>().Sum(resource => resource.PowerForRequest(CommonResReqId));
+        var serverPower = ActiveResources.Select(tuple => tuple.Resource).OfType<Server>().Sum(resource => resource.PowerForRequest(CommonResReqId));
         _serverPower = 0.6 + 0.4 * (1.0 / Math.Exp(30.0 / serverPower));
     }
 
     private List<IResourceRequest> GetResourceRequestList() => new()
     {
-        new DesignerRequest(ProcId),
-        new ServerRequest(ProcId)
+        new DesignerRequest(CommonResReqId),
+        new ServerRequest(CommonResReqId)
     };
 
     public override string Name => "Выпуск документации";

@@ -2,7 +2,7 @@
 
 namespace PcbDesignSimuModeling.Core.Models;
 
-public static class MyExtensions
+public static class CollectionsExtensions
 {
     public static (TSource, TKey) MinByAndKey<TSource, TKey>(this IEnumerable<TSource> source,
         Func<TSource, TKey> selector, IComparer<TKey>? comparer = null)
@@ -42,7 +42,7 @@ public static class MyExtensions
 
         var first = sourceIterator.Current;
         var minKey = selector(first);
-        var minimums = new List<TSource>() { first };
+        var minimums = new List<TSource>() {first};
         while (sourceIterator.MoveNext())
         {
             var candidate = sourceIterator.Current;
@@ -76,7 +76,7 @@ public static class MyExtensions
 
         var first = sourceIterator.Current;
         var minKey = selector(first);
-        var minimums = new List<TSource>() { first };
+        var minimums = new List<TSource>() {first};
         while (sourceIterator.MoveNext())
         {
             var candidate = sourceIterator.Current;
@@ -98,63 +98,58 @@ public static class MyExtensions
         return (minimums, minKey);
     }
 
-    
-    public static (TSource,TKey) MaxByAndKey<TSource, TKey>(this IEnumerable<TSource> source,
-        Func<TSource, TKey> selector, IComparer<TKey>? comparer = null)
+    public static void InsertAfterCondition<TSource>(this IList<TSource> source, TSource item,
+        Func<TSource, bool> predicate)
     {
-        if (source == null) throw new ArgumentNullException(nameof(source));
-        if (selector == null) throw new ArgumentNullException(nameof(selector));
-        comparer ??= Comparer<TKey>.Default;
-
-        using var sourceIterator = source.GetEnumerator();
-        if (!sourceIterator.MoveNext()) throw new InvalidOperationException("Sequence contains no elements");
-
-        var max = sourceIterator.Current;
-        var maxKey = selector(max);
-        while (sourceIterator.MoveNext())
-        {
-            var candidate = sourceIterator.Current;
-            var candidateProjected = selector(candidate);
-
-            if (comparer.Compare(candidateProjected, maxKey) <= 0) continue;
-
-            max = candidate;
-            maxKey = candidateProjected;
-        }
-
-        return (max, maxKey);
+        var insertIndex = source.TakeWhile(predicate).Count();
+        source.Insert(insertIndex, item);
     }
 
-        
+    public static void InsertRangeAfterCondition<TSource>(this IList<TSource> source, IEnumerable<TSource> items,
+        Func<TSource, TSource, bool> predicate) 
+    {
+        foreach (var insItem in items) 
+            InsertAfterCondition(source, insItem, itemSource => predicate(itemSource, insItem));
+    }
+
+    public static IEnumerable<double> CumulativeSum(this IEnumerable<double> numbers)
+    {
+        var acc = 0.0;
+
+        foreach (var number in numbers)
+        {
+            acc += number;
+            yield return acc;
+        }
+    }
+}
+
+public static class MathExt
+{
     public static TimeSpan MultiplyAndClamp(this TimeSpan time, double mulFactor, TimeSpan maxTime)
     {
         if (maxTime.Ticks / mulFactor > time.Ticks)
             return time * mulFactor;
         return maxTime;
     }
-        
+
     public static TimeSpan MultiplyAndClamp(this TimeSpan time, double mulFactor) =>
         time.MultiplyAndClamp(mulFactor, TimeSpan.MaxValue);
-        
-        
+
+
     public static TimeSpan AddAndClamp(this TimeSpan time, TimeSpan addTime, TimeSpan maxTime)
     {
         if (maxTime - addTime > time)
             return time + addTime;
         return maxTime;
     }
-            
+
     public static TimeSpan AddAndClamp(this TimeSpan time, TimeSpan addTime) =>
         time.AddAndClamp(addTime, TimeSpan.MaxValue);
-    
-    
-    public static IEnumerable<double> CumulativeSum(this IEnumerable<double> numbers)
-    {
-        var acc = 0.0;
 
-        foreach (var number in numbers) {
-            acc += number;
-            yield return acc;
-        }
+    public static (int Quotient, double Remainder) DivRem(this double left, double right)
+    {
+        var quotient = (int) (left / right);
+        return (quotient, left - quotient * right);
     }
 }

@@ -25,11 +25,11 @@ public class QualityControl : PcbDesignProcedure
         _remainTime < TimeTol ? TimeSpan.Zero : _remainTime / _designerPower;
 
     public override void InitResourcesPower() => _designerPower =
-        ActiveResources.OfType<Designer>().Sum(resource => resource.PowerForRequest(ProcId));
+        ActiveResources.Select(tuple => tuple.Resource).OfType<Designer>().Sum(resource => resource.PowerForRequest(CommonResReqId));
 
     private List<IResourceRequest> GetResourceRequestList() => new()
     {
-        new DesignerRequest(ProcId)
+        new DesignerRequest(CommonResReqId)
     };
 
     public override string Name => "Оценка качества";
