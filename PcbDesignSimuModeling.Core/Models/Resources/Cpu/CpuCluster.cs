@@ -13,7 +13,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
     private readonly double _contextSwitchPenalty;
     private readonly double _hyperThreadingPenalty;
 
-    protected override List<int> UtilizingProcIds => _processIdAndThreads.Keys.ToList();
+    protected override List<int> UtilizingRequestsIds => _processIdAndThreads.Keys.ToList();
 
     public CpuCluster(int threadCount, double clockRate, double hyperThreadingPenalty = 0.725,
         double contextSwitchPenalty = 0.0035)
@@ -70,7 +70,7 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
 
             threadSum += threadSummaryUsageByTheProcess;
         }
-        
+
         return threadSum * ClockRate;
     }
 
@@ -112,11 +112,15 @@ public class CpuCluster : MixedResource, INotifyPropertyChanged
             unloadedCore = _cpuCores.FirstOrDefault(core => core.ActiveTasks == 0);
             maxLoadThread = _threadPool.MaxBy(thread => thread.RealTaskCount)!;
             minLoadThread = unloadedCore?.Threads.Th0 ?? _threadPool.MinBy(thread => thread.RealTaskCount)!;
-            
+
             deltaLoad = (maxLoadThread.RealTaskCount - minLoadThread.RealTaskCount) / 2.0;
             if (deltaLoad < 1e-12) return;
         }
     }
+
+    public List<double> UsagePerThreadList => _threadPool.Select(thread => 1.0 - thread.IdlePercent).ToList();
+    public List<double> NormTaskPerThreadList => _threadPool.Select(thread => thread.RealTaskCount).ToList();
+    public List<int> TaskPerThreadList => _threadPool.Select(thread => thread.ActiveTasks).ToList();
 
 
     public override IResource Clone() => new CpuCluster(ThreadCount, ClockRate);

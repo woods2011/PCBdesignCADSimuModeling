@@ -11,6 +11,7 @@ using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.PlacingAlgorithms;
 using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.WireRoutingAlgorithms;
 using PcbDesignSimuModeling.Core.Models.Resources.Cpu;
 using PcbDesignSimuModeling.Core.Models.Resources.Designer;
+using PcbDesignSimuModeling.Core.Models.Resources.Ram;
 using PcbDesignSimuModeling.Core.Models.Resources.Server;
 using PcbDesignSimuModeling.Core.Models.SimuSystem;
 using PcbDesignSimuModeling.Core.Models.SimuSystem.SimulationEvents;
@@ -28,11 +29,12 @@ public class BenchTest
     private readonly PcbAlgFactories _pcbAlgFactories;
     private readonly List<SimulationEvent> _preCalcEvents;
     private readonly TimeSpan _finalTime = TimeSpan.FromDays(30);
+    private readonly Ram _ram = new(16);
     private readonly CpuCluster _cpuCluster = new(16, 2.5);
     private readonly Server _server = new(150);
     private readonly int _designersCount = 2;
     private readonly TimeSpan? _timeTol = TimeSpan.FromDays(15);
-    private readonly Func<int, double, double, int, int, int, double> _objectiveFunction;
+    private readonly Func<int, double, double, double, int, int, int, double> _objectiveFunction;
 
     public BenchTest()
     {
@@ -58,10 +60,10 @@ public class BenchTest
 
         //var resFailureGenerator = new ResourceFailureGenerator(resourcePool, _random);
         //preCalcEvents.AddRange(resFailureGenerator.GenerateSimuEvent(_finalTime));
-            
-        var minFinishedTechs = (int)Math.Round(_finalTime / TimeSpan.FromDays(365) * techPerYear * 0.8);
 
-        var simuSystemFuncWrapper = new SimuSystemFuncWrapper(Enumerable.Repeat(_preCalcEvents, 5), _finalTime, minFinishedTechs);
+        var sampleSize = 1;
+        var simuSystemFuncWrapper =
+            new SimuSystemFuncWrapper(Enumerable.Repeat(_preCalcEvents, sampleSize), _finalTime);
         _objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
     }
 
@@ -77,7 +79,7 @@ public class BenchTest
     //[Benchmark]
     public void TestFuncEval()
     {
-        _func(new double[] { _random.NextDouble(), _random.NextDouble() });
+        _func(new double[] {_random.NextDouble(), _random.NextDouble()});
     }
 
     //[Benchmark]
@@ -105,8 +107,9 @@ public class BenchTest
     }
 
     [Benchmark]
-    public void TestFuncWrapper() => _objectiveFunction(_cpuCluster.ThreadCount, _cpuCluster.ClockRate,
-        _server.InternetSpeed, 0, 0, _designersCount);
+    public void TestFuncWrapper() => _objectiveFunction(
+        _cpuCluster.ThreadCount, _cpuCluster.ClockRate,
+        _ram.AvailableAmount, _server.InternetSpeed, 0, 0, _designersCount);
 
     public static class FunctionParser
     {

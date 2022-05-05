@@ -9,6 +9,8 @@ public class FoodSource
     public int ThreadsCount { get; set; }
     public double ClockRate { get; set; }
 
+    public double RamAmount { get; set; }
+    
     public double ServerSpeed { get; set; }
 
     [JsonIgnore]
@@ -19,11 +21,12 @@ public class FoodSource
 
     public int DesignersCount { get; set; }
 
-    public FoodSource(int threadsCount, double clockRate, double serverSpeed, int placingAlgIndex,
+    public FoodSource(int threadsCount, double clockRate, double ramAmount, double serverSpeed, int placingAlgIndex,
         int wireRoutingAlgIndex, int designersCount)
     {
         ThreadsCount = threadsCount;
         ClockRate = clockRate;
+        RamAmount = ramAmount;
         ServerSpeed = serverSpeed;
         PlacingAlgIndex = placingAlgIndex;
         WireRoutingAlgIndex = wireRoutingAlgIndex;
@@ -34,15 +37,15 @@ public class FoodSource
 
     public int NumberOfVisits { get; set; } = 0;
 
-    public FoodSource(int threadsCount, double clockRate, double serverSpeed,
+    public FoodSource(int threadsCount, double clockRate, double ramAmount, double serverSpeed,
         int placingAlgIndex, int wireRoutingAlgIndex, int designersCount,
-        Func<int, double, double, int, int, int, double> objectiveFunction)
-        : this(threadsCount, clockRate, serverSpeed, placingAlgIndex, wireRoutingAlgIndex, designersCount) =>
-        FuncValue = objectiveFunction(threadsCount, clockRate, serverSpeed, placingAlgIndex, wireRoutingAlgIndex,
+        Func<int, double, double, double, int, int, int, double> objectiveFunction)
+        : this(threadsCount, clockRate, ramAmount, serverSpeed, placingAlgIndex, wireRoutingAlgIndex, designersCount) =>
+        FuncValue = objectiveFunction(threadsCount, clockRate, ramAmount, serverSpeed, placingAlgIndex, wireRoutingAlgIndex,
             designersCount);
 
-    public void CalculateCost(Func<int, double, double, int, int, int, double> objectiveFunction) =>
-        FuncValue = objectiveFunction(ThreadsCount, ClockRate, ServerSpeed, PlacingAlgIndex, WireRoutingAlgIndex,
+    public void CalculateCost(Func<int, double, double, double, int, int, int, double> objectiveFunction) =>
+        FuncValue = objectiveFunction(ThreadsCount, ClockRate, RamAmount, ServerSpeed, PlacingAlgIndex, WireRoutingAlgIndex,
             DesignersCount);
 
     public FoodSource Copy() => (FoodSource)MemberwiseClone();
@@ -52,6 +55,7 @@ public class FoodSource
         return $"Оценка: {FuncValue}{Environment.NewLine}" +
                $"Конфигурация:{Environment.NewLine}" +
                $"   Потоков: {ThreadsCount} ; Частота: {ClockRate}{Environment.NewLine}" +
+               $"   Объем оперативной памяти: {RamAmount}{Environment.NewLine}" +
                $"   Скорость сервера: {ServerSpeed}{Environment.NewLine}" +
                $"   Размещение: {PlacingAlgProviderFactory.AlgIndexNameMap[PlacingAlgIndex]} ; Трассировка: {WireRoutingAlgProviderFactory.AlgIndexNameMap[WireRoutingAlgIndex]}{Environment.NewLine}" +
                $"   Количество проектировщиков: {DesignersCount}{Environment.NewLine}";

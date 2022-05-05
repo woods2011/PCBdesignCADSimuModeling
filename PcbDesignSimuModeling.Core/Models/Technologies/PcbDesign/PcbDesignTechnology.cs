@@ -77,7 +77,7 @@ public class PcbDesignTechnology
         _curProcedure.ActiveResources.AddRange(receivedResources);
         _curProcedure.PotentialFailureResources.AddRange(
             receivedResources.Select(pair => pair.Resource).OfType<IPotentialFailureResource>());
-        _curProcedure.InitResourcesPower();
+        _curProcedure.InitResources();
 
         if (_isFirstVisit) return;
         _logger?.Log($"{String.Concat(Enumerable.Repeat("---", (TechId - 1) % 15))}" +

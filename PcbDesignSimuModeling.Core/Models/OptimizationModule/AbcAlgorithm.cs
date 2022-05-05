@@ -6,7 +6,7 @@ public class AbcAlgorithm
 {
     private readonly Random _rnd;
 
-    private readonly Func<int, double, double, int, int, int, double> _objectiveFunction;
+    private readonly Func<int, double, double, double, int, int, int, double> _objectiveFunction;
     private readonly AlgorithmSettings _algSettings;
     private readonly IntervalsOfVariables _intervals;
     private List<FoodSource> _foodSources;
@@ -16,7 +16,7 @@ public class AbcAlgorithm
 
 
     public AbcAlgorithm(AlgorithmSettings algSettings, Random rnd,
-        Func<int, double, double, int, int, int, double> objectiveFunction)
+        Func<int, double, double, double, int, int, int, double> objectiveFunction)
     {
         _algSettings = algSettings;
         _intervals = _algSettings.SearchIntervals;
@@ -27,20 +27,21 @@ public class AbcAlgorithm
         _foodSources = Enumerable.Range(0, _algSettings.FoodSourceCount)
             .Select(_ => GenerateNewFoodSource()).ToList();
 
-        BestFoodSource = _foodSources.MinBy(source => source.FuncValue).Copy();
+        BestFoodSource = _foodSources.MaxBy(source => source.FuncValue)!;
     }
 
     private FoodSource GenerateNewFoodSource()
     {
         var x1 = DiscreteUniform.Sample(_rnd, _intervals.ThreadsCountMin, _intervals.ThreadsCountMax);
         var x2 = ContinuousUniform.Sample(_rnd, _intervals.ClockRateMin, _intervals.ClockRateMax);
-        var x3 = ContinuousUniform.Sample(_rnd, _intervals.ServerSpeedMin, _intervals.ServerSpeedMax);
-        var x4 = _intervals.PlacingAlgsIndexes[
-            DiscreteUniform.Sample(_rnd, 0, _intervals.PlacingAlgsIndexes.Length - 1)];
-        var x5 = _intervals.WireRoutingAlgsIndexes[
-            DiscreteUniform.Sample(_rnd, 0, _intervals.WireRoutingAlgsIndexes.Length - 1)];
-        var x6 = DiscreteUniform.Sample(_rnd, _intervals.DesignersCountMin, _intervals.DesignersCountMax);
-        return new FoodSource(x1, x2, x3, x4, x5, x6, _objectiveFunction);
+        var x3 = ContinuousUniform.Sample(_rnd, _intervals.RamAmountMin, _intervals.RamAmountMax);
+        var x4 = ContinuousUniform.Sample(_rnd, _intervals.ServerSpeedMin, _intervals.ServerSpeedMax);
+        var x5 = _intervals.PlacingAlgsIndexes
+            [DiscreteUniform.Sample(_rnd, 0, _intervals.PlacingAlgsIndexes.Length - 1)];
+        var x6 = _intervals.WireRoutingAlgsIndexes
+            [DiscreteUniform.Sample(_rnd, 0, _intervals.WireRoutingAlgsIndexes.Length - 1)];
+        var x7 = DiscreteUniform.Sample(_rnd, _intervals.DesignersCountMin, _intervals.DesignersCountMax);
+        return new FoodSource(x1, x2, x3, x4, x5, x6, x7, _objectiveFunction);
     }
 
     public IEnumerable<FoodSource> FindMinimum()
@@ -51,9 +52,14 @@ public class AbcAlgorithm
         {
             //Поиск лучшего решения в окрестности текущего
             _foodSources = SearchNeighborsFoodSources();
-            _foodSources.RemoveAll(source =>
-                source.NumberOfVisits >= _algSettings.FoodSourceCount && source != BestFoodSource);
-
+            _foodSources.RemoveAll(source => source.NumberOfVisits >= _algSettings.FoodSourceCount);
+            // if (!_foodSources.Contains(BestFoodSource))
+            // {
+            //     BestFoodSource.NumberOfVisits = 0;
+            //     _foodSources.Add(BestFoodSource);
+            // }
+            
+            
             //Генерируем скаутов, вместо источившихся источников еды
             var scoutsBeesCount = _algSettings.FoodSourceCount - _foodSources.Count;
             _foodSources.AddRange(Enumerable.Range(0, scoutsBeesCount).Select(_ => GenerateNewFoodSource()));
@@ -61,13 +67,13 @@ public class AbcAlgorithm
             //var best = _foodSources.MinBy(chromosome => chromosome.FuncValue).Copy();
 
             //Селекция
-            var (ii, selectedWorkers, selectedCount) = (0, new List<FoodSource>(), 0);
+            var (j, selectedWorkers, selectedCount) = (0, new List<FoodSource>(), 0);
             while (selectedCount < _algSettings.FoodSourceCount)
             {
-                var curWorker = _foodSources[ii];
+                var curWorker = _foodSources[j];
                 var anotherWorker = _foodSources.FisherYatesShuffleExcept(curWorker, _rnd).First();
 
-                if (curWorker.FuncValue <= anotherWorker.FuncValue ||
+                if (curWorker.FuncValue >= anotherWorker.FuncValue ||
                     Math.Exp(-Math.Abs(curWorker.FuncValue - anotherWorker.FuncValue) / _curTemperature) >
                     _rnd.NextDouble())
                 {
@@ -75,19 +81,19 @@ public class AbcAlgorithm
                     selectedCount++;
                 }
 
-                ii = (ii + 1) % _algSettings.FoodSourceCount;
+                j = (j + 1) % _algSettings.FoodSourceCount;
             }
 
             _foodSources = selectedWorkers;
 
             //Выбор лучшего и обновление температуры
-            var iterBest = _foodSources.MinBy(chromosome => chromosome.FuncValue).Copy();
-            if (iterBest.FuncValue < BestFoodSource.FuncValue) BestFoodSource = iterBest;
+            var iterBest = _foodSources.MaxBy(chromosome => chromosome.FuncValue)!;
+            if (iterBest.FuncValue > BestFoodSource.FuncValue) BestFoodSource = iterBest;
             yield return BestFoodSource.Copy();
 
-            _curTemperature = Math.Max(1,
+            _curTemperature = Math.Max(1.0,
                 _algSettings.InitTemperature *
-                Math.Pow(1.0 - i / (double)_algSettings.NumOfIterations, _algSettings.Alpha));
+                Math.Pow(1.0 - i / (double) _algSettings.NumOfIterations, _algSettings.Alpha));
         }
     }
 
@@ -97,49 +103,55 @@ public class AbcAlgorithm
 
         foreach (var curWorkerBee in _foodSources)
         {
-            var dim = _rnd.Next(1, 6 + 1);
+            var dim = DiscreteUniform.Sample(_rnd, 1, 7);
             var neighborFoodSource = _foodSources.FisherYatesShuffleExcept(curWorkerBee, _rnd).First().Copy();
 
             switch (dim)
             {
                 case 1:
-                    neighborFoodSource.ThreadsCount =
-                        Math.Clamp((int)Math.Round(curWorkerBee.ThreadsCount +
-                                                   ContinuousUniform.Sample(_rnd, -1.0, 1.0) *
-                                                   (curWorkerBee.ThreadsCount - neighborFoodSource.ThreadsCount)),
-                            _intervals.ThreadsCountMin, _intervals.ThreadsCountMax);
+                    neighborFoodSource.ThreadsCount = Math.Clamp(
+                        Convert.ToInt32(
+                            curWorkerBee.ThreadsCount +
+                            ContinuousUniform.Sample(_rnd, -1.0, 1.0) *
+                            (curWorkerBee.ThreadsCount - neighborFoodSource.ThreadsCount)),
+                        _intervals.ThreadsCountMin, _intervals.ThreadsCountMax);
                     break;
                 case 2:
-                    neighborFoodSource.ClockRate =
-                        Math.Clamp(
-                            curWorkerBee.ClockRate + (-1.0 + _rnd.NextDouble() * 2.0) *
-                            (curWorkerBee.ClockRate - neighborFoodSource.ClockRate),
-                            _intervals.ClockRateMin, _intervals.ClockRateMax);
+                    neighborFoodSource.ClockRate = Math.Clamp(
+                        curWorkerBee.ClockRate +
+                        ContinuousUniform.Sample(_rnd, -1.0, 1.0) *
+                        (curWorkerBee.ClockRate - neighborFoodSource.ClockRate),
+                        _intervals.ClockRateMin, _intervals.ClockRateMax);
                     break;
                 case 3:
-                    neighborFoodSource.ServerSpeed =
-                        Math.Clamp(
-                            curWorkerBee.ServerSpeed + (-1.0 + _rnd.NextDouble() * 2.0) *
-                            (curWorkerBee.ServerSpeed - neighborFoodSource.ServerSpeed),
-                            _intervals.ServerSpeedMin, _intervals.ServerSpeedMax);
+                    neighborFoodSource.RamAmount = Math.Clamp(
+                        curWorkerBee.RamAmount +
+                        ContinuousUniform.Sample(_rnd, -1.0, 1.0) *
+                        (curWorkerBee.RamAmount - neighborFoodSource.RamAmount),
+                        _intervals.RamAmountMin, _intervals.RamAmountMax);
                     break;
                 case 4:
-                    neighborFoodSource.PlacingAlgIndex =
-                        _intervals.PlacingAlgsIndexes[
-                            DiscreteUniform.Sample(_rnd, 0, _intervals.PlacingAlgsIndexes.Length - 1)];
+                    neighborFoodSource.ServerSpeed = Math.Clamp(
+                        curWorkerBee.ServerSpeed +
+                        ContinuousUniform.Sample(_rnd, -1.0, 1.0) *
+                        (curWorkerBee.ServerSpeed - neighborFoodSource.ServerSpeed),
+                        _intervals.ServerSpeedMin, _intervals.ServerSpeedMax);
                     break;
                 case 5:
-                    neighborFoodSource.WireRoutingAlgIndex =
-                        _intervals.WireRoutingAlgsIndexes[
-                            DiscreteUniform.Sample(_rnd, 0, _intervals.WireRoutingAlgsIndexes.Length - 1)];
+                    neighborFoodSource.PlacingAlgIndex = _intervals.PlacingAlgsIndexes
+                        [DiscreteUniform.Sample(_rnd, 0, _intervals.PlacingAlgsIndexes.Length - 1)];
                     break;
                 case 6:
-                    neighborFoodSource.DesignersCount =
-                        Math.Clamp((int)Math.Round(curWorkerBee.DesignersCount +
-                                                   ContinuousUniform.Sample(_rnd, -1.0, 1.0) *
-                                                   (curWorkerBee.DesignersCount -
-                                                    neighborFoodSource.DesignersCount)),
-                            _intervals.DesignersCountMin, _intervals.DesignersCountMax);
+                    neighborFoodSource.WireRoutingAlgIndex = _intervals.WireRoutingAlgsIndexes
+                        [DiscreteUniform.Sample(_rnd, 0, _intervals.WireRoutingAlgsIndexes.Length - 1)];
+                    break;
+                case 7:
+                    neighborFoodSource.DesignersCount = Math.Clamp(
+                        Convert.ToInt32(
+                            curWorkerBee.DesignersCount +
+                            ContinuousUniform.Sample(_rnd, -1.0, 1.0) *
+                            (curWorkerBee.DesignersCount - neighborFoodSource.DesignersCount)),
+                        _intervals.DesignersCountMin, _intervals.DesignersCountMax);
                     break;
 
                 default: throw new ArgumentOutOfRangeException(nameof(dim));
@@ -147,7 +159,7 @@ public class AbcAlgorithm
 
             neighborFoodSource.CalculateCost(_objectiveFunction);
 
-            if (neighborFoodSource.FuncValue >= curWorkerBee.FuncValue)
+            if (neighborFoodSource.FuncValue <= curWorkerBee.FuncValue)
             {
                 curWorkerBee.NumberOfVisits++;
                 result.Add(curWorkerBee);

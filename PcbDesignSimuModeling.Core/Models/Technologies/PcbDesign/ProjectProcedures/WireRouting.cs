@@ -1,13 +1,14 @@
 ﻿using PcbDesignSimuModeling.Core.Models.Resources;
 using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.WireRoutingAlgorithms;
 using PcbDesignSimuModeling.Core.Models.Resources.Cpu;
+using PcbDesignSimuModeling.Core.Models.Resources.Ram;
 
 namespace PcbDesignSimuModeling.Core.Models.Technologies.PcbDesign.ProjectProcedures;
 
 public class WireRouting : PcbDesignProcedure
 {
     private readonly IWireRoutingAlgorithm _wireRoutingAlg;
-    private double _cpuPower;
+    private (CpuCluster Cpu, double Power) _cpu;
 
     public WireRouting(PcbDesignTechnology context) : base(context)
     {
@@ -24,22 +25,22 @@ public class WireRouting : PcbDesignProcedure
 
     public override void UpdateModelTime(TimeSpan deltaTime)
     {
-        _wireRoutingAlg.UpdateModelTime(deltaTime, _cpuPower);
+        _wireRoutingAlg.UpdateModelTime(deltaTime, _cpu.Power);
     }
 
     public override TimeSpan EstimateEndTime()
     {
-        _cpuPower = ActiveResources.Select(tuple => tuple.Resource).OfType<CpuCluster>().Sum(resource => resource.PowerForRequest(CommonResReqId));
-        return _wireRoutingAlg.EstimateEndTime(_cpuPower);
+        _cpu.Power = _cpu.Cpu.PowerForRequest(CommonResReqId);
+        return _wireRoutingAlg.EstimateEndTime(_cpu.Power);
     }
 
-    public override void InitResourcesPower()
-    {
-    }
+    public override void InitResources() =>
+        _cpu = (ActiveResources.Select(tuple => tuple.Resource).OfType<CpuCluster>().First(), 0.0);
 
     private List<IResourceRequest> GetResourceRequestList() => new()
     {
         new CpuRequest(CommonResReqId, _wireRoutingAlg.MaxThreadUtilization),
+        new RamRequest(CommonResReqId, 2.0)
     };
 
     public override string Name => "Трассировка";

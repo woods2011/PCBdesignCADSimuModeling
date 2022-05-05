@@ -11,6 +11,7 @@ using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.PlacingAlgorithms;
 using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.WireRoutingAlgorithms;
 using PcbDesignSimuModeling.Core.Models.Resources.Cpu;
 using PcbDesignSimuModeling.Core.Models.Resources.Designer;
+using PcbDesignSimuModeling.Core.Models.Resources.Ram;
 using PcbDesignSimuModeling.Core.Models.Resources.Server;
 using PcbDesignSimuModeling.Core.Models.SimuSystem;
 using PcbDesignSimuModeling.Core.Models.SimuSystem.SimulationEvents;
@@ -41,12 +42,11 @@ public class SimuSystemViewModel : BaseViewModel
     public string SelectedWireRoutingAlgStr { get; set; } = WireRoutingAlgProviderFactory.WireRoutingWaveStr;
 
 
-    public Server Server { get; } = new(150);
     public CpuCluster Cpu { get; } = new(16, 2.5);
-    public int DesignersCount { get; set; } = 1;
+    public Ram Ram { get; } = new(16);
+    public Server Server { get; } = new(150);
+    public int DesignersCount { get; set; } = 2;
 
-
-    public TechIntervalBuilderVm TechIntervalDistr { get; }
 
     public int TechPerYear { get; set; } = 200;
     public DblNormalDistributionBuilderVm ElementCountDistr { get; }
@@ -58,8 +58,6 @@ public class SimuSystemViewModel : BaseViewModel
     public SimuSystemViewModel(Random? rndSource = null)
     {
         _rndSource = rndSource ?? new Random(1);
-        TechIntervalDistr =
-            new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0), _rndSource);
         ElementCountDistr = new DblNormalDistributionBuilderVm(150, 15, _rndSource);
         AreaUsagePctDistr = new DblNormalDistributionBuilderVm(0.6, 0.1, _rndSource);
     }
@@ -78,9 +76,8 @@ public class SimuSystemViewModel : BaseViewModel
     {
         try
         {
-            List<IResource> resourcePool = new() {Cpu, Server};
+            var resourcePool = new IResource[] {Ram, Server, Cpu}.Select(resource => resource.Clone()).ToList();
             resourcePool.AddRange(Enumerable.Range(0, DesignersCount).Select(_ => new Designer()));
-            resourcePool = resourcePool.Select(resource => resource.Clone()).ToList();
 
             var pcbAlgFactories = new PcbAlgFactories(
                 placingAlgFactory: PlacingAlgProviderFactory.Create(SelectedPlacingAlgStr),
@@ -128,7 +125,7 @@ public class SimuSystemViewModel : BaseViewModel
                 ResourcePool = resourcePool,
                 SelectedPlacingAlgStr = SelectedPlacingAlgStr,
                 SelectedWireRoutingAlgStr = SelectedWireRoutingAlgStr,
-                TechIntervalDistr = TechIntervalDistr,
+                TechPerYear = TechPerYear,
                 ElementCountDistr = ElementCountDistr,
                 DimensionUsagePctDistr = AreaUsagePctDistr,
                 VariousSizePctMean = VariousSizePctProb,

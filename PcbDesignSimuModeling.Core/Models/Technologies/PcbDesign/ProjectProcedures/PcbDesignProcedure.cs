@@ -7,7 +7,6 @@ public abstract class PcbDesignProcedure
     protected readonly PcbDesignTechnology Context;
     public int CommonResReqId { get; }
 
-
     protected PcbDesignProcedure(PcbDesignTechnology context)
     {
         Context = context;
@@ -23,7 +22,7 @@ public abstract class PcbDesignProcedure
     public abstract void UpdateModelTime(TimeSpan deltaTime);
     public abstract TimeSpan EstimateEndTime();
 
-    public abstract void InitResourcesPower();
+    public abstract void InitResources();
 
     public abstract string Name { get; }
 

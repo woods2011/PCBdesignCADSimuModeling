@@ -20,8 +20,8 @@ public class SimulationResult
     public string? SelectedWireRoutingAlgStr { get; set; }
         
             
-    [JsonProperty("Интервал между изделиями (норм. распр.)")]
-    public TechIntervalBuilderVm? TechIntervalDistr { get; set; }
+    [JsonProperty("Заявок в год")]
+    public int TechPerYear { get; set; }
         
     [JsonProperty("Число элементов на плате (норм. распр.)")]
     public DblNormalDistributionBuilderVm? ElementCountDistr { get; set; }

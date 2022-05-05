@@ -2,11 +2,13 @@
 
 public abstract class UndividedResource : IResource
 {
-    protected int? UtilizingResourceId;
+    public bool IsBusy => UtilizingRequestId is not null;
+    
+    protected int? UtilizingRequestId;
     public abstract double PowerForRequest(int requestId);
 
     public abstract void FreeResource(int requestId);
-
-    public abstract IResource Clone();
+    
     public abstract decimal Cost { get; }
+    public abstract IResource Clone();
 }

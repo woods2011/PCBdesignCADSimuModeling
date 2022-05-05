@@ -43,14 +43,14 @@ public class OptimizationModuleViewModel : BaseViewModel
     public List<string> SelectedWireRoutingAlgStrList { get; set; }
 
 
-    public TechIntervalBuilderVm TechIntervalDistr { get; }
     public double TechPerYear { get; set; } = 200;
     public DblNormalDistributionBuilderVm ElementCountDistr { get; }
     public DblNormalDistributionBuilderVm AreaUsagePctDistr { get; }
     public double VariousSizePctProb { get; set; } = 0.8;
     public TimeSpan FinalTime { get; set; } = TimeSpan.FromDays(30);
+    public int SampleSize { get; set; } = 2;
 
-
+    
     public OptimizationModuleViewModel(Random? rndSource = null)
     {
         SelectedPlacingAlgStrList = PlacingAlgStrList.ToList();
@@ -59,8 +59,6 @@ public class OptimizationModuleViewModel : BaseViewModel
         _rndSource = rndSource ?? new Random(1);
         _savedAlgSettings = AlgSettings.Copy();
 
-        TechIntervalDistr =
-            new TechIntervalBuilderVm(new TimeSpan(1, 20, 0, 0), new TimeSpan(6, 30, 0), _rndSource);
         ElementCountDistr = new DblNormalDistributionBuilderVm(150, 15, _rndSource);
         AreaUsagePctDistr = new DblNormalDistributionBuilderVm(0.6, 0.1, _rndSource);
 
@@ -103,25 +101,13 @@ public class OptimizationModuleViewModel : BaseViewModel
                 rndSource: _rndSource
             );
 
-            var minFinishedTechs = (int)Math.Round(FinalTime / TimeSpan.FromDays(365) * TechPerYear * 0.8);
-
-            var preCalcEventsList = Enumerable.Repeat(simuEventGenerator.GenerateSimuEvent(FinalTime), 5);
-            var simuSystemFuncWrapper = new SimuSystemFuncWrapper(preCalcEventsList, FinalTime, minFinishedTechs);
+            var preCalcEventsList = Enumerable.Range(0, SampleSize).Select(_ => simuEventGenerator.GenerateSimuEvent(FinalTime));
+            var simuSystemFuncWrapper = new SimuSystemFuncWrapper(preCalcEventsList, FinalTime);
             var objectiveFunction = simuSystemFuncWrapper.ObjectiveFunction;
 
             var abcAlgorithm = new AbcAlgorithm(_savedAlgSettings, _rndSource, objectiveFunction);
-
-            _lastResultLog = abcAlgorithm.FindMinimum().Select(foodSource =>
-            {
-                var source = foodSource.Copy();
-                source.FuncValue *= -1.0;
-                return source;
-            }).ToList();
-            var lastResult = abcAlgorithm.BestFoodSource.Copy();
-            lastResult.FuncValue *= -1.0; // ToDo: fix
-            LastResult = lastResult;
-
-            // LastResult = _lastResultLog.LastOrDefault();
+            _lastResultLog = abcAlgorithm.FindMinimum().ToList();
+            LastResult = abcAlgorithm.BestFoodSource.Copy();
 
             DrawLog();
             DrawPlot();

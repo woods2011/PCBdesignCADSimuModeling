@@ -13,11 +13,11 @@ public class AlgorithmSettings : INotifyPropertyChanged
     public int NumOfIterations { get; set; } = 200;
     public double InitTemperature { get; set; } = 200;
     public double Alpha { get; set; } = 1.0;
-        
+
 
     public AlgorithmSettings Copy()
     {
-        var algorithmParameters = (AlgorithmSettings)MemberwiseClone();
+        var algorithmParameters = (AlgorithmSettings) MemberwiseClone();
         algorithmParameters.SearchIntervals = SearchIntervals.Copy();
         return algorithmParameters;
     }
@@ -27,27 +27,29 @@ public class AlgorithmSettings : INotifyPropertyChanged
 
 public class IntervalsOfVariables : INotifyPropertyChanged
 {
-    public int ThreadsCountMin { get; set; } = 1;
+    public int ThreadsCountMin { get; set; } = 2;
     public int ThreadsCountMax { get; set; } = 100;
 
     public double ClockRateMin { get; set; } = 1.2;
     public double ClockRateMax { get; set; } = 4.5;
-
+    
+    public double RamAmountMin { get; set; } = 4;
+    public double RamAmountMax { get; set; } = 100;
+    
     public double ServerSpeedMin { get; set; } = 25;
     public double ServerSpeedMax { get; set; } = 1000;
 
-    [JsonIgnore]
-    public int[] PlacingAlgsIndexes { get; set; } = { 0, 1 };
 
-    [JsonIgnore]
-    public int[] WireRoutingAlgsIndexes { get; set; } = { 0, 1 };
+    [JsonIgnore] public int[] PlacingAlgsIndexes { get; set; } = {0, 1};
+
+    [JsonIgnore] public int[] WireRoutingAlgsIndexes { get; set; } = {0, 1};
 
     public int DesignersCountMin { get; set; } = 1;
     public int DesignersCountMax { get; set; } = 10;
 
     public IntervalsOfVariables Copy()
     {
-        var intervalsOfVariables = (IntervalsOfVariables)MemberwiseClone();
+        var intervalsOfVariables = (IntervalsOfVariables) MemberwiseClone();
         intervalsOfVariables.PlacingAlgsIndexes = PlacingAlgsIndexes.ToArray();
         intervalsOfVariables.WireRoutingAlgsIndexes = WireRoutingAlgsIndexes.ToArray();
         return intervalsOfVariables;

@@ -6,17 +6,17 @@ public class Designer : UndividedResource, IPotentialFailureResource, INotifyPro
 {
     public bool TryGetResource(int procId)
     {
-        if (UtilizingResourceId.HasValue || !IsActive) return false;
+        if (UtilizingRequestId.HasValue || !IsActive) return false;
 
-        UtilizingResourceId = procId;
+        UtilizingRequestId = procId;
         return true;
     }
 
     public bool IsActive { get; set; } = true;
 
-    public override double PowerForRequest(int requestId) => 1.0;
+    public override double PowerForRequest(int _) => 1.0;
 
-    public override void FreeResource(int requestId) => UtilizingResourceId = null;
+    public override void FreeResource(int requestId) => UtilizingRequestId = null;
 
 
     public override IResource Clone() => new Designer();

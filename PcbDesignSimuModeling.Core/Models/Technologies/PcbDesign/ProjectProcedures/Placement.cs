@@ -1,13 +1,14 @@
 ﻿using PcbDesignSimuModeling.Core.Models.Resources;
 using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.PlacingAlgorithms;
 using PcbDesignSimuModeling.Core.Models.Resources.Cpu;
+using PcbDesignSimuModeling.Core.Models.Resources.Ram;
 
 namespace PcbDesignSimuModeling.Core.Models.Technologies.PcbDesign.ProjectProcedures;
 
 public class Placement : PcbDesignProcedure
 {
     private readonly IPlacingAlgorithm _placingAlg;
-    private double _cpuPower;
+    private (CpuCluster Cpu, double Power) _cpu;
 
     public Placement(PcbDesignTechnology context) : base(context)
     {
@@ -24,24 +25,23 @@ public class Placement : PcbDesignProcedure
 
     public override void UpdateModelTime(TimeSpan deltaTime)
     {
-        _placingAlg.UpdateModelTime(deltaTime, _cpuPower);
+        _placingAlg.UpdateModelTime(deltaTime, _cpu.Power);
     }
 
     public override TimeSpan EstimateEndTime()
     {
-        _cpuPower = ActiveResources.Select(tuple => tuple.Resource).OfType<CpuCluster>().Sum(resource => resource.PowerForRequest(CommonResReqId));
-        return _placingAlg.EstimateEndTime(_cpuPower);
+        _cpu.Power = _cpu.Cpu.PowerForRequest(CommonResReqId);
+        return _placingAlg.EstimateEndTime(_cpu.Power);
     }
 
-    public override void InitResourcesPower()
-    {
-    }
+    public override void InitResources() =>
+        _cpu = (ActiveResources.Select(tuple => tuple.Resource).OfType<CpuCluster>().First(), 0.0);
 
 
     private List<IResourceRequest> GetResourceRequestList() => new()
     {
-        //RequiredResources.Add(new DesignerRequest(ProcedureId));
         new CpuRequest(CommonResReqId, _placingAlg.MaxThreadUtilization),
+        new RamRequest(CommonResReqId, 2.0)
     };
 
     public override string Name => "Размещение";

@@ -5,6 +5,7 @@ using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.PlacingAlgorithms;
 using PcbDesignSimuModeling.Core.Models.Resources.Algorithms.WireRoutingAlgorithms;
 using PcbDesignSimuModeling.Core.Models.Resources.Cpu;
 using PcbDesignSimuModeling.Core.Models.Resources.Designer;
+using PcbDesignSimuModeling.Core.Models.Resources.Ram;
 using PcbDesignSimuModeling.Core.Models.Resources.Server;
 using PcbDesignSimuModeling.Core.Models.SimuSystem;
 using PcbDesignSimuModeling.Core.Models.SimuSystem.SimulationEvents;
@@ -18,21 +19,20 @@ public class SimuSystemFuncWrapper
     private readonly IList<IEnumerable<SimulationEvent>> _preCalcEventsList;
 
     private readonly TimeSpan _finalTime;
-    private readonly int _minFinishedTechs;
     private readonly TimeSpan _timeTol;
 
     public SimuSystemFuncWrapper(IEnumerable<IEnumerable<SimulationEvent>> preCalcEventsList, TimeSpan finalTime,
-        int minFinishedTechs, Random? rndSource = null, TimeSpan? timeTol = null)
+        Random? rndSource = null, TimeSpan? timeTol = null)
     {
         _finalTime = finalTime;
-        _minFinishedTechs = minFinishedTechs;
         _rndSource = rndSource ?? new Random(1);
         _timeTol = timeTol ?? finalTime * 0.2;
 
         _preCalcEventsList = preCalcEventsList.ToList();
     }
 
-    public double ObjectiveFunction(int threadsCount, double clockRate, double serverSpeed, int placingAlgIndex,
+    public double ObjectiveFunction(int threadsCount, double clockRate, double ramAmount, double serverSpeed,
+        int placingAlgIndex,
         int wireRoutingAlgIndex, int designersCount)
     {
         // var results = new ConcurrentBag<double>();
@@ -120,9 +120,10 @@ public class SimuSystemFuncWrapper
         var input = _preCalcEventsList.Select(preCalcEventsSource =>
         {
             var preCalcEvents = preCalcEventsSource.ToList();
+            var minFinishedTechs = preCalcEvents.Count * 0.5;
 
             var resourcePool = new List<IResource>
-                {new CpuCluster(threadsCount, clockRate), new Server(serverSpeed)};
+                {new Ram(ramAmount), new Server(serverSpeed), new CpuCluster(threadsCount, clockRate)};
             resourcePool.AddRange(Enumerable.Range(0, designersCount).Select(_ => new Designer()));
 
             var resFailuresEvents =
@@ -130,22 +131,22 @@ public class SimuSystemFuncWrapper
             preCalcEvents.InsertRangeAfterCondition(resFailuresEvents,
                 (itemSource, insItem) => insItem.ActivateTime > itemSource.ActivateTime);
 
-            return (preCalcEvents, resourcePool);
+            return (preCalcEvents, resourcePool, minFinishedTechs);
         }).ToList();
 
-        return input.AsParallel().Average(pair =>
+        return input.AsParallel().Average(tuple =>
             {
                 var pcbAlgFactories = new PcbAlgFactories(
                     placingAlgFactory: PlacingAlgProviderFactory.Create(placingAlgIndex),
                     wireRoutingAlgFactory: WireRoutingAlgProviderFactory.Create(wireRoutingAlgIndex)
                 );
 
-                var simulator = new PcbDesignSimulator(pair.preCalcEvents, pair.resourcePool, pcbAlgFactories,
+                var simulator = new PcbDesignSimulator(tuple.preCalcEvents, tuple.resourcePool, pcbAlgFactories,
                     timeTol: _timeTol);
                 var simulationResult = simulator.Simulate(_finalTime);
 
-                if (simulationResult.Values.Count <= _minFinishedTechs)
-                    return Double.MaxValue / (sampleSize * sampleSize);
+                if (simulationResult.Values.Count <= tuple.minFinishedTechs)
+                    return Double.MinValue / (sampleSize * sampleSize);
 
 
                 var productionTimesSec = simulationResult.Values;
@@ -153,11 +154,11 @@ public class SimuSystemFuncWrapper
                 var avgProductionTimeMilSec = productionTimesSec.Average(time => time.TotalMilliseconds);
                 var avgProductionTime = TimeSpan.FromMilliseconds(avgProductionTimeMilSec);
 
-                var totalConfigCost = pair.resourcePool.Sum(resource => resource.Cost);
+                var totalConfigCost = tuple.resourcePool.Sum(resource => resource.Cost);
 
                 var costToTime = (0.6 * (100000.0 / avgProductionTime.TotalDays)) / (0.4 * (double) totalConfigCost);
 
-                return -1.0 * costToTime;
+                return costToTime;
             }
         );
     }

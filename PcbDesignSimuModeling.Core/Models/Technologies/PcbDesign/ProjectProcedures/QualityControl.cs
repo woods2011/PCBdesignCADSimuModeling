@@ -1,12 +1,13 @@
 ﻿using PcbDesignSimuModeling.Core.Models.Resources;
 using PcbDesignSimuModeling.Core.Models.Resources.Designer;
+using PcbDesignSimuModeling.Core.Models.Resources.Ram;
 
 namespace PcbDesignSimuModeling.Core.Models.Technologies.PcbDesign.ProjectProcedures;
 
 public class QualityControl : PcbDesignProcedure
 {
-    private double _designerPower;
-
+    private TimeSpan _remainTime = TimeSpan.FromDays(0.5);
+    
     public QualityControl(PcbDesignTechnology context) : base(context) =>
         RequiredResources.AddRange(GetResourceRequestList());
 
@@ -17,19 +18,19 @@ public class QualityControl : PcbDesignProcedure
         return true;
     }
 
-    private TimeSpan _remainTime = TimeSpan.FromDays(0.5);
-
-    public override void UpdateModelTime(TimeSpan deltaTime) => _remainTime -= deltaTime * _designerPower;
+    public override void UpdateModelTime(TimeSpan deltaTime) => _remainTime -= deltaTime;
 
     public override TimeSpan EstimateEndTime() =>
-        _remainTime < TimeTol ? TimeSpan.Zero : _remainTime / _designerPower;
+        _remainTime < TimeTol ? TimeSpan.Zero : _remainTime;
 
-    public override void InitResourcesPower() => _designerPower =
-        ActiveResources.Select(tuple => tuple.Resource).OfType<Designer>().Sum(resource => resource.PowerForRequest(CommonResReqId));
+    public override void InitResources()
+    {
+    }
 
     private List<IResourceRequest> GetResourceRequestList() => new()
     {
-        new DesignerRequest(CommonResReqId)
+        new DesignerRequest(CommonResReqId),
+        new RamRequest(CommonResReqId, 1.5)
     };
 
     public override string Name => "Оценка качества";
