@@ -4,6 +4,9 @@
   &lt;Assembly Path="C:\Users\ArtemPC\.nuget\packages\mathnet.numerics\4.15.0\lib\netstandard2.0\MathNet.Numerics.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\6.0.2\PresentationFramework.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.2\ref\net6.0\Microsoft.Win32.Primitives.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\ArtemPC\.nuget\packages\oneof\3.0.216\lib\netstandard2.0\OneOf.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\ArtemPC\.nuget\packages\propertychanged.fody\3.4.0\lib\netstandard2.1\PropertyChanged.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\ArtemPC\.nuget\packages\mvvmdialogs\8.0.0\lib\net5.0-windows7.0\MvvmDialogs.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:Boolean x:Key="/Default/Environment/Highlighting/HighlightingEnabled/@EntryValue">False</s:Boolean>
 	<s:String x:Key="/Default/Environment/Highlighting/HighlightingMode/@EntryValue">OnlyFullLine</s:String>

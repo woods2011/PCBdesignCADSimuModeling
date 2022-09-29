@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using PcbDesignSimuModeling.Core.ViewModels;
+using PcbDesignSimuModeling.WPF.ViewModels;
 using PcbDesignSimuModeling.WPF.Views;
 
 namespace PcbDesignSimuModeling.WPF;

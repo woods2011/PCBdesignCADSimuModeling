@@ -1,0 +1,256 @@
+﻿<UserControl x:Class="PcbDesignSimuModeling.WPF.Views.SimuSystem.SimuSystemView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:wpfTool="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+             xmlns:wpfsharp="clr-namespace:WpfSharp.Controls;assembly=WpfSharp.Controls"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
+             xmlns:wpf="clr-namespace:PcbDesignSimuModeling.WPF"
+             xmlns:views="clr-namespace:PcbDesignSimuModeling.WPF.Views"
+             xmlns:simuSystem1="clr-namespace:PcbDesignSimuModeling.WPF.Views.SimuSystem"
+             xmlns:shared1="clr-namespace:PcbDesignSimuModeling.WPF.Views.Shared"
+             xmlns:simuSystem="clr-namespace:PcbDesignSimuModeling.WPF.ViewModels.SimuSystem"
+             xmlns:shared2="clr-namespace:PcbDesignSimuModeling.WPF.ViewModels.Shared"
+             md:DialogServiceViews.IsRegistered="True"
+             mc:Ignorable="d"
+             d:DesignWidth="1580" d:DesignHeight="1080"
+             d:DataContext="{d:DesignInstance Type=simuSystem:SimuSystemViewModel, IsDesignTimeCreatable=True}">
+
+    <UserControl.Resources>
+        <wpfsharp:StringToWordsConverter x:Key="StringToWordsConverter" />
+    </UserControl.Resources>
+
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Left" Margin="0,0,25,0">
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,0">
+
+                <DockPanel DockPanel.Dock="Left" Margin="0,0,25,0">
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <TextBlock Margin="0,0,0,5" FontSize="14" FontWeight="Bold" Text="КОНФИГУРАЦИЯ САПР" />
+
+                        <ContentControl Content="{Binding CadConfigurationVm}">
+                            <ContentControl.Resources>
+                                <DataTemplate DataType="{x:Type simuSystem:CadConfigurationVm}">
+                                    <simuSystem1:CadConfigurationView />
+                                </DataTemplate>
+                            </ContentControl.Resources>
+                        </ContentControl>
+                    </StackPanel>
+                
+                    <DockPanel DockPanel.Dock="Bottom" LastChildFill="False">
+                        <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="14" Margin="0,0,0,3"
+                                   Text="Калькуляция расходов за Месяц:" />
+                        <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="LightGray">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <TextBlock Padding="2" FontWeight="DemiBold" FontSize="13"
+                                           Text="{Binding CadConfigExpenseReportVm.ExpenseReport}" />
+                            </ScrollViewer>
+                        </Border>
+                    </DockPanel>
+                </DockPanel>
+
+
+                <StackPanel DockPanel.Dock="Right">
+                    <TextBlock Margin="0,0,0,5"
+                               FontSize="14" FontWeight="Bold" Text="ПАРАМЕТРЫ ИМ. МОДЕЛИРОВАНИЯ" />
+
+                    <ContentControl Margin="0,0,0,10" Content="{Binding SimInputParamsVm}">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type shared2:SimulationInputParamsVm}">
+                                <shared1:SimulationInputParamsView />
+                            </DataTemplate>
+                        </ContentControl.Resources>
+                    </ContentControl>
+
+                    <Button VerticalAlignment="Bottom" Width="auto"
+                            HorizontalAlignment="Stretch" FontSize="14" Padding="5"
+                            Command="{Binding BeginSimulationCommand, UpdateSourceTrigger=PropertyChanged}"
+                            Content="Начать Моделирование" />
+                </StackPanel>
+
+            </DockPanel>
+
+            <!-- <DockPanel DockPanel.Dock="Bottom" LastChildFill="False"> -->
+            <!--     <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="14" Margin="0,0,0,3" -->
+            <!--                Text="Калькуляция расходов за Месяц:" /> -->
+            <!--     <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="Lavender"> -->
+            <!--         <ScrollViewer VerticalScrollBarVisibility="Auto"> -->
+            <!--             <TextBlock FontWeight="DemiBold" FontSize="13" -->
+            <!--                        Text="{Binding CadConfigExpenseReportVm.ExpenseReport}" /> -->
+            <!--         </ScrollViewer> -->
+            <!--     </Border> -->
+            <!-- </DockPanel> -->
+        </DockPanel>
+
+        <DockPanel DockPanel.Dock="Right">
+            <TextBlock DockPanel.Dock="Top" Margin="0,0,0,7"
+                       FontSize="14" FontWeight="Bold" Text="РЕЗУЛЬТАТЫ ИМ. МОДЕЛИРОВАНИЯ" />
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,5">
+                <StackPanel DockPanel.Dock="Left" Margin="0,0,10,0">
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Text="Оценка выбранной конфигурации САПР:" FontWeight="Bold"
+                                   VerticalAlignment="Center" />
+                        <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                 Text="{Binding LastSimulationResult.ConfigurationScore, StringFormat=F8, Mode=OneWay, FallbackValue=...}" />
+                    </DockPanel>
+
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Text="Суммарная стоимость выбранной конфигурации САПР:" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                 Text="{Binding LastSimulationResult.ConfigurtaionTotalCost, StringFormat=N2, Mode=OneWay,  FallbackValue=...}" />
+                    </DockPanel>
+
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Text="Среднее время проектирование одной Печатной Платы (раб. ч.):" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                 Text="{Binding LastSimulationResult.AverageProductionTime, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                    </DockPanel>
+                    
+                    <Expander Margin="0,0,0,5" Header = "Среднее время выполнения проектных процедур (раб. ч.):" FontWeight="DemiBold" >
+                        <StackPanel Margin = "10,4,0,0" >
+                            <DockPanel Margin="0,0,0,3">
+                                <TextBlock Text="Ввод схемы:" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                         Text="{Binding LastProceduresTimes.PcbParamsInputTimeHours, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,3">
+                                <TextBlock Text="Создание конструктива ПП и правил:" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                         Text="{Binding LastProceduresTimes.BoardParamsAndRulesTimeHours, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,3">
+                                <TextBlock Text="Автоматическое размещение:" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                         Text="{Binding LastProceduresTimes.AutoPlacementTimeHours, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,3">
+                                <TextBlock Text="Интерактивное размещение:" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                         Text="{Binding LastProceduresTimes.ManualPlacementTimeHours, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,3">
+                                <TextBlock Text="Автоматическая трассировка:" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                         Text="{Binding LastProceduresTimes.AutoRoutingTimeHours, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,3">
+                                <TextBlock Text="Интерактивная трассировка:" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                         Text="{Binding LastProceduresTimes.ManualRoutingTimeHours, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,3">
+                                <TextBlock Text="Контроль качества:" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                         Text="{Binding LastProceduresTimes.QualityControlTimeHours, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                            </DockPanel>
+                            <DockPanel>
+                                <TextBlock Text="Выпуск документации:" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                         Text="{Binding LastProceduresTimes.DocumentationProductionTimeHours, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                            </DockPanel>
+                        </StackPanel >
+                    </Expander >
+                    
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Text="СКО от времени проектирования одной Печатной Платы (раб. ч.):"
+                                   VerticalAlignment="Center" />
+                        <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                 Text="{Binding LastSimulationResult.DevProductionTime, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                    </DockPanel>
+                    
+                    <DockPanel >
+                        <TextBlock Text="Максимальное время проектирования одной Печатной Платы (раб. ч.):"
+                                   VerticalAlignment="Center" />
+                        <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" Width="70" HorizontalAlignment="Right"
+                                 Text="{Binding LastSimulationResult.MaxProductionTime, Mode=OneWay, StringFormat=F3, FallbackValue=...}" />
+                    </DockPanel>
+                </StackPanel>
+
+                <DockPanel DockPanel.Dock="Right" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <DockPanel DockPanel.Dock="Top" >
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,3">
+                            <TextBlock Text="Импорт без параметров моделирования:" Margin="0,0,5,0"
+                                       FontWeight="DemiBold" VerticalAlignment="Center" />
+                            <CheckBox IsChecked="{Binding IsImportWithoutParams}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Button DockPanel.Dock="Left" VerticalAlignment="Stretch" Width="auto" FontSize="14"
+                                Margin="0,0,0,5" Padding="5"
+                                Command="{Binding ImportConfigCommand, UpdateSourceTrigger=PropertyChanged}"
+                                Content="Импорт конфигурации" />
+                    </DockPanel>
+
+                    <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
+                        <Button Width="auto" FontSize="14"
+                                Margin="0,0,0,5" Padding="5"
+                                Command="{Binding SaveSimuResultCommand, UpdateSourceTrigger=PropertyChanged}"
+                                Content="Сохранить Результат Моделирования" />
+                        <Button Width="auto" FontSize="14"
+                                Padding="5"
+                                Command="{Binding SaveLastSimuLogCommand, UpdateSourceTrigger=PropertyChanged}"
+                                Content="Сохранить Подробный Лог Моделирования" />
+                    </StackPanel>
+                </DockPanel>
+            </DockPanel>
+
+            <TabControl DockPanel.Dock="Bottom">
+                <TabItem Header="Графики загрузки ресурсов">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="5,2,0,10">
+                            <TextBlock Text="Строить графики загрузки для каждого потока:" Margin="0,0,5,0"
+                                       FontWeight="DemiBold" VerticalAlignment="Center" />
+                            <CheckBox IsChecked="{Binding IsDrawPlotsForAllThreads}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <ScrollViewer DockPanel.Dock="Bottom" CanContentScroll="True"
+                                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding ResourceUsagePlots}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <oxy:PlotView Model="{Binding}" Height="245" Width="auto" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </TabItem>
+
+                <TabItem Header="Лог моделирования">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="5,2,0,10">
+                            <TextBlock Text="Поиск:" Margin="0,0,5,0" FontWeight="DemiBold"
+                                       VerticalAlignment="Center" />
+                            <TextBox MinWidth="150" Padding="2"
+                                     Text="{Binding LastSimulationResultLogSearch, UpdateSourceTrigger=LostFocus}"
+                                     KeyUp="TextBox_KeyEnterUpdate" />
+                        </StackPanel>
+                        <ScrollViewer DockPanel.Dock="Bottom" CanContentScroll="True"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Auto">
+                            <wpfsharp:SearchableTextBlock
+                                Background="White" HighlightableText="{Binding LastSimulationResultLog}"
+                                SearchWords="{Binding LastSimulationResultLogSearchTransformed, Converter={StaticResource ResourceKey=StringToWordsConverter}}" />
+                            <!-- <FlowDocumentReader > -->
+                            <!--     <FlowDocument > -->
+                            <!--         <Paragraph> -->
+                            <!--             <Run Text="{Binding Path=LastSimulationResultLog, FallbackValue=...}" /> -->
+                            <!--         </Paragraph> -->
+                            <!--     </FlowDocument> -->
+                            <!-- </FlowDocumentReader> -->
+                        </ScrollViewer>
+                    </DockPanel>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
+    </DockPanel>
+</UserControl>

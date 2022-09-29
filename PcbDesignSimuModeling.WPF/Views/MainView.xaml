@@ -5,40 +5,51 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wpfTool="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
         xmlns:wpfsharp="clr-namespace:WpfSharp.Controls;assembly=WpfSharp.Controls"
-        xmlns:viewModels="clr-namespace:PcbDesignSimuModeling.Core.ViewModels;assembly=PcbDesignSimuModeling.Core"
         xmlns:views="clr-namespace:PcbDesignSimuModeling.WPF.Views"
+        xmlns:simuSystem1="clr-namespace:PcbDesignSimuModeling.WPF.Views.SimuSystem"
+        xmlns:helpers1="clr-namespace:PcbDesignSimuModeling.WPF.Views.Helpers"
+        xmlns:viewModels="clr-namespace:PcbDesignSimuModeling.WPF.ViewModels"
+        xmlns:simuSystem2="clr-namespace:PcbDesignSimuModeling.WPF.ViewModels.SimuSystem"
+        xmlns:optimizationModule1="clr-namespace:PcbDesignSimuModeling.WPF.ViewModels.OptimizationModule"
+        xmlns:helpers="clr-namespace:PcbDesignSimuModeling.WPF.ViewModels.Helpers"
+        WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
-        Title="Имитационное моделиерование" Width="1580" Height="920"
+        Title="Система Имитационного Моделирования САПР ПП" Width="1900" Height="1050"
         d:DataContext="{d:DesignInstance Type=viewModels:MainViewModel, IsDesignTimeCreatable=True}">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
 
-    <Grid Background="AliceBlue" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+    <Grid Background="#f2f8ff" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
-
-        <Menu Grid.Row="0" Background="#FFD0E3F6" Margin="10,10,10,5" FontSize="14">
-            <MenuItem Padding="7" Margin="0,0,2,0" Background="#FFB9D7F3" Header="Имитационное моделирование" BorderBrush="Gray"
+        <Menu Grid.Row="0" Background="#FFD0E3F6" Margin="10,5,10,0" FontSize="14">
+            <MenuItem Padding="7" Margin="0,0,2,0" Background="#FFB9D7F3" Header="Имитационное Моделирование" BorderBrush="Gray"
                       BorderThickness="2" FontWeight="DemiBold"
                       Command="{Binding UpdateViewCommand}" CommandParameter="SimuSystem" />
-            <MenuItem Padding="7" Background="#FFB9D7F3" Header="Модуль оптимизации" BorderBrush="Gray"
+            <MenuItem Padding="7" Margin="0,0,2,0" Background="#FFB9D7F3" Header="Модуль Оптимизации" BorderBrush="Gray"
                       BorderThickness="2" FontWeight="DemiBold"
                       Command="{Binding UpdateViewCommand}" CommandParameter="OptimizationModule" />
+            <MenuItem Padding="7" Background="#FFB9D7F3" Header="Расширенные Параметры Моделирования" BorderBrush="Gray"
+                      BorderThickness="2" FontWeight="DemiBold"
+                      Command="{Binding UpdateViewCommand}" CommandParameter="Settings" />
         </Menu>
 
-        <ContentControl Grid.Row="1" Margin="5" Content="{Binding SelectedViewModel}">
+        <ContentControl Grid.Row="1" Margin="10,5" Content="{Binding SelectedViewModel}">
             <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type viewModels:SimuSystemViewModel}">
-                    <views:SimuSystemView />
+                <DataTemplate DataType="{x:Type simuSystem2:SimuSystemViewModel}">
+                    <simuSystem1:SimuSystemView />
                 </DataTemplate>
-                <DataTemplate DataType="{x:Type viewModels:OptimizationModuleViewModel}">
+                <DataTemplate DataType="{x:Type optimizationModule1:OptimizationModuleViewModel}">
                     <views:OptimizationModuleView />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type viewModels:GeneralSimulationSettingsVm}">
+                    <views:GeneralSimSettingsView />
                 </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>
@@ -46,8 +57,8 @@
         <ContentControl Grid.Row="2" Content="{Binding MessageViewModel}"
                         Visibility="{Binding MessageViewModel.HasMessage, Converter={StaticResource BooleanToVisibilityConverter}}">
             <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type viewModels:MessageViewModel}">
-                    <views:MessageView />
+                <DataTemplate DataType="{x:Type helpers:MessageViewModel}">
+                    <helpers1:MessageView />
                 </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>

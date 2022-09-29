@@ -5,38 +5,29 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:wpfTool="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
              xmlns:wpfsharp="clr-namespace:WpfSharp.Controls;assembly=WpfSharp.Controls"
-             xmlns:viewModels="clr-namespace:PcbDesignSimuModeling.Core.ViewModels;assembly=PcbDesignSimuModeling.Core"
              xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
+             xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
+             xmlns:sharedViews="clr-namespace:PcbDesignSimuModeling.WPF.Views.Shared"
+             xmlns:optimizationModule="clr-namespace:PcbDesignSimuModeling.WPF.ViewModels.OptimizationModule"
+             xmlns:sharedVms="clr-namespace:PcbDesignSimuModeling.WPF.ViewModels.Shared"
+             md:DialogServiceViews.IsRegistered="True"
              mc:Ignorable="d"
-             d:DesignWidth="1580" d:DesignHeight="720"
-             d:DataContext="{d:DesignInstance Type=viewModels:OptimizationModuleViewModel, IsDesignTimeCreatable=True}">
+             d:DesignWidth="1580" d:DesignHeight="1000"
+             d:DataContext="{d:DesignInstance Type=optimizationModule:OptimizationModuleViewModel, IsDesignTimeCreatable=True}">
 
     <UserControl.Resources>
         <wpfsharp:StringToWordsConverter x:Key="StringToWordsConverter" />
     </UserControl.Resources>
 
-    <Grid IsSharedSizeScope="True">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-
-        <StackPanel Margin="5" Grid.Row="0" Grid.Column="0">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Left" Margin="0,0,25,0">
             <TextBlock Margin="0,0,0,5" FontSize="14" FontWeight="Bold" Text="ПАРАМЕТРЫ ОПТИМИЗАЦИИ" />
 
-            <StackPanel Margin="0,0,0,5" Orientation="Vertical">
-                <Label Margin="-5,0,0,0" Content="Параметры алгоритма (колонии пчел):" FontWeight="SemiBold" />
+            <StackPanel Margin="0,0,0,12" Orientation="Vertical">
+                <TextBlock Margin="0,0,0,5" Text="Параметры алгоритма (колонии пчел):" VerticalAlignment="Center"
+                           FontWeight="SemiBold" />
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
@@ -48,383 +39,263 @@
                     </Grid.ColumnDefinitions>
 
 
-                    <Label Grid.Row="1" Grid.Column="0" Margin="0,0,0,5" Content="Число итераций:" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"
+                               Text="Число источников пищи:" />
                     <wpfTool:IntegerUpDown Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"
                                            Value="{Binding AlgSettings.FoodSourceCount}"
                                            Increment="10" Minimum="4" Maximum="1000" />
 
-                    <Label Grid.Row="0" Grid.Column="0" Margin="0,0,0,5"
-                           Content="Число источников пищи:" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,5,5" Text="Число итераций:"
+                               VerticalAlignment="Center" />
                     <wpfTool:IntegerUpDown Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
                                            Value="{Binding AlgSettings.NumOfIterations}"
                                            Increment="5" Minimum="5" Maximum="1000" />
 
-                    <Label Grid.Row="3" Grid.Column="0" Margin="0,0,0,5"
-                           Content="Начальная температура:" />
-                    <wpfTool:DoubleUpDown Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,5,5" VerticalAlignment="Center"
+                               Text="Начальная температура:" />
+                    <wpfTool:DoubleUpDown Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"
                                           Value="{Binding AlgSettings.InitTemperature}"
                                           Increment="25" Minimum="1" />
 
-                    <Label Grid.Row="5" Grid.Column="0" Margin="0,0,0,5"
-                           Content="α:" />
-                    <wpfTool:DoubleUpDown Grid.Row="5" Grid.Column="1" Margin="0,0,0,5"
+                    <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Center"
+                               Text="α:" />
+                    <wpfTool:DoubleUpDown Grid.Row="3" Grid.Column="1"
                                           Value="{Binding AlgSettings.Alpha}"
                                           Increment="0.05" Minimum="0.1" Maximum="10" />
                 </Grid>
             </StackPanel>
 
             <StackPanel>
-                <Label Margin="-5,0,0,0" Content="ГРАНИЦЫ ПОИСКА" FontWeight="Bold" FontSize="13" />
+                <TextBlock Margin="0,0,0,5" Text="ГРАНИЦЫ ПОИСКА" VerticalAlignment="Center" FontWeight="Bold"
+                           FontSize="13" />
 
-                <StackPanel Margin="0,5,0,5">
-                    <TextBlock Margin="0,0,0,5" FontWeight="DemiBold" Text="Процессорная мощь:" />
+                <StackPanel Margin="0,0,0,7">
+                    <TextBlock Margin="0,0,0,3" FontWeight="DemiBold" Text="Вычислительный сервер:" />
                     <StackPanel Margin="0,0,0,3">
-                        <TextBlock Margin="0,0,0,2" Text="Число потоков:" />
-                        <WrapPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="Мин:" />
+                        <TextBlock Margin="0,0,0,3" Text="Число потоков:" />
+                        <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,5,0">
+                                <TextBlock Text="Мин:" VerticalAlignment="Center" Margin="0,0,5,0" />
                                 <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.ThreadsCountMin}"
-                                                       Minimum="2"
+                                                       Minimum="4" Width="50"
                                                        Maximum="{Binding AlgSettings.SearchIntervals.ThreadsCountMax}"
                                                        ClipValueToMinMax="True" Increment="2" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="Макс:" />
+                                <TextBlock Text="Макс:" VerticalAlignment="Center" Margin="0,0,5,0" />
                                 <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.ThreadsCountMax}"
                                                        Minimum="{Binding AlgSettings.SearchIntervals.ThreadsCountMin}"
-                                                       Maximum="100"
+                                                       Maximum="192" Width="50"
                                                        ClipValueToMinMax="True" Increment="2" />
                             </StackPanel>
-                        </WrapPanel>
+                        </StackPanel>
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock Margin="0,0,0,2" Text="Частота (ГГц):" />
-                        <WrapPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="Мин:" />
+                        <TextBlock Margin="0,0,0,3" Text="Частота (ГГц):" />
+                        <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,5,0">
+                                <TextBlock Text="Мин:" VerticalAlignment="Center" Margin="0,0,5,0" />
                                 <wpfTool:DoubleUpDown Value="{Binding AlgSettings.SearchIntervals.ClockRateMin}"
-                                                      Minimum="1.2"
+                                                      Minimum="1.5" Width="50"
                                                       Maximum="{Binding AlgSettings.SearchIntervals.ClockRateMax}"
                                                       ClipValueToMinMax="True" Increment="0.25" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="Макс:" />
+                                <TextBlock Text="Макс:" VerticalAlignment="Center" Margin="0,0,5,0" />
                                 <wpfTool:DoubleUpDown Value="{Binding AlgSettings.SearchIntervals.ClockRateMax}"
                                                       Minimum="{Binding AlgSettings.SearchIntervals.ClockRateMin}"
-                                                      Maximum="4.5"
+                                                      Maximum="4.5" Width="50"
                                                       ClipValueToMinMax="True" Increment="0.25" />
                             </StackPanel>
-                        </WrapPanel>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
 
-                <StackPanel Margin="0,5,0,5">
-                    <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="DemiBold" Text="Объем оперативной памяти (Гб):" />
-                    <WrapPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Мин:" />
+                <StackPanel Margin="0,0,0,7">
+                    <TextBlock Margin="0,0,0,3" FontSize="12" FontWeight="DemiBold"
+                               Text="Объем оперативной памяти (Гб):" />
+                    <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,5,0">
+                            <TextBlock Text="Мин:" VerticalAlignment="Center" Margin="0,0,5,0" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.RamAmountMin}"
-                                                   Minimum="4"
+                                                   Minimum="4" Width="50"
                                                    Maximum="{Binding AlgSettings.SearchIntervals.RamAmountMax}"
                                                    ClipValueToMinMax="True" Increment="4" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="Макс:" />
+                            <TextBlock Text="Макс:" VerticalAlignment="Center" Margin="0,0,5,0" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.RamAmountMax}"
                                                    Minimum="{Binding AlgSettings.SearchIntervals.RamAmountMin}"
-                                                   Maximum="1000"
+                                                   Maximum="1000" Width="50"
                                                    ClipValueToMinMax="True" Increment="16" />
                         </StackPanel>
-                    </WrapPanel>
+                    </StackPanel>
                 </StackPanel>
-                
-                <StackPanel Margin="0,5,0,5">
-                    <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="DemiBold" Text="Скорость сервера (Мбит/с):" />
-                    <WrapPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Мин:" />
+
+                <StackPanel Margin="0,0,0,7">
+                    <TextBlock Margin="0,0,0,3" FontSize="12" FontWeight="DemiBold" Text="Скорость интернета (Мбит/с):" />
+                    <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,5,0">
+                            <TextBlock Text="Мин:" VerticalAlignment="Center" Margin="0,0,5,0" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.ServerSpeedMin}"
-                                                   Minimum="25"
+                                                   Minimum="40" Width="50"
                                                    Maximum="{Binding AlgSettings.SearchIntervals.ServerSpeedMax}"
                                                    ClipValueToMinMax="True" Increment="25" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="Макс:" />
+                            <TextBlock Text="Макс:" VerticalAlignment="Center" Margin="0,0,5,0" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.ServerSpeedMax}"
                                                    Minimum="{Binding AlgSettings.SearchIntervals.ServerSpeedMin}"
                                                    Maximum="1000"
                                                    ClipValueToMinMax="True" Increment="25" />
                         </StackPanel>
-                    </WrapPanel>
-                </StackPanel>
-
-                <StackPanel Margin="0,5,0,5">
-                    <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="DemiBold" Text="Алгоритмы:" />
-
-                    <TextBlock Margin="0,0,5,5"
-                               FontSize="12" VerticalAlignment="Center" Text="Размещение:" FontWeight="SemiBold"
-                               FontStyle="Italic" />
-                    <wpfTool:CheckListBox Margin="5,0,0,5"
-                                          ItemsSource="{Binding PlacingAlgStrList}"
-                                          SelectedItemsOverride="{Binding SelectedPlacingAlgStrList}" />
-
-                    <TextBlock Margin="0,0,5,5"
-                               FontSize="12" VerticalAlignment="Center" Text="Трассировка:" FontWeight="SemiBold"
-                               FontStyle="Italic" />
-                    <wpfTool:CheckListBox Margin="5,0,0,5"
-                                          ItemsSource="{Binding WireRoutingAlgStrList}"
-                                          SelectedItemsOverride="{Binding SelectedWireRoutingAlgStrList}" />
-
+                    </StackPanel>
                 </StackPanel>
 
 
-                <StackPanel Margin="0,5,0,5">
-                    <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="DemiBold" Text="Количество проектировщиков:" />
-                    <WrapPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Мин:" />
+                <StackPanel Margin="0,0,0,10">
+                    <TextBlock Margin="0,0,0,3" FontSize="12" FontWeight="DemiBold" Text="Количество проектировщиков:" />
+                    <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,5,0">
+                            <TextBlock Text="Мин:" VerticalAlignment="Center" Margin="0,0,5,0" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.DesignersCountMin}"
-                                                   Minimum="1"
+                                                   Minimum="1" Width="50"
                                                    Maximum="{Binding AlgSettings.SearchIntervals.DesignersCountMax}"
                                                    ClipValueToMinMax="True"
                                                    Increment="1" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="Макс:" />
+                            <TextBlock Text="Макс:" VerticalAlignment="Center" Margin="0,0,5,0" />
                             <wpfTool:IntegerUpDown Value="{Binding AlgSettings.SearchIntervals.DesignersCountMax}"
                                                    Minimum="{Binding AlgSettings.SearchIntervals.DesignersCountMin}"
-                                                   Maximum="10"
+                                                   Maximum="30" Width="50"
                                                    ClipValueToMinMax="True"
                                                    Increment="1" />
                         </StackPanel>
-                    </WrapPanel>
+                    </StackPanel>
+                </StackPanel>
+
+
+                <StackPanel>
+                    <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="DemiBold" Text="Подсистемы САПР:" />
+
+                    <StackPanel>
+                        <TextBlock Margin="0,0,0,2"
+                                   FontSize="12" Text="Автоматическое Размещение:" FontWeight="SemiBold"
+                                   FontStyle="Italic" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Margin="0,0,0,3"
+                                       FontSize="11" VerticalAlignment="Center" Text="Включено в Cтоимость:" />
+                            <CheckBox VerticalAlignment="Center" IsChecked="True">
+                            </CheckBox>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <wpfTool:CheckListBox Margin="5,0,0,5"
+                                          ItemsSource="{Binding PlacingAlgStrList}"
+                                          SelectedItemsOverride="{Binding SelectedPlacingAlgStrList}" />
+
+                    <TextBlock Margin="0,0,0,2"
+                               FontSize="12" Text="Автоматическая Трассировка:" FontWeight="SemiBold"
+                               FontStyle="Italic" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="0,0,0,3"
+                                   FontSize="11" VerticalAlignment="Center" Text="Включено в Cтоимость:" />
+                        <CheckBox VerticalAlignment="Center" IsChecked="True">
+                        </CheckBox>
+                    </StackPanel>
+                    <wpfTool:CheckListBox Margin="5,0,0,0"
+                                          ItemsSource="{Binding WireRoutingAlgStrList}"
+                                          SelectedItemsOverride="{Binding SelectedWireRoutingAlgStrList}" />
                 </StackPanel>
             </StackPanel>
         </StackPanel>
 
-
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="35,5">
+        <StackPanel DockPanel.Dock="Left" Margin="0,0,25,0">
             <TextBlock Margin="0,0,0,5"
                        FontSize="14" FontWeight="Bold" Text="ПАРАМЕТРЫ ИМ. МОДЕЛИРОВАНИЯ" />
 
-            <Grid Margin="0,0,0,5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition SharedSizeGroup="SimuSystemConfig" Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+            <ContentControl Margin="0,0,0,10" Content="{Binding SimInputParamsVm}">
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type sharedVms:SimulationInputParamsVm}">
+                        <sharedViews:SimulationInputParamsView />
+                    </DataTemplate>
+                </ContentControl.Resources>
+            </ContentControl>
 
-                <TextBlock Grid.Column="0" Margin="0,0,5,5"
-                           FontSize="12" VerticalAlignment="Center" Text="~Число плат в год:" />
-                <wpfTool:IntegerUpDown Grid.Column="1" Margin="0,0,0,5"
-                                       HorizontalAlignment="Left"
-                                       MinWidth="50"
-                                       Minimum="10" Maximum="5000" Increment="50"
-                                       Text="{Binding TechPerYear}" />
-            </Grid>
-
-            <StackPanel Margin="0,0,0,20">
-                <TextBlock Margin="0,0,0,5" FontSize="12" FontWeight="Bold" Text="Параметры печатных плат:" />
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="SimuSystemConfig" Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5"
-                               FontSize="12" VerticalAlignment="Center" FontStyle="Italic"
-                               FontWeight="DemiBold"
-                               Text="Число элементов на плате:" />
-
-                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,5,5"
-                               FontSize="12" VerticalAlignment="Center" Text="Мат. ожидание:" />
-                    <wpfTool:IntegerUpDown Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
-                                           HorizontalAlignment="Left"
-                                           MinWidth="50"
-                                           Minimum="25" Maximum="500" Increment="10"
-                                           Value="{Binding ElementCountDistr.Mean}" />
-
-                    <DockPanel Grid.Row="2" Grid.Column="0" Margin="0,0,5,5">
-                        <TextBlock FontSize="12" VerticalAlignment="Center" Text="СКО:" />
-                        <WrapPanel HorizontalAlignment="Right">
-                            <Label Content="Авто:" />
-                            <CheckBox VerticalAlignment="Center"
-                                      IsChecked="{Binding ElementCountDistr.AutoStdChange, FallbackValue=true}" />
-                        </WrapPanel>
-                    </DockPanel>
-                    <wpfTool:IntegerUpDown Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"
-                                           HorizontalAlignment="Left"
-                                           MinWidth="50"
-                                           Minimum="0" Maximum="1000" Increment="5"
-                                           Value="{Binding ElementCountDistr.Std}" />
-
-
-                    <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5"
-                               FontSize="12" VerticalAlignment="Center" FontStyle="Italic"
-                               FontWeight="DemiBold"
-                               Text="Процент занимой площади платы:" />
-
-                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,5,5"
-                               FontSize="12" VerticalAlignment="Center" Text="Мат. ожидание:" />
-                    <wpfTool:DoubleUpDown Grid.Row="4" Grid.Column="1" Margin="0,0,0,5"
-                                          HorizontalAlignment="Left"
-                                          MinWidth="50"
-                                          Minimum="0" Maximum="1" Increment="0.05" FormatString="F3"
-                                          Value="{Binding AreaUsagePctDistr.Mean}" />
-
-                    <DockPanel Grid.Row="5" Grid.Column="0" Margin="0,0,5,5">
-                        <TextBlock FontSize="12" VerticalAlignment="Center" Text="СКО:" />
-                        <WrapPanel HorizontalAlignment="Right">
-                            <Label Content="Авто:" />
-                            <CheckBox VerticalAlignment="Center"
-                                      IsChecked="{Binding AreaUsagePctDistr.AutoStdChange, FallbackValue=true}" />
-                        </WrapPanel>
-                    </DockPanel>
-                    <wpfTool:DoubleUpDown Grid.Row="5" Grid.Column="1" Margin="0,0,0,5"
-                                          HorizontalAlignment="Left"
-                                          MinWidth="50"
-                                          Minimum="0" Maximum="1" Increment="0.05" FormatString="F3"
-                                          Value="{Binding AreaUsagePctDistr.Std}" />
-
-
-                    <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,5,5"
-                               FontSize="12" VerticalAlignment="Center" FontStyle="Italic"
-                               FontWeight="DemiBold">
-                        Процент плат с разногабаритными <LineBreak /> элементами:
-                    </TextBlock>
-
-                    <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,5,5"
-                               FontSize="12" VerticalAlignment="Center" Text="Процент:" />
-                    <wpfTool:DoubleUpDown Grid.Row="7" Grid.Column="1" Margin="0,0,0,5"
-                                          HorizontalAlignment="Left"
-                                          MinWidth="50"
-                                          Minimum="0" Maximum="1" Increment="0.05" FormatString="F3"
-                                          Value="{Binding VariousSizePctProb}" />
-                </Grid>
+            <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                <TextBlock Margin="0,0,5,0" FontSize="12" FontWeight="DemiBold" VerticalAlignment="Center"
+                           TextAlignment="Center"
+                           Text="Количество прогонов:" />
+                <wpfTool:IntegerUpDown HorizontalAlignment="Stretch" MinWidth="50" Minimum="1"
+                                       Value="{Binding SampleSize}" />
             </StackPanel>
 
-            <StackPanel>
-                <DockPanel Margin="0,0,0,10">
-                    <TextBlock Margin="0,0,5,0" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"
-                               TextAlignment="Center"
-                               Text="Время моделирования:" />
-                    <wpfTool:TimeSpanUpDown HorizontalAlignment="Stretch" MinWidth="50" Minimum="0"
-                                            Value="{Binding FinalTime}" />
-                </DockPanel>
-                <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                    <TextBlock Margin="0,0,5,0" FontSize="12" FontWeight="DemiBold" VerticalAlignment="Center"
-                               TextAlignment="Center"
-                               Text="Количество семплов:" />
-                    <wpfTool:IntegerUpDown HorizontalAlignment="Stretch" MinWidth="50" Minimum="1"
-                                           Value="{Binding SampleSize}" />
-                </StackPanel>
-                <Button VerticalAlignment="Bottom" Width="auto"
-                        HorizontalAlignment="Stretch" FontSize="14" Padding="5"
-                        Command="{Binding BeginOptimizationCommand, UpdateSourceTrigger=PropertyChanged}"
-                        Content="Поиск оптимальной конфигурации" />
-            </StackPanel>
+            <Button VerticalAlignment="Bottom" Width="auto"
+                    ToolTip="Выберите Подсистемы Размщения и Трассировки"
+                    ToolTipService.ShowOnDisabled="True"
+                    HorizontalAlignment="Stretch" FontSize="14" Padding="5"
+                    Command="{Binding BeginOptimizationCommand, UpdateSourceTrigger=PropertyChanged}"
+                    Content="Поиск оптимальной конфигурации" />
         </StackPanel>
 
-        <Grid Grid.Row="0" Grid.Column="2" Margin="5">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+        <DockPanel DockPanel.Dock="Right">
+            <TextBlock DockPanel.Dock="Top" Margin="0,0,0,7"
+                       FontSize="14" FontWeight="Bold" Text="РЕЗУЛЬТАТЫ ОПТИМИЗАЦИИ" />
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,5">
+                <TextBlock DockPanel.Dock="Top" Text="Лучшая конфигурация САПР:" Margin="0,0,0,5" VerticalAlignment="Center"
+                           FontWeight="Bold" />
+                <StackPanel DockPanel.Dock="Left" Margin="0,0,10,0">
+                    <!-- <StackPanel Margin="0,0,0,3" Orientation="Horizontal"> -->
+                    <!--     <TextBlock Text="Оценка выбранной конфигурации САПР:" FontWeight="DemiBold" -->
+                    <!--                VerticalAlignment="Center" /> -->
+                    <!--     <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" -->
+                    <!--              Text="{Binding LastResult.FuncValue, FallbackValue=...}" /> -->
+                    <!-- </StackPanel> -->
+                    <TextBox MinWidth="175" IsReadOnly="True" VerticalAlignment="Center" HorizontalAlignment="Left"
+                             Text="{Binding LastOptimizationResultStr, FallbackValue=..., Mode=OneWay}" />
+                </StackPanel>
 
-            <TextBlock Grid.Row="0" Margin="0,0,0,5" FontSize="14" FontWeight="Bold" Text="РЕЗУЛЬТАТЫ ОПТИМИЗАЦИИ" />
+                <DockPanel DockPanel.Dock="Right">
+                    <Button DockPanel.Dock="Top" VerticalAlignment="Stretch" Width="auto" FontSize="14"
+                            Margin="0,0,0,5" Padding="5"
+                            Command="{Binding ExportConfigCommand, UpdateSourceTrigger=PropertyChanged}"
+                            Content="Экспорт Конфигурации в Основной Модуль" />
+                    
+                    <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
+                        <Button VerticalAlignment="Stretch" Width="auto" FontSize="14"
+                                Margin="0,0,0,5" Padding="5"
+                                Command="{Binding SaveLastOptimizationResultCommand, UpdateSourceTrigger=PropertyChanged}"
+                                Content="Сохранить Результат Оптимизации" />
+                        <Button VerticalAlignment="Stretch" Width="auto" FontSize="14"
+                                Padding="5"
+                                Command="{Binding SaveLastOptimizationLogCommand, UpdateSourceTrigger=PropertyChanged}"
+                                Content="Сохранить Подробный Лог Оптимизации" />
+                    </StackPanel>
+                </DockPanel>
 
-            <StackPanel Grid.Row="1">
-                <Label Content="Лучшая конфигурация САПР:" FontWeight="Bold" />
-                <!-- <StackPanel Margin="0,0,0,3" Orientation="Horizontal"> -->
-                <!--     <TextBlock Text="Оценка выбранной конфигурации САПР:" FontWeight="DemiBold" -->
-                <!--                VerticalAlignment="Center" /> -->
-                <!--     <TextBox Margin="5,0,0,0" IsReadOnly="True" Padding="2" -->
-                <!--              Text="{Binding LastResult.FuncValue, FallbackValue=...}" /> -->
-                <!-- </StackPanel> -->
-                <TextBox IsReadOnly="True" VerticalAlignment="Center" HorizontalAlignment="Left"
-                         Text="{Binding LastResult, FallbackValue=..., Mode=OneWay}" />
-            </StackPanel>
+            </DockPanel>
 
-            <Grid Grid.Row="2">
+            <Grid DockPanel.Dock="Bottom">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
+                <oxy:PlotView Grid.Row="0" DockPanel.Dock="Top" Margin="0,0,0,5"
+                              Model="{Binding OptimizationProcessPlot}" />
 
-                <oxy:PlotView Grid.Row="0" Margin="0,10,0,5" Model="{Binding PlotModel}" Width="auto" Height="auto">
-                </oxy:PlotView>
-
-                <Border Grid.Row="1" BorderThickness="2" BorderBrush="LightGray">
-                    <StackPanel Orientation="Vertical" Margin="15,0,5,0">
-                        <Label Content="Ход работы алгоритма:" FontWeight="Bold" FontSize="14" />
-                        <ScrollViewer MaxHeight="150">
-                            <TextBlock Text="{Binding AlgTextLog}" />
+                <DockPanel Grid.Row="1" LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Top" Text="Ход работы алгоритма:" Margin="0,0,0,3" FontWeight="Bold"
+                               FontSize="14" />
+                    <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="Lavender">
+                        <ScrollViewer DockPanel.Dock="Bottom">
+                            <TextBlock Text="{Binding LastOptimizationResultLogStr}" />
                         </ScrollViewer>
-                    </StackPanel>
-                </Border>
-
+                    </Border>
+                </DockPanel>
             </Grid>
-        </Grid>
 
-        <Grid Grid.Row="1" IsSharedSizeScope="True" Grid.Column="0" Grid.ColumnSpan="3">
-            <StackPanel>
-                <Grid Margin="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group2" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group3" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group4" />
-                    </Grid.ColumnDefinitions>
 
-                    <Label VerticalContentAlignment="Center"
-                           Content="Путь до файла со всеми результатми:"
-                           FontWeight="DemiBold" FontSize="13" />
-
-                    <TextBox Grid.Column="1"
-                             VerticalContentAlignment="Center"
-                             Height="auto"
-                             Text="{Binding AllResultsPath}" />
-
-                    <Button Grid.Column="3" VerticalAlignment="Stretch" Width="auto"
-                            FontSize="14"
-                            Command="{Binding SaveLastOptimizationResultCommand}"
-                            Content="Сохранить результат моделирования" />
-                </Grid>
-                <Grid Margin="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group2" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group3" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="Group4" />
-                    </Grid.ColumnDefinitions>
-
-                    <Label VerticalContentAlignment="Center"
-                           Content="Путь до файла с подробным логом последнего результата:"
-                           FontWeight="DemiBold" FontSize="13" />
-
-                    <TextBox Grid.Column="1"
-                             VerticalContentAlignment="Center"
-                             Height="auto"
-                             Text="{Binding LastResultLogPath}" />
-
-                    <Button Grid.Column="3" VerticalAlignment="Stretch" Width="auto"
-                            FontSize="14"
-                            Command="{Binding SaveLastOptimizationLogCommand}"
-                            Content="Сохранить подробный лог" />
-                </Grid>
-            </StackPanel>
-        </Grid>
-    </Grid>
+        </DockPanel>
+    </DockPanel>
 </UserControl>

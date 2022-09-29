@@ -8,13 +8,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Extended.Wpf.Toolkit" Version="4.1.0" />
+      <PackageReference Include="Extended.Wpf.Toolkit" Version="4.3.0" />
+      <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+      <PackageReference Include="MvvmDialogs" Version="8.0.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta1" />
+      <PackageReference Include="OxyPlot.Core" Version="2.1.0" />
       <PackageReference Include="OxyPlot.Wpf" Version="2.1.0" />
+      <PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
       <PackageReference Include="WpfSharp.Controls" Version="1.0.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\PcbDesignSimuModeling.Core\PcbDesignSimuModeling.Core.csproj" />
     </ItemGroup>
 
 </Project>

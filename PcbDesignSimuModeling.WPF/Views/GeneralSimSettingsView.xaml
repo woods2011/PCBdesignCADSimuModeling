@@ -1,0 +1,378 @@
+﻿<UserControl x:Class="PcbDesignSimuModeling.WPF.Views.GeneralSimSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:wpfTool="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+             xmlns:views="clr-namespace:PcbDesignSimuModeling.WPF.Views"
+             xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
+             xmlns:viewModels="clr-namespace:PcbDesignSimuModeling.WPF.ViewModels"
+             md:DialogServiceViews.IsRegistered="True"
+             mc:Ignorable="d"
+             d:DesignWidth="1580" d:DesignHeight="950"
+             d:DataContext="{d:DesignInstance Type=viewModels:GeneralSimulationSettingsVm, IsDesignTimeCreatable=True}">
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <StackPanel Orientation="Horizontal">
+            <StackPanel Margin="0,0,35,0">
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Margin="5,0,0,7" Text="Внешняя нагрузка на вычислительный сервер" FontWeight="DemiBold"
+                               FontSize="13" />
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Среднее число используемых потоков:"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="0" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding ExternalLoadThreadsCount}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Средняя загрузка одного потока (%):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="0.05" Maximum="1.0"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding ExternalLoadAvgOneThreadUtil}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="5,0,5,0" Text="→ На референсной частоте:" FontStyle="Italic"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="1.0" Increment="0.5" Maximum="5.0"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding ExternalLoadAvgOneThreadUtilReferenceClockRate}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Средняя загрузка оперативной памяти (Гб):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="0.5"
+                                               HorizontalAlignment="Right" Value="{Binding ExternalLoadAvgRamUsage}" />
+                    </DockPanel>
+                </StackPanel>
+
+                
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Margin="5,0,0,7" Text="Параметры Операционной Системы" FontWeight="DemiBold"
+                               FontSize="13" />
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Среднее число используемых потоков:"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="0" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding OsAvgThreadsCount}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Средняя загрузка одного потока (%):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="0.05" Maximum="1.0"
+                                               HorizontalAlignment="Right" Value="{Binding OsAvgOneThreadUtil}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="5,0,5,0" Text="→ На референсной частоте:" FontStyle="Italic"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="1.0" Increment="0.5" Maximum="5.0"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding OsAvgOneThreadUtilReferenceClockRate}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Средняя загрузка оперативной памяти (Гб):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="0.5"
+                                               HorizontalAlignment="Right" Value="{Binding OsAvgRamUsage}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Стоимость лицензии (на пользователя):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="1000"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding OsLicensePricePerUserPrice}" />
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Margin="5,0,5,0" Text="→ Длительность подписки / Срок амортизации (лет):"
+                                   FontStyle="Italic"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding OsAmortization}" />
+                    </DockPanel>
+                </StackPanel>
+
+
+                <StackPanel>
+                    <TextBlock Margin="5,0,0,7" Text="Параметры основной САПР" FontWeight="DemiBold" FontSize="13" />
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Среднее число используемых потоков:"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="0" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding MainEadAvgThreadsCount}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Средняя загрузка одного потока (%):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="0.05" Maximum="1.0"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding MainEadAvgOneThreadUtil}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="5,0,5,0" Text="→ На референсной частоте:" FontStyle="Italic"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="1.0" Increment="0.5" Maximum="5.0"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding MainEadOneThreadUtilReferenceClockRate}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Средняя загрузка оперативной памяти (Гб):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="0.5"
+                                               HorizontalAlignment="Right" Value="{Binding MainEadAvgRamUsage}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Стоимость лицензии (на пользователя):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="25000"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding MainEadLicensePricePerUser}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="5,0,5,0" Text="→ Длительность подписки / Срок амортизации (лет):"
+                                   FontStyle="Italic"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding MainEadAmortization}" />
+                    </DockPanel>
+
+                    <TextBlock Margin="5,0,0,5" Text="Подсистема размещения" FontWeight="DemiBold" FontSize="13" />
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Длительность подписки / Срок амортизации (лет):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding PlacingModuleAmortization}" />
+                    </DockPanel>
+                    <TextBlock Margin="5,0,0,5" Text="Подсистема трассировки" FontWeight="DemiBold" FontSize="13" />
+                    <DockPanel>
+                        <TextBlock Margin="0,0,5,0" Text="Длительность подписки / Срок амортизации (лет):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding RoutingModuleAmortization}" />
+                    </DockPanel>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,35,0">
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Margin="5,0,0,7" Text="Параметры Вычислительного Сервера" FontWeight="DemiBold"
+                               FontSize="13" />
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Срок амортизации ЦП (лет):" VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding CpuAmortization}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Стоимость односокетной Материнской Платы:"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="2000"
+                                               HorizontalAlignment="Right" Value="{Binding OneSocketMBoardPrice}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Стоимость двухсокетной Материнской Платы:"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="2000"
+                                               HorizontalAlignment="Right" Value="{Binding TwoSocketMBoardPrice}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="5,0,5,0" Text="→ Срок амортизации (лет)" FontStyle="Italic"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding MBoardAmortization}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Стоимость лицензии средств виртуализации (за ядро):"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="1000"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding VirtualizationLicensePerCorePrice}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="5,0,5,0" Text="→ Длительность подписки / Срок амортизации (лет):"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right"
+                                               Value="{Binding VirtualizationAmortization}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Стоимость Оперативной памяти (за Гб):"
+                                   VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="100"
+                                               HorizontalAlignment="Right" Value="{Binding RamPerGigAvgPrice}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="5,0,5,0" Text="→ Срок амортизации (лет):" FontStyle="Italic"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding RamAmortization}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Стоимость Твердотельного Накопителя (за Гб):"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="15"
+                                               HorizontalAlignment="Right" Value="{Binding DiskPricePer1Gb}" />
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Margin="5,0,5,0" Text="→ Срок амортизации (лет):" FontStyle="Italic"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding DiskAmortization}" />
+                    </DockPanel>
+                </StackPanel>
+
+
+                <StackPanel>
+                
+                    <TextBlock Margin="5,0,0,7" Text="Затраты связанные с проектировщиками" FontWeight="DemiBold"
+                               FontSize="13" />
+                    
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Коэффициент загрузки:" VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Maximum="1" Increment="0.05"
+                                               HorizontalAlignment="Right" Value="1.0" />
+                    </DockPanel>
+                    
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Зарплата проектировщика:" VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="5000"
+                                               HorizontalAlignment="Right" Value="{Binding DesignerSalary}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="0,0,5,0" Text="Дисковое пространство на одного человека (в Гб):"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="10"
+                                               HorizontalAlignment="Right" Value="{Binding DiskSpacePerUser}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Стоимость тонкого клиента:" VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="2000"
+                                               HorizontalAlignment="Right" Value="{Binding ThinClientPrice}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <TextBlock Margin="5,0,5,0" Text="→ Срок амортизации (лет):" FontStyle="Italic"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding ThinClientAmortization}" />
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Margin="0,0,5,0" Text="Стоимость монитора:" VerticalAlignment="Center"
+                                   Height="20" />
+                        <wpfTool:DecimalUpDown Width="80" FormatString="N2" Minimum="0" Increment="2000"
+                                               HorizontalAlignment="Right" Value="{Binding MonitorPrice}" />
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Margin="5,0,5,0" Text="→ Срок амортизации (лет):" FontStyle="Italic"
+                                   VerticalAlignment="Center" Height="20" />
+                        <wpfTool:IntegerUpDown Width="80" Minimum="1" Increment="1"
+                                               HorizontalAlignment="Right" Value="{Binding MonitorAmortization}" />
+                    </DockPanel>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Margin="0,25,0,0">
+                <Button Margin="0,0,0,5" Content="Применить настройки" HorizontalAlignment="Stretch" FontSize="14"
+                        Padding="10,5"
+                        Command="{Binding ApplySettingsCommand}" />
+                <Button Margin="0,0,0,5" Content="Показать текущие настройки" HorizontalAlignment="Stretch"
+                        FontSize="14" Padding="10,5"
+                        Command="{Binding ResetToCurrentCommand}" />
+                <Button Margin="0,0,0,5" Content="Сбросить до стандартных" HorizontalAlignment="Stretch" FontSize="14"
+                        Padding="10,5"
+                        Command="{Binding ResetToDefaultCommand}" />
+                <Button Margin="0,0,0,5" Content="Импорт настроек" HorizontalAlignment="Stretch" FontSize="14"
+                        Padding="10,5"
+                        Command="{Binding ImportCommand}" />
+                <Button Content="Экспорт настроек" HorizontalAlignment="Stretch" FontSize="14" Padding="5"
+                        Command="{Binding ExportCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+
+
+<!-- <UserControl x:Class="PcbDesignSimuModeling.WPF.Views.GeneralSimSettingsView" -->
+<!--              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" -->
+<!--              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" -->
+<!--              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" -->
+<!--              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" -->
+<!--              xmlns:wpfTool="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit" -->
+<!--              xmlns:viewModels="clr-namespace:PcbDesignSimuModeling.Core.ViewModels;assembly=PcbDesignSimuModeling.Core" -->
+<!--              xmlns:views="clr-namespace:PcbDesignSimuModeling.WPF.Views" -->
+<!--              xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs" -->
+<!--              md:DialogServiceViews.IsRegistered="True" -->
+<!--              mc:Ignorable="d" -->
+<!--              d:DesignWidth="1580" d:DesignHeight="720" -->
+<!--              d:DataContext="{d:DesignInstance Type=viewModels:GeneralSimulationSettingsVm, IsDesignTimeCreatable=True}"> -->
+<!--     <Grid Margin="5"> -->
+<!-- -->
+<!--         <Grid.RowDefinitions> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition/> -->
+<!--             <RowDefinition Height="*"/> -->
+<!--         </Grid.RowDefinitions> -->
+<!--          -->
+<!--         <Grid.ColumnDefinitions> -->
+<!--             <ColumnDefinition Width="Auto" /> -->
+<!--             <ColumnDefinition Width="Auto" /> -->
+<!--         </Grid.ColumnDefinitions> -->
+<!-- -->
+<!--         <StackPanel Grid.Column="0"> -->
+<!--             <TextBlock Grid.Row="0" Grid.Column="0" Text="OsAvgThreadsCount: " VerticalAlignment="Bottom"  Height="25"/> -->
+<!--             <wpfTool:DecimalUpDown Grid.Row="0" Grid.Column="1" Value="{Binding OsAvgThreadsCount}" Height="25" /> -->
+<!--              -->
+<!--             <TextBlock Text="OsAvgOneThreadUtil: " VerticalAlignment="Center" Height="25"/> -->
+<!--             <wpfTool:DecimalUpDown Value="{Binding OsAvgOneThreadUtil}" Height="25"/> -->
+<!--              -->
+<!--             <TextBlock  Text="OsAvgOneThreadUtilReferenceClockRate: " VerticalAlignment="Center" Height="25"/> -->
+<!--             <wpfTool:DecimalUpDown Value="{Binding OsAvgOneThreadUtilReferenceClockRate}" Height="25" /> -->
+<!--         </StackPanel> -->
+<!-- -->
+<!--         <StackPanel Grid.Column="1"> -->
+<!--         </StackPanel> -->
+<!-- -->
+<!--         ~1~ <Button Content="Import" Command="{Binding ImportCommand}"/> @1@ -->
+<!--         ~1~ <Button Content="Export" Command="{Binding ExportCommand}"/> @1@ -->
+<!--     </Grid> -->
+<!-- </UserControl> -->
